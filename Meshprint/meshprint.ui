@@ -1,0 +1,1906 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MeshprintClass</class>
+ <widget class="QMainWindow" name="MeshprintClass">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1098</width>
+    <height>978</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Meshprint</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="sizeIncrement">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+   <layout class="QHBoxLayout" name="centralLayout" stretch="0,5">
+    <item>
+     <layout class="QVBoxLayout" name="operationLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+      <item>
+       <widget class="QGroupBox" name="stateGroupLayout">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,2,0">
+           <item>
+            <widget class="QLabel" name="label_Lheight_3">
+             <property name="text">
+              <string>Scale Size</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_XYScan_8">
+             <property name="text">
+              <string>Apply</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="usesScrollButtons">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="addPointSupport">
+         <attribute name="title">
+          <string>Point Support</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="pLayout" stretch="0">
+          <item>
+           <layout class="QVBoxLayout" name="pointLayout" stretch="0,0,0,1,0">
+            <item>
+             <layout class="QHBoxLayout" name="pointLayout1" stretch="1,2">
+              <item>
+               <widget class="QLabel" name="label_pDiameter">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="doubleSpinBox_pDiameter">
+                <property name="value">
+                 <double>0.500000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="pointLayout2" stretch="1,2">
+              <item>
+               <widget class="QLabel" name="label_pHeight">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="doubleSpinBox_pHeight">
+                <property name="value">
+                 <double>0.500000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>Compute Support Region</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="applyPointSupportButton">
+              <property name="text">
+               <string>Apply Point Support</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="pLayoutSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="addLineSupport">
+         <attribute name="title">
+          <string>Line Support</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_LDiameter">
+              <property name="text">
+               <string>Width</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox">
+              <property name="value">
+               <double>0.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_Lheight">
+              <property name="text">
+               <string>Height</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+              <property name="value">
+               <double>0.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="text">
+             <string>Compute Support Region</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="applyLineSupportButton">
+            <property name="text">
+             <string>Apply Line Support</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="autosupport">
+         <attribute name="icon">
+          <iconset theme="AutoSupport">
+           <normaloff>.</normaloff>.</iconset>
+         </attribute>
+         <attribute name="title">
+          <string>Auto Support</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_Lheight_2">
+              <property name="text">
+               <string>support angle</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+              <property name="value">
+               <double>60.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_Lheight_7">
+              <property name="text">
+               <string>line gap</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_22">
+              <property name="value">
+               <double>0.800000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_Lheight_8">
+              <property name="text">
+               <string>line length</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_23">
+              <property name="maximum">
+               <double>99.989999999999995</double>
+              </property>
+              <property name="value">
+               <double>1.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_22" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_Lheight_9">
+              <property name="text">
+               <string>line width</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_27">
+              <property name="value">
+               <double>0.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_23" stretch="1,2">
+            <item>
+             <widget class="QLabel" name="label_Lheight_10">
+              <property name="text">
+               <string>line distance</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_28">
+              <property name="value">
+               <double>2.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_XYScan_7">
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox_2">
+        <property name="currentText">
+         <string>No hatch</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>No hatch</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Chessboard hatch</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Offset filling hatch</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Strip hatch</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="stateGroupLayout_6">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_14"/>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="stateGroupLayout_2">
+        <property name="title">
+         <string>Laser Parameter Setting</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_2" stretch="1,1">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_2">
+             <property name="text">
+              <string>Hatch Laser Power</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_6">
+             <property name="maximum">
+              <number>999</number>
+             </property>
+             <property name="value">
+              <number>200</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_9">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_9">
+             <property name="text">
+              <string>Hatch Laser Speed</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_5">
+             <property name="autoFillBackground">
+              <bool>true</bool>
+             </property>
+             <property name="maximum">
+              <number>9999</number>
+             </property>
+             <property name="value">
+              <number>500</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_4" stretch="1,1">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_4">
+             <property name="text">
+              <string>Contour Laser Power</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_8">
+             <property name="maximum">
+              <number>9999</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_6" stretch="1,1">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_6">
+             <property name="text">
+              <string>Contour Laser Speed</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_9">
+             <property name="maximum">
+              <number>999</number>
+             </property>
+             <property name="value">
+              <number>700</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="stateGroupLayout_7">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_15"/>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="stateGroupLayout_5">
+        <property name="title">
+         <string>Geometric Parameter Setting</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_13">
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_37" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_37">
+             <property name="text">
+              <string>Thickness</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_24">
+             <property name="value">
+              <double>0.030000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_8" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_8">
+             <property name="text">
+              <string>Contour Offset</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="value">
+              <double>0.051000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_10" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_10">
+             <property name="text">
+              <string>Field Width</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+             <property name="value">
+              <double>5.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_11" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_11">
+             <property name="text">
+              <string>Field Height</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+             <property name="value">
+              <double>5.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_17" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_17">
+             <property name="text">
+              <string>Field Space</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_11">
+             <property name="value">
+              <double>0.090000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_36" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_36">
+             <property name="text">
+              <string>Line Space</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_7">
+             <property name="maximum">
+              <number>999</number>
+             </property>
+             <property name="value">
+              <number>150</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="pointLayout1_38" stretch="0,0">
+           <item>
+            <widget class="QLabel" name="label_pDiameter_38">
+             <property name="text">
+              <string>Increment angle</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_10">
+             <property name="maximum">
+              <number>999</number>
+             </property>
+             <property name="value">
+              <number>67</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QPushButton" name="pushButton_XYScan_2">
+              <property name="text">
+               <string>Slicing and Path Generation</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="pointLayout1_3" stretch="1,1">
+        <item>
+         <widget class="QLabel" name="label_pDiameter_3">
+          <property name="text">
+           <string>SLICE ID</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBox">
+          <property name="wrapping">
+           <bool>false</bool>
+          </property>
+          <property name="frame">
+           <bool>true</bool>
+          </property>
+          <property name="maximum">
+           <number>10000</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QSlider" name="horizontalSlider_4">
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="pointLayout1_5" stretch="1,1">
+        <item>
+         <widget class="QLabel" name="label_pDiameter_5">
+          <property name="text">
+           <string>FIELD ID</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBox_2">
+          <property name="wrapping">
+           <bool>false</bool>
+          </property>
+          <property name="frame">
+           <bool>true</bool>
+          </property>
+          <property name="maximum">
+           <number>10000</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox">
+        <property name="text">
+         <string>DISPLY SUPPORT REGION</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_2">
+        <property name="text">
+         <string>DISPLY SUPPORT</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_3">
+        <property name="text">
+         <string>SHOW ALL HATCH</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="renderingLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="RenderingWidget" name="openGLWidget"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1098</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_As"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionFront_View"/>
+    <addaction name="actionLeft_View"/>
+    <addaction name="actionTop_View"/>
+    <addaction name="actionIsometric_View"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuSets">
+    <property name="title">
+     <string>Setting</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuSets"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="fileToolBar">
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="separator"/>
+   <addaction name="actionCut"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionSave_As"/>
+  </widget>
+  <widget class="QToolBar" name="viewToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionALight"/>
+   <addaction name="actionBackground"/>
+   <addaction name="actionFront_View"/>
+   <addaction name="actionLeft_View"/>
+   <addaction name="actionTop_View"/>
+   <addaction name="actionIsometric_View"/>
+   <addaction name="actionRotate_Camera"/>
+   <addaction name="actionTranslation"/>
+   <addaction name="actionGrid"/>
+   <addaction name="actionLine_View"/>
+   <addaction name="actionFace_View"/>
+   <addaction name="separator"/>
+  </widget>
+  <widget class="QToolBar" name="editToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionRotate"/>
+   <addaction name="actionTranslate_Model"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Open Folder.png</normaloff>:/Meshprint/Resources/images/Open Folder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open..</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Save-50.png</normaloff>:/Meshprint/Resources/images/Save-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Save as.png</normaloff>:/Meshprint/Resources/images/Save as.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save As..</string>
+   </property>
+  </action>
+  <action name="actionFront_View">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Front View.png</normaloff>:/Meshprint/Resources/images/Front View.png</iconset>
+   </property>
+   <property name="text">
+    <string>Front View</string>
+   </property>
+  </action>
+  <action name="actionLeft_View">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Left View.png</normaloff>:/Meshprint/Resources/images/Left View.png</iconset>
+   </property>
+   <property name="text">
+    <string>Left View</string>
+   </property>
+  </action>
+  <action name="actionTop_View">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Top View.png</normaloff>:/Meshprint/Resources/images/Top View.png</iconset>
+   </property>
+   <property name="text">
+    <string>Top View</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Add File.png</normaloff>:/Meshprint/Resources/images/Add File.png</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionIsometric_View">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Orthogonal View.png</normaloff>:/Meshprint/Resources/images/Orthogonal View.png</iconset>
+   </property>
+   <property name="text">
+    <string>Orthogonal View</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Cut.png</normaloff>:/Meshprint/Resources/images/Cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionLine_View">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Line Chart.png</normaloff>:/Meshprint/Resources/images/Line Chart.png</iconset>
+   </property>
+   <property name="text">
+    <string>Line View</string>
+   </property>
+  </action>
+  <action name="actionFace_View">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Sphere.png</normaloff>:/Meshprint/Resources/images/Sphere.png</iconset>
+   </property>
+   <property name="text">
+    <string>FaceView</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Undo-52.png</normaloff>:/Meshprint/Resources/images/Undo-52.png</iconset>
+   </property>
+   <property name="text">
+    <string>undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Redo.png</normaloff>:/Meshprint/Resources/images/Redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionTranslation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Whole Hand-50.png</normaloff>:/Meshprint/Resources/images/Whole Hand-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Translate Translation</string>
+   </property>
+  </action>
+  <action name="actionRotate_Camera">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Rotate Camera.png</normaloff>:/Meshprint/Resources/images/Rotate Camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate Camera</string>
+   </property>
+  </action>
+  <action name="actionRotate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Rotate Right.png</normaloff>:/Meshprint/Resources/images/Rotate Right.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+  </action>
+  <action name="actionTranslate_Model">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Resize Four Directions Filled.png</normaloff>:/Meshprint/Resources/images/Resize Four Directions Filled.png</iconset>
+   </property>
+   <property name="text">
+    <string>Translate Model</string>
+   </property>
+  </action>
+  <action name="actionGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Activity Grid-50.png</normaloff>:/Meshprint/Resources/images/Activity Grid-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Grid</string>
+   </property>
+  </action>
+  <action name="actionBackground">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Paint Palette-50.png</normaloff>:/Meshprint/Resources/images/Paint Palette-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Background</string>
+   </property>
+  </action>
+  <action name="actionALight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Light On-50.png</normaloff>:/Meshprint/Resources/images/Light On-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>aLight</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>RenderingWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header location="global">renderingwidget.h</header>
+   <slots>
+    <slot>cutinPieces()</slot>
+    <slot>ReadMesh()</slot>
+    <slot>renderdoHatch()</slot>
+    <slot>CheckGrid()</slot>
+    <slot>AutoSupport()</slot>
+    <slot>DeleteSupport()</slot>
+    <slot>CheckDrawEdge()</slot>
+    <slot>CheckDrawFace()</slot>
+    <slot>AddLineSupport()</slot>
+    <slot>AddPointSupport()</slot>
+    <slot>SetBackground()</slot>
+    <slot>SelectFace()</slot>
+    <slot>SetDirection()</slot>
+    <slot>Export()</slot>
+    <slot>WriteMesh()</slot>
+    <slot>setLaserPower(int)</slot>
+    <slot>setLaserSpeed(int)</slot>
+    <slot>SetSliceCheckId(int)</slot>
+    <slot>CheckLight()</slot>
+    <slot>setHatchType(int)</slot>
+    <slot>setOffset(double)</slot>
+    <slot>setfieldWidth(double)</slot>
+    <slot>setfieldHeight(double)</slot>
+    <slot>setlineOverlap(int)</slot>
+    <slot>setfieldOverlap(double)</slot>
+    <slot>setThickness(double)</slot>
+    <slot>CheckSetFace()</slot>
+    <slot>setLaserPowerPolygon(int)</slot>
+    <slot>setLaserSpeedPolygon(int)</slot>
+    <slot>setAngle(int)</slot>
+    <slot>setThreshold(double)</slot>
+    <slot>setGap(double)</slot>
+    <slot>setSeglength(double)</slot>
+    <slot>setReso(double)</slot>
+    <slot>setVerticalgap(double)</slot>
+    <slot>CheckRegion(bool)</slot>
+    <slot>CheckSupport(bool)</slot>
+    <slot>setFildID(int)</slot>
+    <slot>setPointD(double)</slot>
+    <slot>setPointH(double)</slot>
+    <slot>setLineD(double)</slot>
+    <slot>setLineH(double)</slot>
+    <slot>FindRegion()</slot>
+    <slot>CheckRotateModel(bool)</slot>
+    <slot>SetScaleT(double)</slot>
+    <slot>SclaleModel()</slot>
+    <slot>SetAllHatch(bool)</slot>
+    <slot>SetSliceCheckIdText(int)</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="meshprint.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>ReadMesh()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>643</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGrid</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckGrid()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>591</x>
+     <y>406</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNew</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>AutoSupport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>596</x>
+     <y>406</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCut</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>DeleteSupport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>596</x>
+     <y>406</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLine_View</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckDrawEdge()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>596</x>
+     <y>406</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFace_View</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckDrawFace()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>596</x>
+     <y>406</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applyLineSupportButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>AddLineSupport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>128</x>
+     <y>259</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>821</x>
+     <y>464</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applyPointSupportButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>AddPointSupport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>152</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>550</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBackground</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetBackground()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>596</x>
+     <y>406</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_As</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>Export()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>467</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>WriteMesh()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>467</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionALight</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckLight()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>744</x>
+     <y>463</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider_4</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetSliceCheckId(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>785</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>860</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_XYScan_2</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>renderdoHatch()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>710</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>601</x>
+     <y>837</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBox_2</sender>
+   <signal>activated(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setHatchType(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>163</x>
+     <y>354</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>822</x>
+     <y>564</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_3</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setOffset(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>409</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>599</x>
+     <y>824</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_4</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setfieldWidth(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>549</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>842</x>
+     <y>592</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_5</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setfieldHeight(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>577</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>515</x>
+     <y>531</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_11</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setlineOverlap(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>605</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>566</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_6</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setLaserPower(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>437</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>785</x>
+     <y>498</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_5</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setLaserSpeed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>465</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>781</x>
+     <y>531</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_7</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setHatchType(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>633</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>611</x>
+     <y>765</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_8</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setLaserPowerPolygon(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>493</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>584</x>
+     <y>204</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_9</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setLaserSpeedPolygon(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>470</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_10</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setAngle(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>661</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>597</x>
+     <y>718</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_6</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setThreshold(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>172</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>442</x>
+     <y>165</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_22</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setGap(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>494</x>
+     <y>190</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_23</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setSeglength(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>228</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_27</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setReso(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>257</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>618</x>
+     <y>344</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_28</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setVerticalgap(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>285</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>599</x>
+     <y>347</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_XYScan_7</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>AutoSupport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>128</x>
+     <y>315</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>845</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTranslation</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckSetFace()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>880</x>
+     <y>506</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckRegion(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>835</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>461</x>
+     <y>882</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_2</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckSupport(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>857</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>797</x>
+     <y>940</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setFildID(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>812</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>791</x>
+     <y>940</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_pDiameter</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setPointD(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>173</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>810</x>
+     <y>167</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_pHeight</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setPointH(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>819</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setLineD(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>172</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>839</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_2</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setLineH(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>845</x>
+     <y>210</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>FindRegion()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>152</x>
+     <y>231</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>865</x>
+     <y>351</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>FindRegion()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>194</x>
+     <y>230</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>824</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRotate</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>CheckRotateModel(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>928</x>
+     <y>509</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_7</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetScaleT(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>489</x>
+     <y>83</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_XYScan_8</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SclaleModel()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>544</x>
+     <y>126</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_3</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetAllHatch(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>58</x>
+     <y>876</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>407</x>
+     <y>909</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetSliceCheckIdText(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>745</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>424</x>
+     <y>672</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_24</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setThickness(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>480</x>
+     <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

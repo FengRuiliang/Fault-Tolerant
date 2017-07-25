@@ -1,0 +1,28 @@
+<RCC>
+  <qresource prefix="/Meshprint">
+    <file>Resources/images/Light On-50.png</file>
+    <file>Resources/images/Add File.png</file>
+    <file>Resources/images/Paint Palette-50.png</file>
+    <file>Resources/images/Cut.png</file>
+    <file>Resources/images/Front View.png</file>
+    <file>Resources/images/Left View.png</file>
+    <file>Resources/images/Line Chart.png</file>
+    <file>Resources/images/Maintenance.png</file>
+    <file>Resources/images/Open Folder.png</file>
+    <file>Resources/images/Orthogonal View.png</file>
+    <file>Resources/images/Paste.png</file>
+    <file>Resources/images/Redo.png</file>
+    <file>Resources/images/Resize Four Directions Filled.png</file>
+    <file>Resources/images/Rotate Camera.png</file>
+    <file>Resources/images/Rotate Right.png</file>
+    <file>Resources/images/Save as.png</file>
+    <file>Resources/images/Sphere.png</file>
+    <file>Resources/images/Top View.png</file>
+    <file>Resources/images/Zoom In.png</file>
+    <file>Resources/images/Zoom Out.png</file>
+    <file>Resources/images/Save-50.png</file>
+    <file>Resources/images/Activity Grid-50.png</file>
+    <file>Resources/images/Whole Hand-50.png</file>
+    <file>Resources/images/Undo-52.png</file>
+  </qresource>
+</RCC>

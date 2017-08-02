@@ -6,6 +6,7 @@
 #include <QEvent>
 #include "HE_mesh/Vec.h"
 #include "HE_mesh/Mesh3D.h"
+#include "SliceCut.h"
 using trimesh::vec;
 using trimesh::point;
 typedef trimesh::vec3  Vec3f;
@@ -13,6 +14,7 @@ class Meshprint;
 class MainWindow;
 class CArcBall;
 class Mesh3D;
+class SliceCut;
 class RenderingWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -47,8 +49,10 @@ signals:
 private:
 	void Render();
 	void SetLight();
+
 	public slots:
 	void SetBackground();
+	void SetSliceCheckId(int id);
 	void ReadMesh();
 	void WriteMesh();
 	void CheckDrawPoint();
@@ -58,6 +62,7 @@ private:
 	void CheckGrid();
 	void CheckDrawTexture();
 	void CheckDrawAxes();
+	void DoSlice();
 private:
 	void DrawAxes(bool bv);
 	void DrawPoints(bool);
@@ -65,11 +70,13 @@ private:
 	void DrawFace(bool);
 	void DrawTexture(bool);
 	void DrawGrid(bool bV);
+	void DrawSlice(bool bv);
+	
 public:
 	MainWindow					*ptr_mainwindow_;
 	CArcBall					*ptr_arcball_;
-	CArcBall					*ptr_arcball_module_;
 	Mesh3D						*ptr_mesh_;
+	SliceCut					*ptr_slice_;
 	// Texture
 	GLuint						texture_[1];
 	bool						is_load_texture_;
@@ -92,6 +99,8 @@ public:
 	bool						is_select_face;
 	bool						is_draw_hatch_;
 	bool						is_show_all;
+private:
+	int							slice_check_id_;
 };
 
 #endif // RENDERINGWIDGET_H

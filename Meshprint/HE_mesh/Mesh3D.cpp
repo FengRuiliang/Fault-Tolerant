@@ -21,9 +21,7 @@
 #include <QTime>
 #include "globalFunctions.h"
 #pragma comment(lib,"ws2_32.lib")
-#define SWAP(a,b,T) {T tmp=(a); (a)=(b); (b)=tmp;}
-#define min(a,b) a<b?a:b
-#define max(a,b) a>b?a:b
+
 
 Mesh3D::Mesh3D(void)
 {
@@ -179,31 +177,20 @@ HE_edge* Mesh3D::InsertEdge(HE_vert* vstart, HE_vert* vend)
 	pedge->pvert_->degree_++;
 	vstart->pedge_ = pedge;
 	edgemap_[PAIR_VERTEX(vstart, vend)] = pedge;
-	//qDebug() << edgemap_.size();
 	pedge->id_ = static_cast<int>(pedges_list_->size());
 	pedges_list_->push_back(pedge);
-
 	return pedge;
 }
-
 HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv)
 {
-	int vsize = static_cast<int>(vec_hv.size());
-	//if (vsize != 3)
-	//{
-	//	return NULL;
-	//}
-
 	if (pfaces_list_ == NULL)
 	{
 		pfaces_list_ = new std::vector<HE_face*>;
 	}
-
 	HE_face *pface = new HE_face;
+	int vsize = static_cast<int>(vec_hv.size());
 	pface->valence_ = vsize;
-	//HE_edge *bhe[3];
 	HE_edge *he1 = NULL, *he2 = NULL, *he3 = NULL, *he1_pair_ = NULL, *he2_pair_ = NULL, *he3_pair_ = NULL;
-	//std::vector<HE_edge*> vec_edges;
 	he1 = InsertEdge(vec_hv[0], vec_hv[1]);
 	he2 = InsertEdge(vec_hv[1], vec_hv[2]);
 	he3 = InsertEdge(vec_hv[2], vec_hv[0]);
@@ -216,64 +203,74 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv)
 	he2_pair_->ppair_ = he2;
 	he3->ppair_ = he3_pair_;
 	he3_pair_->ppair_ = he3;
-
-	if (he1->pface_ != NULL || he2->pface_ != NULL || he3->pface_ != NULL)//if has one been used, mean the triangle is stored in cw direction.
-	{
-		//qDebug() << "insert #" << (pfaces_list_->size()) << "facet,he1 has been used in facet:";
-		pface->set_selected(SELECTED);
-		sss++;
-		pface->pedge_ = he1_pair_;
-		he1_pair_->pnext_ = he3_pair_;
-		he1_pair_->pprev_ = he2_pair_;
-		he1_pair_->pface_ = pface;
-		he2_pair_->pnext_ = he1_pair_;
-		he2_pair_->pprev_ = he3_pair_;
-		he2_pair_->pface_ = pface;
-		he3_pair_->pnext_ = he2_pair_;
-		he3_pair_->pprev_ = he1_pair_;
-		he3_pair_->pface_ = pface;
-		//qDebug() << pface->pedge_->id() << pface->pedge_->pnext_->id() << pface->pedge_->pnext_->pnext_->id();
-		HE_edge *current = pface->pedge_->pnext_->pnext_;
-	//	qDebug() << current->pnext_->id();
-		vec_hv[0]->adjHEdges.push_back(he1);
-		vec_hv[1]->adjHEdges.push_back(he2);
-		vec_hv[2]->adjHEdges.push_back(he3);
-		//he1->set_boundary_flag(BOUNDARY);
-		//he2->set_boundary_flag(BOUNDARY);
-		//he3->set_boundary_flag(BOUNDARY);
-		//bhe[0] = he1;
-		//bhe[1] = he2;
-		//bhe[2] = he3;
-	}
-
-	else
-
-	{
-		pface->pedge_ = he1;
-		he1->pnext_ = he2;
-		he1->pprev_ = he3;
-		he1->pface_ = pface;
-		he2->pnext_ = he3;
-		he2->pprev_ = he1;
-		he2->pface_ = pface;
-		he3->pnext_ = he1;
-		he3->pprev_ = he2;
-		he3->pface_ = pface;
-		vec_hv[0]->adjHEdges.push_back(he3_pair_);
-		vec_hv[1]->adjHEdges.push_back(he1_pair_);
-		vec_hv[2]->adjHEdges.push_back(he2_pair_);
-		//he1_pair_->set_boundary_flag(BOUNDARY);
-		//he2_pair_->set_boundary_flag(BOUNDARY);
-		//he3_pair_->set_boundary_flag(BOUNDARY);
-		//bhe[0] = he1_pair_;
-		//bhe[1] = he2_pair_;
-		//bhe[2] = he3_pair_;
-	}
+	pface->pedge_ = he1;
+	he1->pnext_ = he2;
+	he1->pprev_ = he3;
+	he1->pface_ = pface;
+	he2->pnext_ = he3;
+	he2->pprev_ = he1;
+	he2->pface_ = pface;
+	he3->pnext_ = he1;
+	he3->pprev_ = he2;
+	he3->pface_ = pface;
+	vec_hv[0]->adjHEdges.push_back(he3_pair_);
+	vec_hv[1]->adjHEdges.push_back(he1_pair_);
+	vec_hv[2]->adjHEdges.push_back(he2_pair_);
 
 	pface->id_ = static_cast<int>(pfaces_list_->size());
 	pfaces_list_->push_back(pface);
 	return pface;
-	
+
+}
+
+HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv,Vec3f normal_read_)
+{
+	if (pfaces_list_==NULL)
+	{
+		pfaces_list_ = new std::vector<HE_face *>;
+	}
+	HE_face *pface = new HE_face;
+	pface->id_ = static_cast<int>(pfaces_list_->size());
+	pfaces_list_->push_back(pface);
+	pface->normal() = normal_read_;
+	//if the normal is wrong ,exchange the order of vec_hv
+	Vec3f vector1 = vec_hv[1]->position() - vec_hv[0]->position();
+	Vec3f vector2 = vec_hv[2]->position() - vec_hv[0]->position();
+	Vec3f n_ = vector1^vector2;
+	n_.normalize();
+	if (n_.dot(normal_read_)<-0.98)
+	{
+		HE_vert* t1 = vec_hv[1];
+		vec_hv[1] = vec_hv[2];
+		vec_hv[2] = t1;
+	}
+	pface->vertices_ = vec_hv;
+	HE_edge *he1 = NULL, *he2 = NULL, *he3 = NULL, *he1_pair_ = NULL, *he2_pair_ = NULL, *he3_pair_ = NULL;
+	he1 = InsertEdge(vec_hv[0], vec_hv[1]);
+	he2 = InsertEdge(vec_hv[1], vec_hv[2]);
+	he3 = InsertEdge(vec_hv[2], vec_hv[0]);
+	he1_pair_ = InsertEdge(vec_hv[1], vec_hv[0]);
+	he2_pair_ = InsertEdge(vec_hv[2], vec_hv[1]);
+	he3_pair_ = InsertEdge(vec_hv[0], vec_hv[2]);
+	he1->ppair_ = he1_pair_;
+	he2->ppair_ = he2_pair_;
+	he3->ppair_ = he3_pair_;
+	he1_pair_->ppair_ = he1; 
+	he2_pair_->ppair_ = he2; 
+	he3_pair_->ppair_ = he3;
+	he1->pnext_ = he2;
+	he2->pnext_ = he3;
+	he3->pnext_ = he1;	
+	he1->pprev_ = he3;
+	he2->pprev_ = he1;
+	he3->pprev_ = he2;
+	vec_hv[0]->adjHEdges.push_back(he3_pair_);
+	vec_hv[1]->adjHEdges.push_back(he1_pair_);
+	vec_hv[2]->adjHEdges.push_back(he2_pair_);
+	he1->pface_ = pface;
+	he2->pface_ = pface;
+	he3->pface_ = pface;
+	return pface;
 }
 
 bool Mesh3D::LoadFromOBJFile(const char* fins)//¶ÁÈ¡objÎÄ¼þ
@@ -486,45 +483,36 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 		std::cerr << "Cannot open file for reading:" << qPrintable(file.errorString()) << std::endl;
 		return false;
 	}
-
 	ClearData();
 	// read ASCII .stl file
 	if (file.read(1) == "s")
 	{
-		//qDebug() << "s" << file.readLine();
 		QTextStream inASCII(file.readAll());
 		ClearData();
-		int NUm_vertex = 0, num_facet = 0;
 		std::vector<HE_vert* > s_faceid;
 		Vec3f normal;
+		QString temp;
 		while (!inASCII.atEnd())
 		{
-			QString temp;
 			inASCII >> temp;
-
-			if (temp == "vertex")
+			if (temp=="normal")
 			{
-				//qDebug() << NUm_vertex;
-				NUm_vertex++;
+				inASCII >> normal[0] >> normal[1] >> normal[2];
+			}
+			else if (temp == "vertex")
+			{
 				HE_vert* hv;
 				Vec3f nvv;
 				inASCII >> nvv[0] >> nvv[1] >> nvv[2];
 				//now we have a new vertex
 				hv = new HE_vert(nvv);
-				if (pvertices_list_ == NULL)
+				if (pvertices_list_==NULL)
 				{
-					pvertices_list_ = new std::vector<HE_vert*>;
-					hv->set_id(0);
-					//pvertices_list_->push_back(hv);
+					pvertices_list_ = new std::vector<HE_vert *>;
 				}
-				else
-				{
-					hv->set_id(static_cast<int>(pvertices_list_->size()));
-				}
-
+				hv->set_id(static_cast<int>(pvertices_list_->size()));
 				std::set<HE_vert*, comVertex>::iterator  iterVert = input_vertex_list_.insert(hv).first;//get the 
 				if ((*iterVert)->id()== pvertices_list_->size())
-				//if (hv->id() != (*iterVert)->id() || hv->id() == pvertices_list_->size())
 				{
 					pvertices_list_->push_back(hv);
 				}
@@ -533,24 +521,14 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 					hv = *iterVert;
 				}
 				s_faceid.push_back(hv);
-
 			}
 			else if (temp == "endfacet")
 			{
 				if (s_faceid.size() >= 3)
 				{
-					//if (num_facet==1)
-// 					{
-// 						qDebug() << num_facet;
-// 					}
-					InsertFace(s_faceid)/*->normal_=normal*/;
-					num_facet++;
+					InsertFace(s_faceid,normal);
 				}
 				s_faceid.clear();
-			}
-			else if (temp == "normal")
-			{
-				inASCII >> normal[0] >> normal[1] >> normal[2];
 			}
 		}
 	}
@@ -558,7 +536,6 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 	// read Binary .stl file
 	else
 	{
-
 		quint32 num_of_face;
 		file.seek(80);
 		QDataStream inBinary(file.readAll());
@@ -620,14 +597,8 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 			//qDebug() << pfaces_list_->size() << pvertices_list_->size();
 		}
 	}
-	
 	file.close();
-	UpdateMesh();
 	Unify(2.f);
-	exportNeighborId();
-
-	//qDebug() << pvertices_list_->size();
-	
 	return isValid();;
 }
 
@@ -858,6 +829,7 @@ void Mesh3D::ComputeBoundingBox(void)
 
 void Mesh3D::Unify(float size)
 {
+	ComputeBoundingBox();
 	//qDebug() << "z position" << zmax_;
 	float scaleX = xmax_ - xmin_;
 	float scaleY = ymax_ - ymin_;
@@ -1498,6 +1470,21 @@ void Mesh3D::FaceDFS(HE_face* facet, int no)
 		cur = cur->pnext_;
 	} while (cur != sta&&cur != NULL);
 
+}
+
+void Mesh3D::MarkEdge()
+{
+	for (int i = 0; i < pedges_list_->size(); i++)
+	{
+		if (pedges_list_->at(i)->ppair_->pface_ == NULL || pedges_list_->at(i)->pface_==NULL)
+		{
+			pedges_list_->at(i)->set_boundary_flag(BOUNDARY);
+		}
+		else if (pedges_list_->at(i)->pface_->normal().dot(pedges_list_->at(i)->ppair_->pface_->normal())<0.1)
+		{
+			pedges_list_->at(i)->set_boundary_flag(BOUNDARY);
+		}
+	}
 }
 
 

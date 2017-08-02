@@ -27,8 +27,8 @@ RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	has_lighting_(true), is_draw_point_(false), is_draw_edge_(false), is_draw_face_(true)
 {
 	ptr_arcball_ = new CArcBall(width(), height());
-	ptr_arcball_module_ = new CArcBall(width(), height());
 	ptr_mesh_ = new Mesh3D();
+	ptr_slice_ = NULL;
 	is_select_face = false;
 	is_draw_hatch_ = false;
 	is_load_texture_ = false;
@@ -41,18 +41,19 @@ RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	eye_goal_[0] = eye_goal_[1] = eye_goal_[2] = 0.0;
 	eye_direction_[0] = eye_direction_[1] = 0.0;
 	eye_direction_[2] = 1.0;
+	slice_check_id_ = 1;
 }
 
 RenderingWidget::~RenderingWidget()
 {
 	SafeDelete(ptr_arcball_);
-	SafeDelete(ptr_arcball_module_);
+	SafeDelete(ptr_slice_);
 	SafeDelete(ptr_mesh_);
 }
 
 void RenderingWidget::initializeGL()
 {
-	glClearColor(.1, .1, .1, 0.0);
+	glClearColor(0.68, 0.68, 0.68, 0.0);
 	glShadeModel(GL_SMOOTH);
 	//glShadeModel(GL_FLAT);
 
@@ -79,7 +80,6 @@ void RenderingWidget::resizeGL(int w, int h)
 	h = (h == 0) ? 1 : h;
 
 	ptr_arcball_->reSetBound(w, h);
-	ptr_arcball_module_->reSetBound(w, h);
 
 
 	glViewport(0, 0, w, h);
@@ -145,9 +145,31 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 		break;
 	case  Qt::RightButton:
 	{
+		makeCurrent();
+		OpenGLProjector myProjector = OpenGLProjector();
+		Vec3f myPointN(e->x(), height() - e->y(), -1.0f);
+		Vec3f myPointF(e->x(), height() - e->y(), 1.0f);
+		Vec3f add_pointN = myProjector.UnProject(myPointN);
+		Vec3f add_pointF = myProjector.UnProject(myPointF);
+		Vec3f direc = add_pointF - add_pointN;
+		// when near is 0.001, here direc*10.0f, near is 0.01, then direct*1.0f
+		add_pointN -= direc * 0.10f;
+		direc.normalize();
+		const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
+		for (int i=0;i<faces.size();i++)
+		{
+			Vec3f point_;
+			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vertices_[0]->position(),
+				direc, add_pointN, point_);
+			if (PointinTriangle(faces.at(i),point_))
+			{
+				ptr_mesh_->SetDirection(i);
+				ptr_mesh_->scalemesh(1.0);
+				break;
+			}
+		}
 		break;
 	}
-
 	default:
 		break;
 	}
@@ -182,15 +204,8 @@ void RenderingWidget::mouseReleaseEvent(QMouseEvent *e)
 	switch (e->button())
 	{
 	case Qt::LeftButton:
-		if (is_move_module_)
-		{
-			ptr_arcball_module_->MouseUp(e->pos());
-		}
-		else
-		{
-			ptr_arcball_->MouseUp(e->pos());
-		}
 
+ptr_arcball_->MouseUp(e->pos());
 		setCursor(Qt::ArrowCursor);
 
 		ptr_arcball_->MouseUp(e->pos());
@@ -253,6 +268,7 @@ void RenderingWidget::Render()
 	DrawEdge(is_draw_edge_);
 	DrawFace(is_draw_face_);
 	DrawTexture(is_draw_texture_);
+	DrawSlice(true);
 }
 
 void RenderingWidget::SetLight()
@@ -290,7 +306,6 @@ void RenderingWidget::SetLight()
 	glEnable(GL_LIGHT2);
 }
 
-bool booladsad = true;
 void RenderingWidget::SetBackground()
 {
 	QColor color = QColorDialog::getColor(Qt::white, this, tr("background color"));
@@ -304,13 +319,29 @@ void RenderingWidget::SetBackground()
 	//updateGL();
 	update();
 }
+void RenderingWidget::SetSliceCheckId(int id)
+{
+	if (ptr_slice_==NULL)
+	{
+		return;
+	}
+	if (slice_check_id_>=ptr_slice_->GetNumPieces())
+	{
+		slice_check_id_ = ptr_slice_->GetNumPieces()-1;
+	}
+	else
+	{
+		slice_check_id_ = id;
+	}
+	update();
+}
+
 
 void RenderingWidget::ReadMesh()
 {
 	QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
 	QString str = time.toString("yyyy-MM-dd hh:mm:ss ddd"); //设置显示格式
 	ptr_arcball_->reSetBound(width(), height());
-	ptr_arcball_module_->reSetBound(width(), height());
 	ptr_mesh_->ClearData();
 	is_draw_grid_ = true;
 	is_draw_face_ = true;
@@ -372,6 +403,7 @@ void RenderingWidget::ReadMesh()
 	//ptr_arcball_->PlaceBall(scaleV);
 	scaleT = scaleV;
 	eye_distance_ = 2 * max_;
+	ptr_mesh_->MarkEdge();
 }
 
 void RenderingWidget::WriteMesh()
@@ -388,7 +420,6 @@ void RenderingWidget::WriteMesh()
 		return;
 	QByteArray byfilename = filename.toLocal8Bit();
 }
-
 
 void RenderingWidget::CheckDrawPoint()
 {
@@ -558,35 +589,32 @@ void RenderingWidget::DrawFace(bool bv)
 		return;
 	}
 
+	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
+	glLineWidth(2.0f);
+	glColor4ub(0, 0, 0, 255);
+	glBegin(GL_LINES);
+	for (int i=0;i<edges.size();i++)
+	{
+		if (edges[i]->boundary_flag()==BOUNDARY)
+		{
+			glVertex3fv(edges.at(i)->start_->position());
+			glVertex3fv(edges.at(i)->pvert_->position());
+		}
+	}
+	glEnd();
+
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
 	glBegin(GL_TRIANGLES);
 
-	glColor4f(.5, .5, 1.0, 0.9);
+	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-	
-			HE_edge *pedge(faces.at(i)->pedge_);
-			do
-			{
-				if (pedge == NULL)
-				{
-					break;
-				}
-				if (pedge == NULL || pedge->pface_->id() != faces.at(i)->id())
-				{
-					faces.at(i)->pedge_ = NULL;
-					qDebug() << faces.at(i)->id() << "facet display wrong";
-					break;
-				}
-				glNormal3fv(pedge->pvert_->normal().data());
-				glVertex3fv((pedge->pvert_->position()*scaleV).data());
-				pedge = pedge->pnext_;
-			} while (pedge != faces.at(i)->pedge_);
-		
+		glNormal3fv(faces.at(i)->normal());
+		glVertex3fv(faces.at(i)->vertices_[0]->position());
+		glVertex3fv(faces.at(i)->vertices_[1]->position());
+		glVertex3fv(faces.at(i)->vertices_[2]->position());
 	}
 	glEnd();
-	//return;
-
 }
 void RenderingWidget::DrawTexture(bool bv)
 {
@@ -643,4 +671,37 @@ void RenderingWidget::DrawGrid(bool bv)
 	glEnd();
 
 	//glEnable(GL_LIGHTING);
+}
+void RenderingWidget::DrawSlice(bool bv)
+{
+	if (!bv||ptr_slice_==NULL)
+		return;
+	glLineWidth(1.0);
+	glColor3f(0.0, 1.0, 0.0);
+	std::vector < std::vector<cutLine>* >*tc = (ptr_slice_->GetPieces());
+	for (int i = slice_check_id_; i < slice_check_id_ + 1; i++)
+	{
+		glBegin(GL_LINES);
+		for (size_t j = 0; j < tc[i].size(); j++)
+		{
+			for (int k = 0; k < (tc[i])[j]->size(); k++)
+			{
+				glVertex3fv(((tc[i])[j])->at(k).position_vert[0]);
+				glVertex3fv(((tc[i])[j])->at(k).position_vert[1]);
+			}
+		}
+		glEnd();
+	}
+
+}
+
+void RenderingWidget::DoSlice()
+{
+	if (ptr_slice_!=NULL)
+	{
+		SafeDelete(ptr_slice_);
+	}
+	ptr_slice_ = new SliceCut(ptr_mesh_);
+	ptr_slice_->StoreFaceIntoSlice();
+	ptr_slice_->CutInPieces();
 }

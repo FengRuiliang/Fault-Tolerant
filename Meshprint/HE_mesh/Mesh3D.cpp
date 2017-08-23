@@ -339,7 +339,8 @@ bool Mesh3D::LoadFromOBJFile(const char* fins)//¶ÁÈ¡objÎÄ¼þ
 				}
 				if ((int)s_faceid.size() >= 3)
 				{
-					InsertFace(s_faceid);
+					InsertFace(s_faceid)->vertices_=s_faceid;
+
 				}
 			}
 		}

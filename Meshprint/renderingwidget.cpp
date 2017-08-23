@@ -319,13 +319,14 @@ void RenderingWidget::SetBackground()
 	//updateGL();
 	update();
 }
+
 void RenderingWidget::SetSliceCheckId(int id)
 {
 	if (ptr_slice_==NULL)
 	{
 		return;
 	}
-	if (slice_check_id_>=ptr_slice_->GetNumPieces())
+	if (id>=ptr_slice_->GetNumPieces())
 	{
 		slice_check_id_ = ptr_slice_->GetNumPieces()-1;
 	}
@@ -335,7 +336,6 @@ void RenderingWidget::SetSliceCheckId(int id)
 	}
 	update();
 }
-
 
 void RenderingWidget::ReadMesh()
 {
@@ -588,7 +588,6 @@ void RenderingWidget::DrawFace(bool bv)
 	{
 		return;
 	}
-
 	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
 	glLineWidth(2.0f);
 	glColor4ub(0, 0, 0, 255);
@@ -602,10 +601,8 @@ void RenderingWidget::DrawFace(bool bv)
 		}
 	}
 	glEnd();
-
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
 	glBegin(GL_TRIANGLES);
-
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{

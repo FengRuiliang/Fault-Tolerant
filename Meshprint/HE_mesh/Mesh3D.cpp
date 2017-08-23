@@ -244,7 +244,7 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv,Vec3f normal_read_)
 		vec_hv[1] = vec_hv[2];
 		vec_hv[2] = t1;
 	}
-	pface->vertices_ = vec_hv;
+	
 	HE_edge *he1 = NULL, *he2 = NULL, *he3 = NULL, *he1_pair_ = NULL, *he2_pair_ = NULL, *he3_pair_ = NULL;
 	he1 = InsertEdge(vec_hv[0], vec_hv[1]);
 	he2 = InsertEdge(vec_hv[1], vec_hv[2]);
@@ -270,6 +270,7 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv,Vec3f normal_read_)
 	he1->pface_ = pface;
 	he2->pface_ = pface;
 	he3->pface_ = pface;
+	pface->pedge_ = he1;
 	return pface;
 }
 
@@ -548,8 +549,15 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 		num_of_face = htonl(num_of_face);
 		while (!inBinary.atEnd())
 		{
-			float normalvector;
-			inBinary >> normalvector >> normalvector >> normalvector;//can confirm its correctness
+			Vec3f nor_;
+			quint32 normalvector[3];
+			inBinary >> normalvector[0] >> normalvector[1] >> normalvector[2];//can confirm its correctness
+			normalvector[0] = htonl(normalvector[0]);
+			normalvector[1] = htonl(normalvector[1]);
+			normalvector[2] = htonl(normalvector[2]);
+			nor_[0] = *(float*)&normalvector[0];
+			nor_[1] = *(float*)&normalvector[1];
+			nor_[2] = *(float*)&normalvector[2];
 			Vec3f nvv;
 			//qDebug() << sizeof(nvv[0]);
 			quint16 info;
@@ -590,12 +598,10 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 					hv = *iterVert;
 				}
 				s_faceid.push_back(hv);
-
 			}
 			inBinary >> info;
-			InsertFace(s_faceid);
+			InsertFace(s_faceid,nor_);
 			s_faceid.clear();
-			//qDebug() << pfaces_list_->size() << pvertices_list_->size();
 		}
 	}
 	file.close();
@@ -1212,7 +1218,6 @@ void Mesh3D::meshTranslate(float param1, float param2)
 	}
 }
 
-
 void Mesh3D::scalemesh(float size)
 {
 	Unify(size);
@@ -1472,7 +1477,6 @@ void Mesh3D::FaceDFS(HE_face* facet, int no)
 	} while (cur != sta&&cur != NULL);
 
 }
-
 void Mesh3D::MarkEdge()
 {
 	for (int i = 0; i < pedges_list_->size(); i++)

@@ -65,6 +65,9 @@ public:
 
 	void ClearSlice();
 	void CutInPieces();
+
+	void insertCutline(Vec3f p1, Vec3f p2, int id);
+	
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<cutLine>* >* GetPieces(){ return pieces_list_; }
 	int GetNumPieces() { return num_pieces_; }
@@ -78,7 +81,8 @@ private:
 	Mesh3D* mesh_in_;
 	 std::vector<cutLine>* circle_list_;
 	 std::vector < std::vector<cutLine>* >*pieces_list_;
+	 std::vector< std::vector<cutLine>>* cutline_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
-	std::vector<Vec3f> sortVertInFace(HE_face* face_);
+	HE_edge*  getLeftEdge(HE_face* face_, float height_);
 };
 

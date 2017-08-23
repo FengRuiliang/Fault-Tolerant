@@ -1245,8 +1245,8 @@
    <slot>AddLineSupport()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>259</y>
+     <x>102</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>821</x>
@@ -1549,8 +1549,8 @@
    <slot>setThreshold(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>172</y>
+     <x>120</x>
+     <y>181</y>
     </hint>
     <hint type="destinationlabel">
      <x>442</x>
@@ -1565,8 +1565,8 @@
    <slot>setGap(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>200</y>
+     <x>120</x>
+     <y>185</y>
     </hint>
     <hint type="destinationlabel">
      <x>494</x>
@@ -1581,8 +1581,8 @@
    <slot>setSeglength(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>228</y>
+     <x>120</x>
+     <y>188</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -1597,8 +1597,8 @@
    <slot>setReso(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>257</y>
+     <x>120</x>
+     <y>192</y>
     </hint>
     <hint type="destinationlabel">
      <x>618</x>
@@ -1613,8 +1613,8 @@
    <slot>setVerticalgap(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>285</y>
+     <x>120</x>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel">
      <x>599</x>
@@ -1629,8 +1629,8 @@
    <slot>AutoSupport()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>315</y>
+     <x>102</x>
+     <y>169</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -1741,8 +1741,8 @@
    <slot>setLineD(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>172</y>
+     <x>120</x>
+     <y>181</y>
     </hint>
     <hint type="destinationlabel">
      <x>839</x>
@@ -1757,8 +1757,8 @@
    <slot>setLineH(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>200</y>
+     <x>120</x>
+     <y>185</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -1789,8 +1789,8 @@
    <slot>FindRegion()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>194</x>
-     <y>230</y>
+     <x>102</x>
+     <y>159</y>
     </hint>
     <hint type="destinationlabel">
      <x>824</x>
@@ -1891,6 +1891,22 @@
     <hint type="destinationlabel">
      <x>480</x>
      <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetSliceCheckId(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>844</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>964</y>
     </hint>
    </hints>
   </connection>

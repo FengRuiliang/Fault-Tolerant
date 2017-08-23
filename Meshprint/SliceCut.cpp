@@ -21,7 +21,6 @@ SliceCut::~SliceCut()
 	ClearSlice();
 }
 
-
 std::vector<int> * SliceCut::StoreFaceIntoSlice()
 {
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
@@ -29,21 +28,22 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 	
 	for (auto iter_Face= faces.begin();iter_Face!= faces.end();iter_Face++ )
 	{
-		std::vector<HE_vert*> vertex_list = (*iter_Face)->vertices_;
 		double max_height = MIN_FLOAT_VALUE;
 		double min_height = MAX_FLOAT_VALUE;
-
-		for (int i = 0; i < 3; i++)
+		HE_edge* sta_ = (*iter_Face)->pedge_;
+		HE_edge* cur_ = sta_;
+		do 
 		{
-			min_height = min(min_height, vertex_list[i]->position().z());
-			max_height = max(max_height, vertex_list[i]->position().z());
-		}
+			min_height = min(min_height, cur_->pvert_->position().z());
+			max_height = max(max_height, cur_->pvert_->position().z());
+			cur_ = cur_->pnext_;
+		} while (cur_!=sta_);
 		if (max_height == min_height)// 22/01/2017
 		{
 			continue;
 		}
 		//the num of layer equal to 
-		for (int j= min_height / thickness_;j<=max_height / thickness_;j++)
+		for (int j= min_height / thickness_+1;j<=max_height / thickness_;j++)
 		{
 			storage_Face_list_[j].push_back((*iter_Face)->id());
 		}
@@ -65,38 +65,19 @@ int SliceCut::isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface){
 	return -1;
 }
 
-std::vector<Vec3f> SliceCut::sortVertInFace(HE_face* face_)
+HE_edge* SliceCut::getLeftEdge(HE_face* face_,float height_)
 {
-
-	std::vector<Vec3f> vertex_list;
-	 face_->vertices_;
-	int min_id_;
-	double min_height = MIN_FLOAT_VALUE;
-	for (int i = 0; i < 3; i++)
+	HE_edge* sta_ = face_->pedge_;
+	HE_edge* cur_ = face_->pedge_;
+	do 
 	{
-		vertex_list.push_back(face_->vertices_[i]->position());
-		if (min_height < vertex_list[i].z())
+		if (cur_->pvert_->position().z()<height_&&cur_->start_->position().z()>height_)
 		{
-			min_height = vertex_list[i].z();
-			min_id_ = i;
+			return cur_;
 		}
-	}
-	switch (min_id_)
-	{
-	case 0:
-		break;
-	case 1:
-		SWAP(vertex_list[0], vertex_list[1],Vec3f);
-		SWAP(vertex_list[1], vertex_list[2], Vec3f);
-		break;
-	case 2:
-		SWAP(vertex_list[0], vertex_list[2], Vec3f);
-		SWAP(vertex_list[1], vertex_list[2], Vec3f);
-		break;
-	default:
-		break;
-	}
-	 return vertex_list;
+		cur_ = cur_->pnext_;
+	} while (cur_!=sta_);
+	return NULL;
 }
 
 void SliceCut:: ClearSlice()
@@ -119,40 +100,57 @@ void SliceCut:: ClearSlice()
 void SliceCut::CutInPieces()
 {
 	pieces_list_ = new std::vector<std::vector<cutLine>*>[num_pieces_];
+	cutline_list_ = new std::vector<HE_edge *>[num_pieces_];
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	const std::vector<HE_vert *>& verts = *(mesh_in_->get_vertex_list());
 	for (size_t i = 0; i < num_pieces_; i++)
 	{
 		circle_list_ = new std::vector<cutLine>;
-		std::vector<int>&slice_faces_ = storage_Face_list_[i];
+		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
 		for (int j = 0; j < slice_faces_.size(); j++)
 		{
 			HE_face* f_ = faces[slice_faces_[j]];
-			std::vector<Vec3f> v = sortVertInFace(f_);
+			HE_edge* e_ = getLeftEdge(f_,cur_height_);
+			if (e_==NULL)
+			{
+				qDebug() << "e is null";
+				continue;
+			}
 			Vec3f pos1, pos2;
-			if (v[2].z() > cur_height_)
+			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
+				e_->pvert_->position()-e_->start_->position(), e_->pvert_->position(), pos1);
+			do
 			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_), v[2] - v[0], v[0], pos1);
-			}
-			else
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_), v[1] - v[2], v[2], pos1);
-			}
-			if (v[1].z() > cur_height_)
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_), v[1] - v[0], v[0], pos2);
-			}
-			else
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_), v[2] - v[1], v[1], pos2);
-			}
-			pos1.z() = cur_height_;
-			pos2.z() = cur_height_;
+				e_ = e_->pnext_;
+			} while (e_->pvert_->position().z()<=cur_height_);
+			
+
+			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
+				e_->pvert_->position() - e_->start_->position(), e_->pvert_->position(), pos2);
+			insertCutline(pos1, pos2,i);
 			cutLine new_cutline(pos1, pos2);
 			circle_list_->push_back(new_cutline);
 		}
 		pieces_list_[i].push_back(circle_list_);
+	}
+}
+
+
+void SliceCut::insertCutline(Vec3f p1, Vec3f p2, int id)
+{
+	cutLine l_(p1, p2);
+
+	for (int i=0;i<cutline_list_[id].size();i++)
+	{
+		if (cutline_list_[id][i].front().position_vert[0]==p2)
+		{
+			cutline_list_[id][i].insert(cutline_list_[id][i].begin(), l_);
+		}
+		else if (cutline_list_[id][i].back().position_vert[1] == p1)
+		{
+			cutline_list_[id][i].push_back(l_);
+		}
 	}
 }
 

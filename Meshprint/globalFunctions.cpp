@@ -79,7 +79,7 @@ void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineV
 	m2 = linePoint.y();
 	m3 = linePoint.z();
 	vpt = v1 * vp1 + v2 * vp2 + v3 * vp3;
-	//首先判断直线是否与平面平�? 
+
 	if (abs(vpt) < 1e-3)
 	{
 		point = linePoint + lineVector;

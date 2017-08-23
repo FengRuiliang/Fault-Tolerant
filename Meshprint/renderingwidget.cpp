@@ -606,10 +606,15 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
+		
 		glNormal3fv(faces.at(i)->normal());
-		glVertex3fv(faces.at(i)->vertices_[0]->position());
-		glVertex3fv(faces.at(i)->vertices_[1]->position());
-		glVertex3fv(faces.at(i)->vertices_[2]->position());
+		HE_edge* sta_ = faces[i]->pedge_;
+		HE_edge* cur_ = sta_;
+		do 
+		{
+			glVertex3fv(cur_->pvert_->position());
+			cur_ = cur_->pnext_;
+		} while (cur_!=sta_);
 	}
 	glEnd();
 }
@@ -676,6 +681,10 @@ void RenderingWidget::DrawSlice(bool bv)
 	glLineWidth(1.0);
 	glColor3f(0.0, 1.0, 0.0);
 	std::vector < std::vector<cutLine>* >*tc = (ptr_slice_->GetPieces());
+	if (tc==NULL)
+	{
+		return;
+	}
 	for (int i = slice_check_id_; i < slice_check_id_ + 1; i++)
 	{
 		glBegin(GL_LINES);
@@ -689,7 +698,6 @@ void RenderingWidget::DrawSlice(bool bv)
 		}
 		glEnd();
 	}
-
 }
 
 void RenderingWidget::DoSlice()

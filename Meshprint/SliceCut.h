@@ -1,6 +1,7 @@
 #pragma once
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
+#include "clipper.hpp"
 class Mesh3D;
 class vector;
 class Field;
@@ -79,7 +80,7 @@ public:
 private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
-	 std::vector<cutLine>* circle_list_;
+	/* std::vector<cutLine>* circle_list_;*/
 	 std::vector < std::vector<cutLine>* >*pieces_list_;
 	 std::vector< std::vector<cutLine>>* cutline_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);

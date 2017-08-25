@@ -71,7 +71,7 @@ HE_edge* SliceCut::getLeftEdge(HE_face* face_,float height_)
 	HE_edge* cur_ = face_->pedge_;
 	do 
 	{
-		if (cur_->pvert_->position().z()<height_&&cur_->start_->position().z()>height_)
+		if (cur_->pvert_->position().z()<height_&&cur_->start_->position().z()>=height_)
 		{
 			return cur_;
 		}
@@ -100,39 +100,56 @@ void SliceCut:: ClearSlice()
 void SliceCut::CutInPieces()
 {
 	pieces_list_ = new std::vector<std::vector<cutLine>*>[num_pieces_];
-	cutline_list_ = new std::vector<HE_edge *>[num_pieces_];
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
-	const std::vector<HE_vert *>& verts = *(mesh_in_->get_vertex_list());
 	for (size_t i = 0; i < num_pieces_; i++)
 	{
-		circle_list_ = new std::vector<cutLine>;
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
 		for (int j = 0; j < slice_faces_.size(); j++)
 		{
-			HE_face* f_ = faces[slice_faces_[j]];
-			HE_edge* e_ = getLeftEdge(f_,cur_height_);
-			if (e_==NULL)
-			{
-				qDebug() << "e is null";
+			if (faces[slice_faces_[j]]->selected()) {
 				continue;
-			}
-			Vec3f pos1, pos2;
-			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
-				e_->pvert_->position()-e_->start_->position(), e_->pvert_->position(), pos1);
+			}	
+			HE_edge* sta_edge_ = getLeftEdge(faces[slice_faces_[j]], cur_height_);
+			HE_edge* cur_edge_ = sta_edge_;
+			std::vector<cutLine>* chain_boundary_=new std::vector<cutLine>;
 			do
 			{
-				e_ = e_->pnext_;
-			} while (e_->pvert_->position().z()<=cur_height_);
-			
-
-			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
-				e_->pvert_->position() - e_->start_->position(), e_->pvert_->position(), pos2);
-			insertCutline(pos1, pos2,i);
-			cutLine new_cutline(pos1, pos2);
-			circle_list_->push_back(new_cutline);
+				cur_edge_->pface_->set_selected(1);
+				Vec3f pos1, pos2;
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
+					cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos1);
+				do
+				{
+					cur_edge_ = cur_edge_->pnext_;
+				} while (cur_edge_->pvert_->position().z() < cur_height_);
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
+					cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos2);
+				chain_boundary_->push_back(cutLine(pos1, pos2));
+				cur_edge_ = cur_edge_->ppair_;
+			} while (cur_edge_!=NULL&&cur_edge_!=sta_edge_);
+			if (cur_edge_->ppair_ == NULL)
+			{
+				cur_edge_ = sta_edge_;
+				while (cur_edge_->ppair_ != NULL)
+				{
+					Vec3f pos1, pos2;
+					cur_edge_ = cur_edge_->ppair_;
+					CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
+						cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos2);
+					do
+					{
+						cur_edge_ = cur_edge_->pprev_;
+					} while (cur_edge_->start_->position().z() >= cur_height_);
+					CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
+						cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos1);
+					chain_boundary_->insert(chain_boundary_->begin(), cutLine(pos1, pos2));
+				}
+			}
+			pieces_list_[i].push_back(chain_boundary_);
 		}
-		pieces_list_[i].push_back(circle_list_);
+		for (int j = 0; j < slice_faces_.size(); j++)
+		faces[slice_faces_[j]]->set_selected(0);
 	}
 }
 

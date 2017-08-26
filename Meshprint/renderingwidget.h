@@ -7,6 +7,7 @@
 #include "HE_mesh/Vec.h"
 #include "HE_mesh/Mesh3D.h"
 #include "SliceCut.h"
+#include "Hatch.h"
 using trimesh::vec;
 using trimesh::point;
 typedef trimesh::vec3  Vec3f;
@@ -63,6 +64,8 @@ private:
 	void CheckDrawTexture();
 	void CheckDrawAxes();
 	void DoSlice();
+	void fillPath();
+	void setHatchType(int type_);
 private:
 	void DrawAxes(bool bv);
 	void DrawPoints(bool);
@@ -71,12 +74,15 @@ private:
 	void DrawTexture(bool);
 	void DrawGrid(bool bV);
 	void DrawSlice(bool bv);
+	void DrawHatch(bool bv);
 	
 public:
 	MainWindow					*ptr_mainwindow_;
 	CArcBall					*ptr_arcball_;
 	Mesh3D						*ptr_mesh_;
 	SliceCut					*ptr_slice_;
+	Hatch						*ptr_hatch_;
+	hatchType					hatch_type_;
 	// Texture
 	GLuint						texture_[1];
 	bool						is_load_texture_;

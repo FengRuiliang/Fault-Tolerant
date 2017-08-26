@@ -528,7 +528,7 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 			{
 				if (s_faceid.size() >= 3)
 				{
-					InsertFace(s_faceid,normal);
+					InsertFace(s_faceid,normal)->vertices_=s_faceid;
 				}
 				s_faceid.clear();
 			}
@@ -600,7 +600,7 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 				s_faceid.push_back(hv);
 			}
 			inBinary >> info;
-			InsertFace(s_faceid,nor_);
+			InsertFace(s_faceid,nor_)->vertices_=s_faceid;
 			s_faceid.clear();
 		}
 	}

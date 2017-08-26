@@ -40,8 +40,9 @@ void SafeDelete(object *ptr)
 	if (ptr != NULL)
 	{
 		delete ptr;
-		ptr = NULL;
+			ptr = NULL;
 	}
+
 }
 
 template<class object>
@@ -63,4 +64,14 @@ void inline MySwap(T &t1, T &t2)
 };
 extern bool PointinTriangle(HE_face* face, Vec3f point_in);
 extern void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineVector, Vec3f linePoint, Vec3f& point);
+
+
+enum hatchType
+{
+	NONE = 0,
+	CHESSBOARD,
+	OFFSETFILLING,
+	STRIP,
+	MEANDER
+};
 #endif // GLOBALFUNCTIONS_H

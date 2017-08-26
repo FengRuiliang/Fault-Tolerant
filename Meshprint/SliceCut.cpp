@@ -15,7 +15,6 @@ typedef std::vector<HE_face* >::reverse_iterator FACE_RITER;
 typedef std::vector<HE_edge* >::reverse_iterator EDGE_RITER;
 typedef std::pair<HE_vert*, HE_vert* > PAIR_VERTEX;
 
-
 SliceCut::~SliceCut()
 {
 	ClearSlice();
@@ -71,7 +70,7 @@ HE_edge* SliceCut::getLeftEdge(HE_face* face_,float height_)
 	HE_edge* cur_ = face_->pedge_;
 	do 
 	{
-		if (cur_->pvert_->position().z()<height_&&cur_->start_->position().z()>=height_)
+		if (cur_->pvert_->position().z()<=height_&&cur_->start_->position().z()>=height_)
 		{
 			return cur_;
 		}
@@ -86,23 +85,20 @@ void SliceCut:: ClearSlice()
 	{
 		return;
 	}
-	for (size_t i=0;i<num_pieces_;i++)
-	{
-		pieces_list_[i].clear();
-		storage_Face_list_[i].clear();
-	}
 	delete[]pieces_list_;
 	delete[] storage_Face_list_;
 	pieces_list_ = NULL;
 	storage_Face_list_ = NULL;
+	
 }
 
 void SliceCut::CutInPieces()
 {
 	pieces_list_ = new std::vector<std::vector<cutLine>*>[num_pieces_];
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
-	for (size_t i = 0; i < num_pieces_; i++)
+	for (size_t i =0; i <num_pieces_; i++)
 	{
+
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
 		for (int j = 0; j < slice_faces_.size(); j++)
@@ -127,47 +123,53 @@ void SliceCut::CutInPieces()
 					cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos2);
 				chain_boundary_->push_back(cutLine(pos1, pos2));
 				cur_edge_ = cur_edge_->ppair_;
-			} while (cur_edge_!=NULL&&cur_edge_!=sta_edge_);
-			if (cur_edge_->ppair_ == NULL)
+			} while (cur_edge_->pface_!=NULL&&!cur_edge_->pface_->selected()&&cur_edge_!=sta_edge_);
+			Vec3f p1 = chain_boundary_->front().position_vert[0];
+			Vec3f p2 = chain_boundary_->back().position_vert[1];
+			//still can be more effective
+			if ((p1-p2).length()>1e-3)
 			{
-				cur_edge_ = sta_edge_;
-				while (cur_edge_->ppair_ != NULL)
+				if (pieces_list_[i].size()==0)
 				{
-					Vec3f pos1, pos2;
-					cur_edge_ = cur_edge_->ppair_;
-					CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
-						cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos2);
-					do
+					pieces_list_[i].push_back(chain_boundary_);
+				}
+				else
+				{
+					for (int k = 0; k < pieces_list_[i].size(); k++)
 					{
-						cur_edge_ = cur_edge_->pprev_;
-					} while (cur_edge_->start_->position().z() >= cur_height_);
-					CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
-						cur_edge_->pvert_->position() - cur_edge_->start_->position(), cur_edge_->pvert_->position(), pos1);
-					chain_boundary_->insert(chain_boundary_->begin(), cutLine(pos1, pos2));
+						Vec3f p3 = pieces_list_[i][k]->front().position_vert[0];
+						Vec3f p4 = pieces_list_[i][k]->back().position_vert[1];
+						if ((p3 - p4).length() >1e-3)
+						{
+							if ((p3 - p2).length() < 1e-3)
+							{
+								pieces_list_[i][k]->insert(pieces_list_[i][k]->begin(), chain_boundary_->begin(), chain_boundary_->end());
+								break;
+							}
+							else if ((p4 - p1).length() < 1e-3)
+							{
+								pieces_list_[i][k]->insert(pieces_list_[i][k]->end(), chain_boundary_->begin(), chain_boundary_->end());
+								break;
+							}
+						}
+						if (k == pieces_list_[i].size() - 1)
+						{
+							pieces_list_[i].push_back(chain_boundary_);
+							break;
+						}
+					}
 				}
 			}
-			pieces_list_[i].push_back(chain_boundary_);
+			else
+			{
+				pieces_list_[i].push_back(chain_boundary_);
+			}
 		}
 		for (int j = 0; j < slice_faces_.size(); j++)
 		faces[slice_faces_[j]]->set_selected(0);
+	
 	}
+
 }
 
-
-void SliceCut::insertCutline(Vec3f p1, Vec3f p2, int id)
-{
-	cutLine l_(p1, p2);
-
-	for (int i=0;i<cutline_list_[id].size();i++)
-	{
-		if (cutline_list_[id][i].front().position_vert[0]==p2)
-		{
-			cutline_list_[id][i].insert(cutline_list_[id][i].begin(), l_);
-		}
-		else if (cutline_list_[id][i].back().position_vert[1] == p1)
-		{
-			cutline_list_[id][i].push_back(l_);
-		}
-	}
-}
 

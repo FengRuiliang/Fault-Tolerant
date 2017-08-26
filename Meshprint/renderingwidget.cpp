@@ -27,8 +27,9 @@ RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	has_lighting_(true), is_draw_point_(false), is_draw_edge_(false), is_draw_face_(true)
 {
 	ptr_arcball_ = new CArcBall(width(), height());
-	ptr_mesh_ = new Mesh3D();
+	ptr_mesh_ =new Mesh3D;
 	ptr_slice_ = NULL;
+	ptr_hatch_ = NULL;
 	is_select_face = false;
 	is_draw_hatch_ = false;
 	is_load_texture_ = false;
@@ -41,7 +42,7 @@ RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	eye_goal_[0] = eye_goal_[1] = eye_goal_[2] = 0.0;
 	eye_direction_[0] = eye_direction_[1] = 0.0;
 	eye_direction_[2] = 1.0;
-	slice_check_id_ = 1;
+	slice_check_id_ = 0;
 }
 
 RenderingWidget::~RenderingWidget()
@@ -269,6 +270,7 @@ void RenderingWidget::Render()
 	DrawFace(is_draw_face_);
 	DrawTexture(is_draw_texture_);
 	DrawSlice(true);
+	DrawHatch(true);
 }
 
 void RenderingWidget::SetLight()
@@ -322,13 +324,13 @@ void RenderingWidget::SetBackground()
 
 void RenderingWidget::SetSliceCheckId(int id)
 {
-	if (ptr_slice_==NULL)
+	if (ptr_slice_ == NULL)
 	{
 		return;
 	}
-	if (id>=ptr_slice_->GetNumPieces())
+	if (id >= ptr_slice_->GetNumPieces())
 	{
-		slice_check_id_ = ptr_slice_->GetNumPieces()-1;
+		slice_check_id_ = ptr_slice_->GetNumPieces() - 1;
 	}
 	else
 	{
@@ -337,12 +339,23 @@ void RenderingWidget::SetSliceCheckId(int id)
 	update();
 }
 
+void RenderingWidget::setHatchType(int type_)
+{
+	hatch_type_ = (hatchType)type_;
+}
+
 void RenderingWidget::ReadMesh()
 {
+	SafeDelete(ptr_mesh_);
+	SafeDelete(ptr_slice_);
+	SafeDelete(ptr_hatch_);
+	ptr_mesh_ = NULL;
+	ptr_slice_ = NULL;
+	ptr_hatch_ = NULL;
 	QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
 	QString str = time.toString("yyyy-MM-dd hh:mm:ss ddd"); //设置显示格式
 	ptr_arcball_->reSetBound(width(), height());
-	ptr_mesh_->ClearData();
+	ptr_mesh_ = new Mesh3D();
 	is_draw_grid_ = true;
 	is_draw_face_ = true;
 	is_draw_cutpieces_ = true;
@@ -350,7 +363,7 @@ void RenderingWidget::ReadMesh()
 	has_lighting_ = true;
 	QString filename = QFileDialog::
 		getOpenFileName(this, tr("Read Mesh"),
-		"Resources/models", tr("Meshes (*.obj *.stl)"));
+			"Resources/models", tr("Meshes (*.obj *.stl)"));
 
 	if (filename.isEmpty())
 	{
@@ -388,22 +401,16 @@ void RenderingWidget::ReadMesh()
 	max_ = max_ > ptr_mesh_->getBoundingBox().at(0).at(1) ? max_ : ptr_mesh_->getBoundingBox().at(0).at(1);
 	max_ = max_ > ptr_mesh_->getBoundingBox().at(0).at(2) ? max_ : ptr_mesh_->getBoundingBox().at(0).at(2);
 
-	//updateGL();
 	update();
 	time = QDateTime::currentDateTime();//获取系统现在的时间
 	str = time.toString("yyyy-MM-dd hh:mm:ss ddd"); //设置显示格式
 	//qDebug() << "read mesh end time :" << str;
-
-	// 	qDebug() << "孔洞个数为：" << ptr_mesh_->GetBLoop().size();
-	// 	qDebug() << "法向面片错误" <<sss;
-	//qDebug() << "法向错误面片个数："<<sss;
-	qDebug() << "load model end at" << time;
-	qDebug() << ptr_mesh_->get_faces_list()->size();
-	qDebug() << ptr_mesh_->getBoundingBox().at(0)[0] * 2 << ptr_mesh_->getBoundingBox().at(0)[1] * 2 << ptr_mesh_->getBoundingBox().at(0)[2];
-	//ptr_arcball_->PlaceBall(scaleV);
 	scaleT = scaleV;
 	eye_distance_ = 2 * max_;
 	ptr_mesh_->MarkEdge();
+	qDebug() << "load model end at" << time;
+	qDebug() << ptr_mesh_->get_faces_list()->size();
+	qDebug() << ptr_mesh_->getBoundingBox().at(0)[0] * 2 << ptr_mesh_->getBoundingBox().at(0)[1] * 2 << ptr_mesh_->getBoundingBox().at(0)[2];
 }
 
 void RenderingWidget::WriteMesh()
@@ -606,15 +613,10 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		
 		glNormal3fv(faces.at(i)->normal());
-		HE_edge* sta_ = faces[i]->pedge_;
-		HE_edge* cur_ = sta_;
-		do 
-		{
-			glVertex3fv(cur_->pvert_->position());
-			cur_ = cur_->pnext_;
-		} while (cur_!=sta_);
+		glVertex3fv(faces[i]->vertices_[0]->position());
+		glVertex3fv(faces[i]->vertices_[1]->position());
+		glVertex3fv(faces[i]->vertices_[2]->position());
 	}
 	glEnd();
 }
@@ -685,13 +687,21 @@ void RenderingWidget::DrawSlice(bool bv)
 	{
 		return;
 	}
-	for (int i = slice_check_id_; i < slice_check_id_ + 1; i++)
+	for (int i = slice_check_id_; i < slice_check_id_+1; i++)
 	{
 		glBegin(GL_LINES);
 		for (size_t j = 0; j < tc[i].size(); j++)
 		{
 			for (int k = 0; k < (tc[i])[j]->size(); k++)
 			{
+				if (k==0)
+				{
+					glColor3f(1.0, 0.0, 0.0);
+				}
+				else
+				{
+					glColor3f(0.0, 1.0, 0.0);
+				}
 				glVertex3fv(((tc[i])[j])->at(k).position_vert[0]);
 				glVertex3fv(((tc[i])[j])->at(k).position_vert[1]);
 			}
@@ -699,7 +709,73 @@ void RenderingWidget::DrawSlice(bool bv)
 		glEnd();
 	}
 }
+void RenderingWidget::DrawHatch(bool bv)
+{
+	if (!bv)
+	{
+		return;
+	}
+	if (ptr_mesh_->num_of_vertex_list() == 0 || ptr_slice_ == NULL || ptr_hatch_ == NULL)
+	{
+		return;
+	}
+	std::vector<Vec3f*>* tc_hatch_ = ptr_hatch_->getHatch();
+	std::vector < std::vector<Vec3f>>* tc_offset_ = ptr_hatch_->getOffsetVertex();
+	if (slice_check_id_ > ptr_hatch_->num_pieces_ - 1)
+	{
+		return;
+	}
+	if (is_show_all)
+	{
+		for (int i = 0; i < ptr_hatch_->num_pieces_; i++)
+		{
+			for (auto iterline = tc_hatch_[i].begin(); iterline != tc_hatch_[i].end(); iterline++)
+			{
+				glColor3f(0.0, 1.0, 0.0);
+				glBegin(GL_LINES);
+				glVertex3fv((*iterline)[0] );
+				glVertex3fv((*iterline)[1] );
+				glEnd();
+			}
 
+			for (int j = 0; j < tc_offset_[i].size(); j++)
+			{
+				glColor3f(1.0, 0.0, 0.0);
+				glBegin(GL_LINE_LOOP);
+				for (int k = 0; k < ((tc_offset_[i])[j]).size(); k++)
+				{
+					glVertex3fv(((tc_offset_[i])[j]).at(k));
+				}
+				glEnd();
+			}
+		}
+	}
+	else
+	{
+		for (int i = slice_check_id_; i < slice_check_id_ + 1; i++)
+		{
+			for (auto iterline = tc_hatch_[i].begin(); iterline != tc_hatch_[i].end(); iterline++)
+			{
+				glColor3f(0.0, 1.0, 0.0);
+				glBegin(GL_LINES);
+				glVertex3fv(((*iterline)[0]));
+				glVertex3fv(((*iterline)[1]));
+				glEnd();
+			}
+
+			for (int j = 0; j < tc_offset_[i].size(); j++)
+			{
+				glColor3f(1.0, 0.0, 0.0);
+				glBegin(GL_LINE_LOOP);
+				for (int k = 0; k < ((tc_offset_[i])[j]).size(); k++)
+				{
+					glVertex3fv(((tc_offset_[i])[j]).at(k));
+				}
+				glEnd();
+			}
+		}
+	}
+}
 void RenderingWidget::DoSlice()
 {
 	if (ptr_slice_!=NULL)
@@ -709,4 +785,38 @@ void RenderingWidget::DoSlice()
 	ptr_slice_ = new SliceCut(ptr_mesh_);
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();
+	fillPath();
 }
+void RenderingWidget::fillPath()
+{
+	if (ptr_mesh_->num_of_vertex_list() == 0)
+	{
+		return;
+	}
+	switch (hatch_type_)
+	{
+	case NONE:
+		SafeDelete(ptr_hatch_);
+		ptr_hatch_ = NULL;
+		break;
+	case CHESSBOARD:
+		SafeDelete(ptr_hatch_);
+		ptr_hatch_ = new HatchChessboard(ptr_slice_);
+		ptr_hatch_->doHatch();
+		break;
+	case OFFSETFILLING:
+		break;
+	case STRIP:
+		SafeDelete(ptr_hatch_);
+		ptr_hatch_ = new HatchStrip(ptr_slice_);
+		ptr_hatch_->doHatch();
+		break;
+	case MEANDER:
+		break;
+	default:
+		break;
+	}
+	update();
+}
+
+

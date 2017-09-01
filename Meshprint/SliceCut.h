@@ -2,9 +2,11 @@
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
 #include "clipper.hpp"
+#include "Sweepline.h"
 class Mesh3D;
 class vector;
 class Field;
+class SweepLine;
 #define DEFAULT_T 0.02f
 typedef trimesh::point point;
 typedef trimesh::vec3  Vec3f;

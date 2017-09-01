@@ -1,7 +1,6 @@
 #pragma once
 #include "SliceCut.h"
 #include "QDebug"
-
 #define MAX_FLOAT_VALUE (static_cast<float>(10e10))
 #define MIN_FLOAT_VALUE	(static_cast<float>(-10e10))
 //CHANGE
@@ -100,7 +99,7 @@ void SliceCut::CutInPieces()
 	{
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
-		std::vector<cutLine>* chain_boundary_ = new std::vector<cutLine>;
+		std::vector<std::pair<Vec3f,Vec3f>> chain_boundary_;
 		for (int j=0;j<slice_faces_.size();j++)
 		{
 			Vec3f p[3];
@@ -157,7 +156,6 @@ void SliceCut::CutInPieces()
 							CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
 								p[1] - p[0], p[0], pos2);
 						}
-
 					}
 					else
 					{
@@ -166,15 +164,11 @@ void SliceCut::CutInPieces()
 						CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_height_),
 							p[2] - p[1], p[1], pos2);
 					}
-
 				}
-
-			chain_boundary_->push_back(cutLine(pos1, pos2));
-			}
-				
+			chain_boundary_.push_back(std::pair<Vec3f,Vec3f>(pos1, pos2));
+			}			
 		}
-		pieces_list_[i].push_back(chain_boundary_);
-		qDebug() << i << pieces_list_[i].size();
+		SweepLine sweep_line_(chain_boundary_);
 	}
 }
 

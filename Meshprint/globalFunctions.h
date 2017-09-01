@@ -74,4 +74,15 @@ enum hatchType
 	STRIP,
 	MEANDER
 };
+struct compare_He_vert
+{
+	bool operator ()(HE_vert* a, HE_vert* b)
+	{
+		if (a->position()<b->position())
+		{
+			return true;
+		}
+		return false;
+	}
+};
 #endif // GLOBALFUNCTIONS_H

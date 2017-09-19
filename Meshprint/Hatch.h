@@ -124,7 +124,7 @@ public:
 	std::vector<Vec3f*>* getHatch() { return hatch_; };
 public:
 	std::vector<Vec3f*>* hatch_;
-	std::vector <std::vector<cutLine>*>*boudary_edge_;
+	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>*boudary_edge_;
 	std::vector < std::vector<Vec3f>>*offset_vert_;
 	//std::vector < std::vector<Vec3f>*>*offset_vert_rotate_;
 public:

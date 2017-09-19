@@ -93,9 +93,9 @@ void SliceCut:: ClearSlice()
 
 void SliceCut::CutInPieces()
 {
-	pieces_list_ = new std::vector<std::vector<cutLine>*>[num_pieces_];
+	pieces_list_ = new std::vector<std::vector<std::pair<Vec3f, Vec3f>>>[num_pieces_];
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
-	for (size_t i = 0; i < num_pieces_; i++)
+	for (size_t i = 1; i < num_pieces_; i++)
 	{
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
@@ -108,9 +108,7 @@ void SliceCut::CutInPieces()
 				p[m] = faces[slice_faces_[j]]->vertices_[m]->position();
 			}
 			Vec3f pos1, pos2;
-			for (int j = 0; j < slice_faces_.size(); j++)
-			{
-				if (p[0].z() >= cur_height_)
+			if (p[0].z() >= cur_height_)
 				{
 					if (p[1].z() >= cur_height_)
 					{
@@ -138,7 +136,7 @@ void SliceCut::CutInPieces()
 						}
 					}
 				}
-				else
+			else
 				{
 					if (p[1].z() >= cur_height_)
 					{
@@ -166,9 +164,12 @@ void SliceCut::CutInPieces()
 					}
 				}
 			chain_boundary_.push_back(std::pair<Vec3f,Vec3f>(pos1, pos2));
-			}			
+						
 		}
+		qDebug() << i;
 		SweepLine sweep_line_(chain_boundary_);
+		sweep_line_.polygonization();
+		sweep_line_.getContuor(pieces_list_[i]);
 	}
 }
 

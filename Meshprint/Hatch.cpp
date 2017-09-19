@@ -92,9 +92,9 @@ void HatchChessboard::doHatch()
 		{
 			std::vector<Vec3f> Bpoints;
 			std::vector<std::vector<Vec3f>> OFFPoints;
-			for (size_t k = 0; k < (boudary_edge_[i])[j]->size(); k++)
+			for (size_t k = 0; k < (boudary_edge_[i])[j].size(); k++)
 			{
-				Bpoints.push_back((boudary_edge_[i])[j]->at(k).position_vert[0]);
+				Bpoints.push_back((boudary_edge_[i])[j][k].first);
 			}
 			if (Bpoints.size()<3)
 			{

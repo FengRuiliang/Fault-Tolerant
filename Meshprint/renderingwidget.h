@@ -51,7 +51,7 @@ private:
 	void Render();
 	void SetLight();
 
-	public slots:
+public slots:
 	void SetBackground();
 	void SetSliceCheckId(int id);
 	void ReadMesh();
@@ -66,6 +66,8 @@ private:
 	void DoSlice();
 	void fillPath();
 	void setHatchType(int type_);
+	void setThickness(double t) { 
+		thickness_ = t; }
 private:
 	void DrawAxes(bool bv);
 	void DrawPoints(bool);

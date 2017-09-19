@@ -682,17 +682,17 @@ void RenderingWidget::DrawSlice(bool bv)
 		return;
 	glLineWidth(1.0);
 	glColor3f(0.0, 1.0, 0.0);
-	std::vector < std::vector<cutLine>* >*tc = (ptr_slice_->GetPieces());
+	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
 	if (tc==NULL)
 	{
 		return;
 	}
-	for (int i = slice_check_id_; i < slice_check_id_+1; i++)
+	for (int i = 0; i < ptr_slice_->num_pieces_; i++)
 	{
 		glBegin(GL_LINES);
 		for (size_t j = 0; j < tc[i].size(); j++)
 		{
-			for (int k = 0; k < (tc[i])[j]->size(); k++)
+			for (int k = 0; k < (tc[i])[j].size(); k++)
 			{
 				if (k==0)
 				{
@@ -702,8 +702,8 @@ void RenderingWidget::DrawSlice(bool bv)
 				{
 					glColor3f(0.0, 1.0, 0.0);
 				}
-				glVertex3fv(((tc[i])[j])->at(k).position_vert[0]);
-				glVertex3fv(((tc[i])[j])->at(k).position_vert[1]);
+				glVertex3fv(tc[i][j][k].first);
+				glVertex3fv(tc[i][j][k].second);
 			}
 		}
 		glEnd();

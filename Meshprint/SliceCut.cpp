@@ -96,7 +96,7 @@ void SliceCut::CutInPieces()
 {
 	pieces_list_ = new std::vector<std::vector<std::pair<Vec3f, Vec3f>>>[num_pieces_];
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
-	for (size_t i = 1; i < num_pieces_; i++)
+	for (size_t i = 84; i < num_pieces_; i++)
 	{
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
@@ -168,10 +168,17 @@ void SliceCut::CutInPieces()
 						
 		}
 		qDebug() << i;
+
+		//pieces_list_[i] .push_back( chain_boundary_);
+		//break;
 		SweepLine sweep_line_(chain_boundary_);
 		sweep_line_.polygonization();
-		sweep_line_.getContuor(pieces_list_[i]);
-		break;
+		//sweep_line_.getContuor(pieces_list_[i]);
+		if (i==83)
+		{
+			break;
+		}
+		//break;
 	}
 }
 

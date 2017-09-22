@@ -75,6 +75,7 @@ void SweepLine::polygonization()
 		//qDebug() << que_event_.size()<<qsegment_.size();
 		std::sort(qsegment_.begin(), qsegment_.end(), compSegment);
 		int n = qsegment_.size();
+		qDebug() << n;
 		for (int i=0;i<qsegment_.size();i++)
 		{
 			if ((qsegment_[i]->first_->position_-qsegment_[(i+1)%n]->second_->position_).length()<1e-3)

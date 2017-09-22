@@ -49,11 +49,6 @@ public:
 
 bool compSegment(const Segment* a, const Segment* b);
 bool compareEvent(const Event*  a, const Event*  b);
-
-
-
-
-
 class SweepLine
 {
 public:

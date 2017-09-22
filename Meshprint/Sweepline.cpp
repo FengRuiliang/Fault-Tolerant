@@ -43,7 +43,7 @@ void SweepLine::getContuor(std::vector<std::vector<std::pair<Vec3f,Vec3f>>>& lay
 			std::vector<std::pair<Vec3f,Vec3f>> polygon_;
 			Segment* sta_ = segment_list_[i];
 			Segment* cur_ = sta_;
-			qDebug() << i;
+			//qDebug() << i;
 			do 
 			{
 				cur_->visited_ = true;

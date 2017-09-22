@@ -680,8 +680,27 @@ void RenderingWidget::DrawSlice(bool bv)
 {
 	if (!bv||ptr_slice_==NULL)
 		return;
-	glLineWidth(1.0);
+	//glLineWidth(1.0);
 	glColor3f(0.0, 1.0, 0.0);
+	std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> map_cut_ = ptr_slice_->getMapPieces();
+	auto layer_ = ptr_slice_->thickf_;
+	for (auto iterset=layer_.begin();iterset!=layer_.end();iterset++)
+	{
+		std::vector<std::pair<Vec3f, Vec3f>>& lines_ = map_cut_[*iterset];
+		glBegin(GL_LINES);
+		for (int j=0;j<lines_.size();j++)
+		{	
+		
+			glVertex3fv(lines_[j].first);
+			glVertex3fv(lines_[j].second);
+		}
+		glEnd();
+	}
+	return;
+
+
+
+
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
 	if (tc==NULL)
 	{
@@ -783,6 +802,8 @@ void RenderingWidget::DoSlice()
 		SafeDelete(ptr_slice_);
 	}
 	ptr_slice_ = new SliceCut(ptr_mesh_);
+	ptr_slice_->cutFacets();
+	return;
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();
 	fillPath();

@@ -88,6 +88,7 @@ void SliceCut:: ClearSlice()
 	delete[] storage_Face_list_;
 	pieces_list_ = NULL;
 	storage_Face_list_ = NULL;
+
 	
 }
 
@@ -170,7 +171,37 @@ void SliceCut::CutInPieces()
 		SweepLine sweep_line_(chain_boundary_);
 		sweep_line_.polygonization();
 		sweep_line_.getContuor(pieces_list_[i]);
+		break;
 	}
 }
 
+bool compvec3fz(const Vec3f a, const Vec3f b)
+{
+	return a.z() < b.z();
+}
+void SliceCut::cutFacets()
+{
+	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
+	for (int i = 0; i < faces.size();i++)
+	{
+		if (faces[i]->normal().x() ==0&& faces[i]->normal().y() == 0)
+		{
+			continue;
+		}
+		std::vector<Vec3f>  v_;
+		Vec3f pos_;
+		for (int j=0;j<3;j++)
+		{
+			v_.push_back(faces[i]->vertices_[j]->position_);
+		}
+		sort(v_.begin(), v_.end(),compvec3fz);
+		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), v_[1],
+			v_[2] - v_[0], v_[0], pos_);
+		if ((pos_-v_[1]).cross(faces[i]->normal()).z()>0)
+			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(v_[1], pos_));
+		else
+			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(pos_, v_[1]));
 
+		thickf_.insert(v_[1].z());
+	}
+}

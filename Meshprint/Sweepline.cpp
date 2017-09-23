@@ -49,7 +49,6 @@ void SweepLine::getContuor(std::vector<std::vector<std::pair<Vec3f,Vec3f>>>& lay
 				cur_->visited_ = true;
 				polygon_.push_back(std::pair<Vec3f, Vec3f>(cur_->first_->position_, cur_->second_->position_));
 				cur_ = cur_->next_seg_;
-				
 			} while (cur_ != NULL&&cur_ != sta_);
 			layer_edge_.push_back(polygon_);
 		}

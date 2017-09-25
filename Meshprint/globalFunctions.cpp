@@ -99,4 +99,12 @@ void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineV
 	}
 }
 
+bool sortByZS(HE_vert* a, HE_vert* b)
+{
+	return a->position().z() < b->position().z();
+}
+bool sortByZB(HE_vert* a, HE_vert* b)
+{
+	return a->position().z() < b->position().z();
+}
 //////////////////////////////////////////////////////////////////////////

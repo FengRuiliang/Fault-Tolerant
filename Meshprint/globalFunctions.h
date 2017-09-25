@@ -66,6 +66,8 @@ extern bool PointinTriangle(HE_face* face, Vec3f point_in);
 extern void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineVector, Vec3f linePoint, Vec3f& point);
 
 
+bool sortByZS(HE_vert* a, HE_vert* b);
+bool sortByZB(HE_vert* a, HE_vert* b);
 enum hatchType
 {
 	NONE = 0,
@@ -78,11 +80,13 @@ struct compare_He_vert
 {
 	bool operator ()(HE_vert* a, HE_vert* b)
 	{
-		if (a->position()<b->position())
+		if (a->position() < b->position())
 		{
 			return true;
 		}
 		return false;
 	}
 };
+
+
 #endif // GLOBALFUNCTIONS_H

@@ -186,8 +186,23 @@ bool compvec3fz(const Vec3f a, const Vec3f b)
 {
 	return a.z() < b.z();
 }
-void SliceCut::cutFacets()
+void SliceCut::sweepPline()
 {
+
+	std::vector<HE_vert*> queue_event_ = *mesh_in_->get_vertex_list();
+	sort(queue_event_.begin(), queue_event_.end(), sortByZB);
+	while (!queue_event_.empty())
+	{
+		HE_vert* cur_vert_= queue_event_.back();
+		if (!cur_vert_->mergeFace.empty() || !cur_vert_->splitFace.empty())
+		{
+			
+		}
+
+	}
+		
+
+
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	for (int i = 0; i < faces.size();i++)
 	{
@@ -207,7 +222,7 @@ void SliceCut::cutFacets()
 		if ((pos_-v_[1]).cross(faces[i]->normal()).z()>0)
 			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(v_[1], pos_));
 		else
-			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(pos_, v_[1]));
+			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(pos_, v_[1])); 
 
 		thickf_.insert(v_[1].z());
 	}

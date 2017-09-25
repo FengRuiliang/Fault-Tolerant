@@ -799,8 +799,8 @@ void RenderingWidget::DoSlice()
 		SafeDelete(ptr_slice_);
 	}
 	ptr_slice_ = new SliceCut(ptr_mesh_);
-// 	ptr_slice_->cutFacets();
-// 	return;
+ 	ptr_slice_->sweepPline();
+ 	return;
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();
 	fillPath();

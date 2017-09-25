@@ -69,7 +69,7 @@ public:
 	void ClearSlice();
 	void CutInPieces();
 
-	void cutFacets();
+	void sweepPline();
 
 
 	float getThickness() { return thickness_; };
@@ -85,8 +85,8 @@ private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
 	/* std::vector<cutLine>* circle_list_;*/
-	 std::vector < std::vector<std::pair<Vec3f,Vec3f>>>* pieces_list_;
-	 std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> cut_list_;
+	std::vector < std::vector<std::pair<Vec3f,Vec3f>>>* pieces_list_;
+	std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> cut_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
 	HE_edge*  getLeftEdge(HE_face* face_, float height_);
 };

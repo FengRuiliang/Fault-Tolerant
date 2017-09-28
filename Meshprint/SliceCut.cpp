@@ -14,6 +14,9 @@ typedef std::vector<HE_face* >::reverse_iterator FACE_RITER;
 typedef std::vector<HE_edge* >::reverse_iterator EDGE_RITER;
 typedef std::pair<HE_vert*, HE_vert* > PAIR_VERTEX;
 
+
+
+
 SliceCut::~SliceCut()
 {
 	ClearSlice();
@@ -194,6 +197,41 @@ void SliceCut::sweepPline()
 	while (!queue_event_.empty())
 	{
 		HE_vert* cur_vert_= queue_event_.back();
+		std::vector<cutLine*> lines_;
+		float cur_hei_ = cur_vert_->position().z() - (float)((int)(cur_vert_->position().z() * 100) % (int)(thickness_ * 100)) / 100;
+		for (int i=0;i<cur_vert_->splitFace.size();i++)
+		{
+			std::pair<Vec3f, Vec3f> p = cutFacet(cur_vert_->splitFace[i], cur_hei_);
+			std::vector<std::pair<Vec3f, Vec3f>> lines_;
+			auto iter = lines_.begin();
+			for (;iter!=lines_.end();iter++)
+			{
+				if ((iter->second-p.first).length()<1e-3)
+				{
+					lines_.insert(iter, p);
+				}
+				else if ((iter->first - p.second).length()<1e-3)
+				{
+					lines_.insert(iter-1, p);
+				}
+			}
+			if (iter==lines_.end())
+			{
+				lines_.push_back(p);
+			}
+		}
+
+		if (!cur_vert_->mergeFace.empty())
+		{
+			//replace all merge face by split facet
+		}
+		else
+		{
+			//insert new loop
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+
 		if (!cur_vert_->mergeFace.empty() || !cur_vert_->splitFace.empty())
 		{
 			
@@ -226,4 +264,71 @@ void SliceCut::sweepPline()
 
 		thickf_.insert(v_[1].z());
 	}
+}
+
+std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_hei_)
+{
+	Vec3f p[3];
+
+	for (int m = 0; m < 3; m++)
+	{
+		p[m] = facet->vertices_[m]->position();
+	}
+	Vec3f pos1, pos2;
+	if (p[0].z() >= cur_hei_)
+	{
+		if (p[1].z() >= cur_hei_)
+		{
+			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+				p[2] - p[1], p[2], pos1);
+			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+				p[0] - p[2], p[0], pos2);
+		}
+		else
+		{
+			if (p[2].z() >= cur_hei_)
+			{
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[1] - p[0], p[0], pos1);
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[2] - p[1], p[1], pos2);
+			}
+			else
+			{
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[1] - p[0], p[0], pos1);
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[2] - p[0], p[0], pos2);
+
+			}
+		}
+	}
+	else
+	{
+		if (p[1].z() >= cur_hei_)
+		{
+			if (p[2].z() >= cur_hei_)
+			{
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[0] - p[2], p[2], pos1);
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[1] - p[0], p[0], pos2);
+			}
+			else
+			{
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[2] - p[1], p[2], pos1);
+				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+					p[1] - p[0], p[0], pos2);
+			}
+		}
+		else
+		{
+			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+				p[0] - p[2], p[2], pos1);
+			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+				p[2] - p[1], p[1], pos2);
+		}
+	}
+	return std::pair<Vec3f,Vec3f>(pos1, pos2);
 }

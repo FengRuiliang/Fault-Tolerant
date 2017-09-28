@@ -181,6 +181,7 @@ HE_edge* Mesh3D::InsertEdge(HE_vert* vstart, HE_vert* vend)
 	pedges_list_->push_back(pedge);
 	return pedge;
 }
+
 HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv)
 {
 	if (pfaces_list_ == NULL)

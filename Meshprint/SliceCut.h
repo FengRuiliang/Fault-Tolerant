@@ -21,6 +21,7 @@ public:
 		position_vert[0] = p1; position_vert[1] = p2;
 		sweep_point_ = p1;
 		sweep_point_Last_ = p1;
+		next_line_ = NULL;
 	/*	edgeid_vert[0] = edge1; edgeid_vert[1] = edge2;*/
 	}
 	cutLine(point p1, point p2,int xID,int yID)
@@ -39,6 +40,7 @@ public:
 public:
 	Vec3f sweep_point_;
 	Vec3f sweep_point_Last_;
+	cutLine* next_line_;
 	int x_field_;
 	int y_field_;
 };
@@ -72,6 +74,8 @@ public:
 	void sweepPline();
 
 
+
+	std::pair<Vec3f,Vec3f> cutFacet(HE_face* facet, float cur_hei_);
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces() { return pieces_list_; }
 	std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> getMapPieces() { return cut_list_; }

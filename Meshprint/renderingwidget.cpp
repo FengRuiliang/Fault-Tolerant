@@ -407,7 +407,7 @@ void RenderingWidget::ReadMesh()
 	//qDebug() << "read mesh end time :" << str;
 	scaleT = scaleV;
 	eye_distance_ = 2 * max_;
-	ptr_mesh_->MarkEdge();
+	//ptr_mesh_->MarkEdge();
 	qDebug() << "load model end at" << time;
 	qDebug() << ptr_mesh_->get_faces_list()->size();
 	qDebug() << ptr_mesh_->getBoundingBox().at(0)[0] * 2 << ptr_mesh_->getBoundingBox().at(0)[1] * 2 << ptr_mesh_->getBoundingBox().at(0)[2];
@@ -595,19 +595,19 @@ void RenderingWidget::DrawFace(bool bv)
 	{
 		return;
 	}
-	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
-	glLineWidth(2.0f);
-	glColor4ub(0, 0, 0, 255);
-	glBegin(GL_LINES);
-	for (int i=0;i<edges.size();i++)
-	{
-		if (edges[i]->boundary_flag()==BOUNDARY)
-		{
-			glVertex3fv(edges.at(i)->start_->position());
-			glVertex3fv(edges.at(i)->pvert_->position());
-		}
-	}
-	glEnd();
+// 	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
+// 	glLineWidth(2.0f);
+// 	glColor4ub(0, 0, 0, 255);
+// 	glBegin(GL_LINES);
+// 	for (int i=0;i<edges.size();i++)
+// 	{
+// 		if (edges[i]->boundary_flag()==BOUNDARY)
+// 		{
+// 			glVertex3fv(edges.at(i)->start_->position());
+// 			glVertex3fv(edges.at(i)->pvert_->position());
+// 		}
+// 	}
+// 	glEnd();
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
 	glBegin(GL_TRIANGLES);
 	glColor4ub(0, 170, 0, 255);
@@ -682,21 +682,24 @@ void RenderingWidget::DrawSlice(bool bv)
 		return;
 	//glLineWidth(1.0);
 	glColor3f(0.0, 1.0, 0.0);
-// 	std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> map_cut_ = ptr_slice_->getMapPieces();
-// 	auto layer_ = ptr_slice_->thickf_;
-// 	for (auto iterset=layer_.begin();iterset!=layer_.end();iterset++)
-// 	{
-// 		std::vector<std::pair<Vec3f, Vec3f>>& lines_ = map_cut_[*iterset];
-// 		glBegin(GL_LINES);
-// 		for (int j=0;j<lines_.size();j++)
-// 		{	
-// 		
-// 			glVertex3fv(lines_[j].first);
-// 			glVertex3fv(lines_[j].second);
-// 		}
-// 		glEnd();
-// 	}
-// 	return;
+	std::map<float, std::vector<std::vector<cutLine>>> map_cut_ = ptr_slice_->getMapPieces();
+	auto layer_ = ptr_slice_->thickf_;
+	for (auto iterset = layer_.begin(); iterset != layer_.end(); iterset++)
+	{
+		std::vector<std::vector<cutLine>>& loops_ = map_cut_[*iterset];
+		glBegin(GL_LINES);
+		for (int j = 0; j < loops_.size(); j++)
+		{
+			std::vector<cutLine>& one_loop_ = loops_[j];
+			for (int k=0;k<one_loop_.size();k++)
+			{
+				glVertex3fv(one_loop_[k].position_vert[0]);
+				glVertex3fv(one_loop_[k].position_vert[1]);
+			}
+		}
+		glEnd();
+	}
+	return;
 
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
 	if (tc==NULL)
@@ -799,7 +802,7 @@ void RenderingWidget::DoSlice()
 		SafeDelete(ptr_slice_);
 	}
 	ptr_slice_ = new SliceCut(ptr_mesh_);
- 	ptr_slice_->sweepPline();
+ 	ptr_slice_->cutThrouthVertex();
  	return;
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();

@@ -71,14 +71,17 @@ public:
 	void ClearSlice();
 	void CutInPieces();
 
+	void cutThrouthVertex();
+
 	void sweepPline();
 
 
 
 	std::pair<Vec3f,Vec3f> cutFacet(HE_face* facet, float cur_hei_);
+	void cutFacetInmiddlePoint();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces() { return pieces_list_; }
-	std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> getMapPieces() { return cut_list_; }
+	std::map<float, std::vector<std::vector<cutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	std::vector<int> * StoreFaceIntoSlice();
 	std::vector<int>  *storage_Face_list_;
@@ -90,7 +93,7 @@ private:
 	Mesh3D* mesh_in_;
 	/* std::vector<cutLine>* circle_list_;*/
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>>>* pieces_list_;
-	std::map<float, std::vector<std::pair<Vec3f, Vec3f>>> cut_list_;
+	std::map<float, std::vector<std::vector<cutLine>>> cut_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
 	HE_edge*  getLeftEdge(HE_face* face_, float height_);
 };

@@ -55,7 +55,7 @@ public:
 	SweepLine() {};
 	SweepLine(std::vector<std::pair<Vec3f, Vec3f>> P);
 	~SweepLine() ;
-	void getContuor(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>& layer_edge_);
+	void getContuor(std::map<float, std::vector<std::vector<cutLine>>>& layer_edge_, float cur_hei);
 private:
 	std::vector<Event*>		que_event_;
 	std::vector<Segment*>	qsegment_;

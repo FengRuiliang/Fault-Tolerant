@@ -189,81 +189,105 @@ bool compvec3fz(const Vec3f a, const Vec3f b)
 {
 	return a.z() < b.z();
 }
+
+void SliceCut::cutThrouthVertex()
+{
+	std::vector<HE_vert*> queue_event_ = *mesh_in_->get_vertex_list();
+	std::vector<HE_face*> faces_ = *mesh_in_->get_faces_list();
+	sort(queue_event_.begin(), queue_event_.end(), sortByZB);
+	std::vector<int> layer_faces_(mesh_in_->num_of_face_list());
+	while (!queue_event_.empty())
+	{
+
+		std::vector<std::pair<Vec3f, Vec3f>> chain_boundary_;
+		HE_vert* cur_vert_ = queue_event_.back();
+		HE_vert* sta_vert_ = cur_vert_;
+		int hei_ = cur_vert_->position().z() * 100;
+		int thi_ = thickness_ * 100;
+		float cur_hei_ = (float)(hei_ -hei_%thi_) / 100;
+		do 
+		{
+			cur_vert_ = queue_event_.back();
+			for (int i = 0; i < cur_vert_->mergeFace.size(); i++)
+			{
+				layer_faces_[cur_vert_->mergeFace[i]] = 0;
+			}
+			for (int j = 0; j < cur_vert_->splitFace.size(); j++)
+			{
+				layer_faces_[cur_vert_->splitFace[j]] = 1;
+			}
+			queue_event_.pop_back();
+		} while (!queue_event_.empty()&&sta_vert_->position().z()-queue_event_.back()->position().z()<1e-3);
+		
+		for (int k=0;k<layer_faces_.size();k++)
+		{
+			if (layer_faces_[k])
+			{
+				chain_boundary_.push_back( cutFacet(faces_[k], cur_hei_));
+			}
+		}
+		SweepLine sweep_line_(chain_boundary_);
+		sweep_line_.polygonization();
+		sweep_line_.getContuor(cut_list_,cur_hei_);
+	}
+}
+
+
+
+
 void SliceCut::sweepPline()
 {
 
-	std::vector<HE_vert*> queue_event_ = *mesh_in_->get_vertex_list();
-	sort(queue_event_.begin(), queue_event_.end(), sortByZB);
-	while (!queue_event_.empty())
-	{
-		HE_vert* cur_vert_= queue_event_.back();
-		std::vector<cutLine*> lines_;
-		float cur_hei_ = cur_vert_->position().z() - (float)((int)(cur_vert_->position().z() * 100) % (int)(thickness_ * 100)) / 100;
-		for (int i=0;i<cur_vert_->splitFace.size();i++)
-		{
-			std::pair<Vec3f, Vec3f> p = cutFacet(cur_vert_->splitFace[i], cur_hei_);
-			std::vector<std::pair<Vec3f, Vec3f>> lines_;
-			auto iter = lines_.begin();
-			for (;iter!=lines_.end();iter++)
-			{
-				if ((iter->second-p.first).length()<1e-3)
-				{
-					lines_.insert(iter, p);
-				}
-				else if ((iter->first - p.second).length()<1e-3)
-				{
-					lines_.insert(iter-1, p);
-				}
-			}
-			if (iter==lines_.end())
-			{
-				lines_.push_back(p);
-			}
-		}
+// 	std::vector<HE_vert*> queue_event_ = *mesh_in_->get_vertex_list();
+// 	sort(queue_event_.begin(), queue_event_.end(), sortByZB);
+// 	while (!queue_event_.empty())
+// 	{
+// 		HE_vert* cur_vert_= queue_event_.back();
+// 		std::vector<cutLine*> lines_;
+// 		float cur_hei_ = cur_vert_->position().z() - (float)((int)(cur_vert_->position().z() * 100) % (int)(thickness_ * 100)) / 100;
+// 		for (int i=0;i<cur_vert_->splitFace.size();i++)
+// 		{
+// 			std::pair<Vec3f, Vec3f> p = cutFacet(cur_vert_->splitFace[i], cur_hei_);
+// 			std::vector<std::pair<Vec3f, Vec3f>> lines_;
+// 			auto iter = lines_.begin();
+// 			for (;iter!=lines_.end();iter++)
+// 			{
+// 				if ((iter->second-p.first).length()<1e-3)
+// 				{
+// 					lines_.insert(iter, p);
+// 				}
+// 				else if ((iter->first - p.second).length()<1e-3)
+// 				{
+// 					lines_.insert(iter-1, p);
+// 				}
+// 			}
+// 			if (iter==lines_.end())
+// 			{
+// 				lines_.push_back(p);
+// 			}
+// 		}
+// 		if (!cur_vert_->mergeFace.empty())
+// 		{
+// 			//replace all merge face by split facet
+// 
+// 		}
+// 		else
+// 		{
+// 			//insert new loop
+// 		}
+// 
+// 		//////////////////////////////////////////////////////////////////////////
+// 
+// 		if (!cur_vert_->mergeFace.empty() || !cur_vert_->splitFace.empty())
+// 		{
+// 			
+// 		}
+// 
+// 	}
+// 		
 
-		if (!cur_vert_->mergeFace.empty())
-		{
-			//replace all merge face by split facet
-		}
-		else
-		{
-			//insert new loop
-		}
-
-		//////////////////////////////////////////////////////////////////////////
-
-		if (!cur_vert_->mergeFace.empty() || !cur_vert_->splitFace.empty())
-		{
-			
-		}
-
-	}
-		
 
 
-	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
-	for (int i = 0; i < faces.size();i++)
-	{
-		if (faces[i]->normal().x() ==0&& faces[i]->normal().y() == 0)
-		{
-			continue;
-		}
-		std::vector<Vec3f>  v_;
-		Vec3f pos_;
-		for (int j=0;j<3;j++)
-		{
-			v_.push_back(faces[i]->vertices_[j]->position_);
-		}
-		sort(v_.begin(), v_.end(),compvec3fz);
-		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), v_[1],
-			v_[2] - v_[0], v_[0], pos_);
-		if ((pos_-v_[1]).cross(faces[i]->normal()).z()>0)
-			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(v_[1], pos_));
-		else
-			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(pos_, v_[1])); 
-
-		thickf_.insert(v_[1].z());
-	}
 }
 
 std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_hei_)
@@ -331,4 +355,31 @@ std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_hei_)
 		}
 	}
 	return std::pair<Vec3f,Vec3f>(pos1, pos2);
+}
+
+void SliceCut::cutFacetInmiddlePoint()
+{
+// 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
+// 	for (int i = 0; i < faces.size(); i++)
+// 	{
+// 		if (faces[i]->normal().x() == 0 && faces[i]->normal().y() == 0)
+// 		{
+// 			continue;
+// 		}
+// 		std::vector<Vec3f>  v_;
+// 		Vec3f pos_;
+// 		for (int j = 0; j < 3; j++)
+// 		{
+// 			v_.push_back(faces[i]->vertices_[j]->position_);
+// 		}
+// 		sort(v_.begin(), v_.end(), compvec3fz);
+// 		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), v_[1],
+// 			v_[2] - v_[0], v_[0], pos_);
+// 		if ((pos_ - v_[1]).cross(faces[i]->normal()).z() > 0)
+// 			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(v_[1], pos_));
+// 		else
+// 			cut_list_[v_[1].z()].push_back(std::pair<Vec3f, Vec3f>(pos_, v_[1]));
+// 
+// 		thickf_.insert(v_[1].z());
+//	}
 }

@@ -246,18 +246,13 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv,Vec3f normal_read_)
 	}
 	else
 		pface->vertices_ = vec_hv;
-	if (abs(n_*Vec3f(0.0,0.0,1.0))>0.98)
+	if (abs(n_*Vec3f(0.0,0.0,1.0))<0.98)
 	{
-		return pface;
+		sort(vec_hv.begin(), vec_hv.end(), sortByZB);
+		vec_hv[0]->mergeFace.push_back(pface->id());
+		vec_hv[2]->splitFace.push_back(pface->id());
 	}
-	sort(vec_hv.begin(), vec_hv.end(), sortByZB);
-	vec_hv[0]->mergeFace.push_back(pface);
-	vec_hv[2]->splitFace.push_back(pface);
 	return pface;
-
-
-
-
 	HE_edge *he1 = NULL, *he2 = NULL, *he3 = NULL, *he1_pair_ = NULL, *he2_pair_ = NULL, *he3_pair_ = NULL;
 	he1 = InsertEdge(vec_hv[0], vec_hv[1]);
 	he2 = InsertEdge(vec_hv[1], vec_hv[2]);

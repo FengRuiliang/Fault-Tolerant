@@ -7,7 +7,7 @@ float field_overlap_ = 0.09;
 float unit = 0.01;
 int units_y_ = field_height_ / line_width_;
 int units_x_ = field_width_ / line_width_;
-float thickness_ = 0.3;
+float thickness_ = 0.03;
 float offset_dis_ = 0.051;
 int * num_hatch;
 float laser_power_hatch_ = 200;

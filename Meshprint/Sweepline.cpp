@@ -34,29 +34,57 @@ SweepLine::~SweepLine()
 	event_list_.clear();
 }
 
-void SweepLine::getContuor(std::vector<std::vector<std::pair<Vec3f,Vec3f>>>& layer_edge_)
+void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& layer_edge_,float cur_hei)
 {
 	for (int i=0;i<segment_list_.size();i++)
 	{
 		if (!segment_list_[i]->visited_)
 		{
-			std::vector<std::pair<Vec3f,Vec3f>> polygon_;
+			std::vector<cutLine> polygon_;
 			Segment* sta_ = segment_list_[i];
 			Segment* cur_ = sta_;
 			//qDebug() << i;
 			do 
 			{
 				cur_->visited_ = true;
-				polygon_.push_back(std::pair<Vec3f, Vec3f>(cur_->first_->position_, cur_->second_->position_));
+				polygon_.push_back(cutLine(cur_->first_->position_, cur_->second_->position_));
 				cur_ = cur_->next_seg_;
 			} while (cur_ != NULL&&cur_ != sta_);
-			layer_edge_.push_back(polygon_);
+			layer_edge_[cur_hei].push_back(polygon_);
 		}
 	}
 }
 
 void SweepLine::polygonization()
 {
+	//////////////////////////////////////////////////////////////////////////
+	while (!que_event_.empty())
+	{
+		std::vector<Segment*> segs_;
+		Vec3f pos_ = que_event_.back()->position_;
+		do
+		{
+			Event* cur_event_ = que_event_.back();
+			Segment* cur_seg_ = cur_event_->segment_;
+		
+
+			for (auto iter = segs_.begin(); iter != segs_.end(); iter++)
+			{
+				if (((*iter)->second_->position_ - cur_event_->position_).length() < 1e-3)
+				{
+					(*iter)->next_seg_ = cur_seg_;
+				}
+				else if (((*iter)->first_->position_ - cur_event_->position_).length() < 1e-3)
+				{
+					cur_seg_->next_seg_ = (*iter);
+				}
+			}
+			segs_.push_back(que_event_.back()->segment_);
+			que_event_.pop_back();
+		} while (!que_event_.empty() && (que_event_.back()->position_ - pos_).length() < 1e-3);
+	}
+	return;
+	//////////////////////////////////////////////////////////////////////////
 	while (!que_event_.empty())
 	{
 		Vec3f pos_ = que_event_.back()->position_;

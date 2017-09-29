@@ -56,8 +56,8 @@ public:
 	HE_vert* pnext;
 	std::vector<Vec3f> helper;
 	/*--------------------add by Ruiliang Feng at 2017-09-25----------------------*/
-	std::vector<HE_face*> mergeFace;
-	std::vector<HE_face*> splitFace;
+	std::vector<int> mergeFace;
+	std::vector<int> splitFace;
 public:
 	HE_vert(const Vec3f& v)
 		: id_(-1), position_(v), pedge_(NULL), degree_(0), boundary_flag_(INNER), selected_(UNSELECTED)

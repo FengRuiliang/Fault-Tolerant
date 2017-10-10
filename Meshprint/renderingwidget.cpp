@@ -699,7 +699,7 @@ void RenderingWidget::DrawSlice(bool bv)
 		}
 		glEnd();
 	}
-	return;
+	//return;
 
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
 	if (tc==NULL)
@@ -802,8 +802,8 @@ void RenderingWidget::DoSlice()
 		SafeDelete(ptr_slice_);
 	}
 	ptr_slice_ = new SliceCut(ptr_mesh_);
- 	ptr_slice_->cutThrouthVertex();
- 	return;
+//  	ptr_slice_->cutThrouthVertex();
+//  	return;
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();
 	fillPath();

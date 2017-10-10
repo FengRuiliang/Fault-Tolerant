@@ -30,8 +30,13 @@ SweepLine::~SweepLine()
 	{
 		delete segment_list_.at(i);
 	}
+	for (auto iter=points_.begin();iter!=points_.end();iter++)
+	{
+		delete *iter;
+	}
 	segment_list_.clear();
 	event_list_.clear();
+	points_.clear();
 }
 
 void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& layer_edge_)
@@ -56,69 +61,69 @@ void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& l
 	}
 }
 
-void SweepLine::polygonization()
-{
-	//////////////////////////////////////////////////////////////////////////
-	while (!que_event_.empty())
-	{
-		std::vector<Segment*> segs_;
-		Vec3f pos_ = que_event_.back()->position_;
-		do
-		{
-			Event* cur_event_ = que_event_.back();
-			Segment* cur_seg_ = cur_event_->segment_;
-	
-			for (auto iter = segs_.begin(); iter != segs_.end(); iter++)
-			{
-				if (((*iter)->second_->position_ - cur_event_->position_).length() < 1e-3)
-				{
-					(*iter)->next_seg_ = cur_seg_;
-				}
-				else if (((*iter)->first_->position_ - cur_event_->position_).length() < 1e-3)
-				{
-					cur_seg_->next_seg_ = (*iter);
-				}
-			}
-			segs_.push_back(que_event_.back()->segment_);
-			que_event_.pop_back();
-		} while (!que_event_.empty() && (que_event_.back()->position_ - pos_).length() < 1e-3);
-	}
-	return;
-	//////////////////////////////////////////////////////////////////////////
-	while (!que_event_.empty())
-	{
-		Vec3f pos_ = que_event_.back()->position_;
-		do 
-		{
-			Vec3f	angle_ = que_event_.back()->epair_->position_ - pos_;
-			angle_.normalize();
-			if (angle_.y()>=0)
-				que_event_.back()->segment_->angle_=acos(angle_.dot(Vec3f(-1.0, 0.0, 0.0)));
-			else
-				que_event_.back()->segment_->angle_ = 6.28-acos(angle_.dot(Vec3f(1.0, 0.0, 0.0)));
-			qsegment_.push_back(que_event_.back()->segment_);
-			que_event_.pop_back();
-		} while (!que_event_.empty()&&(que_event_.back()->position_-pos_).length()<1e-3);
-		//qDebug() << que_event_.size()<<qsegment_.size();
-		std::sort(qsegment_.begin(), qsegment_.end(), compSegment);
-		int n = qsegment_.size();
-		qDebug() << n;
-		for (int i=0;i<qsegment_.size();i++)
-		{
-			if ((qsegment_[i]->first_->position_-qsegment_[(i+1)%n]->second_->position_).length()<1e-3)
-			{
-				qsegment_[i]->prev_seg_ = qsegment_[(i + 1) % n];
-				qsegment_[(i + 1) % n]->next_seg_=qsegment_[i];
-			}
-			else
-			{
-				qsegment_[i]->next_seg_ = qsegment_[(i + 1) % n];
-				qsegment_[(i + 1) % n]->prev_seg_ = qsegment_[i];
-			}
-		}
-		qsegment_.clear();
-	}
-}
+// void SweepLine::polygonization()
+// {
+// 	//////////////////////////////////////////////////////////////////////////
+// 	while (!que_event_.empty())
+// 	{
+// 		std::vector<Segment*> segs_;
+// 		Vec3f pos_ = que_event_.back()->position_;
+// 		do
+// 		{
+// 			Event* cur_event_ = que_event_.back();
+// 			Segment* cur_seg_ = cur_event_->segment_;
+// 	
+// 			for (auto iter = segs_.begin(); iter != segs_.end(); iter++)
+// 			{
+// 				if (((*iter)->second_->position_ - cur_event_->position_).length() < 1e-3)
+// 				{
+// 					(*iter)->next_seg_ = cur_seg_;
+// 				}
+// 				else if (((*iter)->first_->position_ - cur_event_->position_).length() < 1e-3)
+// 				{
+// 					cur_seg_->next_seg_ = (*iter);
+// 				}
+// 			}
+// 			segs_.push_back(que_event_.back()->segment_);
+// 			que_event_.pop_back();
+// 		} while (!que_event_.empty() && (que_event_.back()->position_ - pos_).length() < 1e-3);
+// 	}
+// 	return;
+// 	//////////////////////////////////////////////////////////////////////////
+// 	while (!que_event_.empty())
+// 	{
+// 		Vec3f pos_ = que_event_.back()->position_;
+// 		do 
+// 		{
+// 			Vec3f	angle_ = que_event_.back()->epair_->position_ - pos_;
+// 			angle_.normalize();
+// 			if (angle_.y()>=0)
+// 				que_event_.back()->segment_->angle_=acos(angle_.dot(Vec3f(-1.0, 0.0, 0.0)));
+// 			else
+// 				que_event_.back()->segment_->angle_ = 6.28-acos(angle_.dot(Vec3f(1.0, 0.0, 0.0)));
+// 			qsegment_.push_back(que_event_.back()->segment_);
+// 			que_event_.pop_back();
+// 		} while (!que_event_.empty()&&(que_event_.back()->position_-pos_).length()<1e-3);
+// 		//qDebug() << que_event_.size()<<qsegment_.size();
+// 		std::sort(qsegment_.begin(), qsegment_.end(), compSegment);
+// 		int n = qsegment_.size();
+// 		qDebug() << n;
+// 		for (int i=0;i<qsegment_.size();i++)
+// 		{
+// 			if ((qsegment_[i]->first_->position_-qsegment_[(i+1)%n]->second_->position_).length()<1e-3)
+// 			{
+// 				qsegment_[i]->prev_seg_ = qsegment_[(i + 1) % n];
+// 				qsegment_[(i + 1) % n]->next_seg_=qsegment_[i];
+// 			}
+// 			else
+// 			{
+// 				qsegment_[i]->next_seg_ = qsegment_[(i + 1) % n];
+// 				qsegment_[(i + 1) % n]->prev_seg_ = qsegment_[i];
+// 			}
+// 		}
+// 		qsegment_.clear();
+// 	}
+// }
 bool compareEvent(const Event*  a, const Event*  b)
 {
 	if (a->position_.y() < b->position_.y())
@@ -133,4 +138,58 @@ bool compareEvent(const Event*  a, const Event*  b)
 bool compSegment(const Segment* a, const Segment* b)
 {
 	return a->angle_ < b->angle_;
+}
+
+std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
+{
+
+	std::vector<std::vector<std::pair<Vec3f, Vec3f>>> contours_;
+	for (auto iter = points_.begin(); iter != points_.end(); iter++)
+	{
+		if ((*iter)->selected_)
+		{
+			continue;
+		}
+			
+		std::vector<std::pair<Vec3f, Vec3f>> contour_;
+
+		Event* sta_ = *iter;
+		Event* cur_ = sta_;
+		do
+		{
+			if (cur_->segment_==NULL)
+			{
+				cur_->selected_ = true;
+				break;
+			}
+			std::pair<Vec3f, Vec3f> p2(cur_->segment_->first_->position_, cur_->segment_->second_->position_);
+			contour_.push_back(p2);
+			cur_ =cur_->segment_->second_;
+			cur_->selected_ = true;
+		} while (cur_ != sta_);
+		contours_.push_back(contour_);
+	}
+
+	return contours_;
+}
+
+void SweepLine::insertSegment(std::pair<Vec3f, Vec3f> pair_points_)
+{
+	Event* a = new Event(pair_points_.first);
+	Event* b = new Event(pair_points_.second);
+	auto pair_ = points_.insert(a);
+	if (!pair_.second)
+	{
+		delete a;
+		a = *pair_.first;
+	}
+	pair_ = points_.insert(b);
+	if (!pair_.second)
+	{
+		delete b;
+		b = *pair_.first;
+	}
+	Segment* seg = new Segment(a, b);
+	segment_list_.push_back(seg);
+	a->segment_ = seg;
 }

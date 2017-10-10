@@ -75,9 +75,8 @@ public:
 
 	void sweepPline();
 
+	std::pair<Vec3f, Vec3f> cutFacet(HE_face * facet, float cur_height_);
 
-
-	bool cutFacet(HE_face* facet, float cur_hei_, cutLine& l);
 	void cutFacetInmiddlePoint();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();

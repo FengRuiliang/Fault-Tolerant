@@ -103,7 +103,7 @@ void SliceCut::CutInPieces()
 	{
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
-		std::vector<std::pair<Vec3f,Vec3f>> chain_boundary_;
+		std::vector<cutLine> chain_boundary_;
 		for (int j=0;j<slice_faces_.size();j++)
 		{
 			Vec3f p[3];
@@ -167,7 +167,7 @@ void SliceCut::CutInPieces()
 							p[2] - p[1], p[1], pos2);
 					}
 				}
-			chain_boundary_.push_back(std::pair<Vec3f,Vec3f>(pos1, pos2));
+			chain_boundary_.push_back(cutLine(pos1, pos2));
 						
 		}
 		qDebug() << i;
@@ -196,10 +196,11 @@ void SliceCut::cutThrouthVertex()
 	std::vector<HE_face*> faces_ = *mesh_in_->get_faces_list();
 	sort(queue_event_.begin(), queue_event_.end(), sortByZB);
 	std::vector<int> layer_faces_(mesh_in_->num_of_face_list());
+	int nu = 0;
 	while (!queue_event_.empty())
 	{
-
-		std::vector<std::pair<Vec3f, Vec3f>> chain_boundary_;
+		nu++;
+		std::vector<cutLine> chain_boundary_;
 		HE_vert* cur_vert_ = queue_event_.back();
 		HE_vert* sta_vert_ = cur_vert_;
 		int hei_ = cur_vert_->position().z() * 100;
@@ -218,17 +219,26 @@ void SliceCut::cutThrouthVertex()
 			}
 			queue_event_.pop_back();
 		} while (!queue_event_.empty()&&sta_vert_->position().z()-queue_event_.back()->position().z()<1e-3);
-		
+// 		qDebug() << nu;
+// 		if (nu==127||nu==250||nu==255||nu==272||nu==451||nu==572||nu==772||nu==835||nu==943||nu==947||nu==963)
+// 		{
+// 			qDebug() << nu;
+// 			continue;
+// 		}
 		for (int k=0;k<layer_faces_.size();k++)
 		{
 			if (layer_faces_[k])
 			{
-				chain_boundary_.push_back( cutFacet(faces_[k], cur_hei_));
+				cutLine l;
+				if (cutFacet(faces_[k], cur_vert_->position().z()-0.001,l))
+				{chain_boundary_.push_back(l );
+				}
+				
 			}
 		}
 		SweepLine sweep_line_(chain_boundary_);
 		sweep_line_.polygonization();
-		sweep_line_.getContuor(cut_list_,cur_hei_);
+		sweep_line_.getContuor(cut_list_);
 	}
 }
 
@@ -290,71 +300,102 @@ void SliceCut::sweepPline()
 
 }
 
-std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_hei_)
+bool SliceCut::cutFacet(HE_face* facet,float cur_hei_,cutLine& l)
 {
-	Vec3f p[3];
-
+	std::vector<Vec3f> c_p_;
+	std::vector<HE_vert*>& verts_ = facet->vertices_;
 	for (int m = 0; m < 3; m++)
 	{
-		p[m] = facet->vertices_[m]->position();
-	}
-	Vec3f pos1, pos2;
-	if (p[0].z() >= cur_hei_)
-	{
-		if (p[1].z() >= cur_hei_)
+		if ((verts_[m]->position().z() - cur_hei_)*
+			(verts_[(m + 1) % 3]->position().z() - cur_hei_) <=0)
 		{
-			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-				p[2] - p[1], p[2], pos1);
-			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-				p[0] - p[2], p[0], pos2);
+			Vec3f p;
+			bool re = CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+				verts_[(m + 1) % 3]->position() - verts_[m]->position(), verts_[m]->position(), p);
+			if(re)
+				c_p_.push_back(p);
+		}
+	}
+	if (c_p_.size()==2)
+	{
+		if (((c_p_[0] - c_p_[1]) ^ facet->normal()).z() > 0)
+		{
+			l.position_vert[0] = c_p_[0];
+			l.position_vert[1] = c_p_[1];
+			return true;
 		}
 		else
 		{
-			if (p[2].z() >= cur_hei_)
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[1] - p[0], p[0], pos1);
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[2] - p[1], p[1], pos2);
-			}
-			else
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[1] - p[0], p[0], pos1);
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[2] - p[0], p[0], pos2);
-
-			}
+			l.position_vert[0] = c_p_[0];
+			l.position_vert[1] = c_p_[1];
 		}
+			
+		return true;
 	}
 	else
 	{
-		if (p[1].z() >= cur_hei_)
-		{
-			if (p[2].z() >= cur_hei_)
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[0] - p[2], p[2], pos1);
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[1] - p[0], p[0], pos2);
-			}
-			else
-			{
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[2] - p[1], p[2], pos1);
-				CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-					p[1] - p[0], p[0], pos2);
-			}
-		}
-		else
-		{
-			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-				p[0] - p[2], p[2], pos1);
-			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
-				p[2] - p[1], p[1], pos2);
-		}
+		return false;
+		qDebug() << c_p_.size()<<verts_[0]->position().z() << verts_[1]->position().z() << verts_[2]->position().z()<<cur_hei_;
 	}
-	return std::pair<Vec3f,Vec3f>(pos1, pos2);
+	
+	//Vec3f p[3];
+	//Vec3f pos1, pos2;
+	//if (p[0].z() >= cur_hei_)
+	//{
+	//	if (p[1].z() >= cur_hei_)
+	//	{
+	//		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//			p[2] - p[1], p[2], pos1);
+	//		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//			p[0] - p[2], p[0], pos2);
+	//	}
+	//	else
+	//	{
+	//		if (p[2].z() >= cur_hei_)
+	//		{
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[1] - p[0], p[0], pos1);
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[2] - p[1], p[1], pos2);
+	//		}
+	//		else
+	//		{
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[1] - p[0], p[0], pos1);
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[2] - p[0], p[0], pos2);
+
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	if (p[1].z() >= cur_hei_)
+	//	{
+	//		if (p[2].z() >= cur_hei_)
+	//		{
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[0] - p[2], p[2], pos1);
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[1] - p[0], p[0], pos2);
+	//		}
+	//		else
+	//		{
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[2] - p[1], p[2], pos1);
+	//			CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//				p[1] - p[0], p[0], pos2);
+	//		}
+	//	}
+	//	else
+	//	{
+	//		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//			p[0] - p[2], p[2], pos1);
+	//		CalPlaneLineIntersectPoint(Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, cur_hei_),
+	//			p[2] - p[1], p[1], pos2);
+	//	}
+	//}
+	//return std::pair<Vec3f,Vec3f>(pos1, pos2);
 }
 
 void SliceCut::cutFacetInmiddlePoint()
@@ -382,4 +423,10 @@ void SliceCut::cutFacetInmiddlePoint()
 // 
 // 		thickf_.insert(v_[1].z());
 //	}
+}
+
+std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* SliceCut::GetPieces()
+{
+	
+	 return pieces_list_; 
 }

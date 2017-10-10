@@ -684,9 +684,9 @@ void RenderingWidget::DrawSlice(bool bv)
 	glColor3f(0.0, 1.0, 0.0);
 	std::map<float, std::vector<std::vector<cutLine>>> map_cut_ = ptr_slice_->getMapPieces();
 	auto layer_ = ptr_slice_->thickf_;
-	for (auto iterset = layer_.begin(); iterset != layer_.end(); iterset++)
+	for (auto iterset = map_cut_.begin(); iterset != map_cut_.end(); iterset++)
 	{
-		std::vector<std::vector<cutLine>>& loops_ = map_cut_[*iterset];
+		std::vector<std::vector<cutLine>>& loops_ = iterset->second;
 		glBegin(GL_LINES);
 		for (int j = 0; j < loops_.size(); j++)
 		{

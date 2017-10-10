@@ -1,11 +1,11 @@
 #include "Sweepline.h"
 #include <qdebug.h>
-SweepLine::SweepLine(std::vector<std::pair<Vec3f, Vec3f>> P)
+SweepLine::SweepLine(std::vector<cutLine> P)
 {
 	for (int i=0;i<P.size();i++)
 	{
-		Event* v1 = new Event(P[i].first);
-		Event* v2 = new Event(P[i].second);
+		Event* v1 = new Event(P[i].position_vert[0]);
+		Event* v2 = new Event(P[i].position_vert[1]);
 		v1->epair_ = v2;
 		v2->epair_ = v1;
 		Segment* seg = new Segment(v1,v2);
@@ -34,7 +34,7 @@ SweepLine::~SweepLine()
 	event_list_.clear();
 }
 
-void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& layer_edge_,float cur_hei)
+void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& layer_edge_)
 {
 	for (int i=0;i<segment_list_.size();i++)
 	{
@@ -44,13 +44,14 @@ void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& l
 			Segment* sta_ = segment_list_[i];
 			Segment* cur_ = sta_;
 			//qDebug() << i;
+			int n = 0;
 			do 
 			{
 				cur_->visited_ = true;
 				polygon_.push_back(cutLine(cur_->first_->position_, cur_->second_->position_));
 				cur_ = cur_->next_seg_;
-			} while (cur_ != NULL&&cur_ != sta_);
-			layer_edge_[cur_hei].push_back(polygon_);
+			} while (cur_ != NULL&&cur_ != sta_&&n++<1000);
+			layer_edge_[sta_->first_->position_.z()].push_back(polygon_);
 		}
 	}
 }
@@ -66,8 +67,7 @@ void SweepLine::polygonization()
 		{
 			Event* cur_event_ = que_event_.back();
 			Segment* cur_seg_ = cur_event_->segment_;
-		
-
+	
 			for (auto iter = segs_.begin(); iter != segs_.end(); iter++)
 			{
 				if (((*iter)->second_->position_ - cur_event_->position_).length() < 1e-3)

@@ -77,10 +77,10 @@ public:
 
 
 
-	std::pair<Vec3f,Vec3f> cutFacet(HE_face* facet, float cur_hei_);
+	bool cutFacet(HE_face* facet, float cur_hei_, cutLine& l);
 	void cutFacetInmiddlePoint();
 	float getThickness() { return thickness_; };
-	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces() { return pieces_list_; }
+	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();
 	std::map<float, std::vector<std::vector<cutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	std::vector<int> * StoreFaceIntoSlice();

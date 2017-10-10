@@ -7,7 +7,7 @@ float field_overlap_ = 0.09;
 float unit = 0.01;
 int units_y_ = field_height_ / line_width_;
 int units_x_ = field_width_ / line_width_;
-float thickness_ = 0.03;
+float thickness_ = 0.3;
 float offset_dis_ = 0.051;
 int * num_hatch;
 float laser_power_hatch_ = 200;
@@ -63,7 +63,7 @@ bool PointinTriangle(HE_face* face, Vec3f point_in)
 	return u + v <= 1;
 }
 
-void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineVector, Vec3f linePoint, Vec3f& point)
+bool CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineVector, Vec3f linePoint, Vec3f& point)
 {
 	float vp1, vp2, vp3, n1, n2, n3, v1, v2, v3, m1, m2, m3, t, vpt;
 	vp1 = planeVector.x();
@@ -89,6 +89,7 @@ void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineV
 			point = linePoint;
 		}
 		point.y() -= 0.01;
+		return false;
 	}
 	else
 	{
@@ -96,7 +97,12 @@ void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineV
 		point.x() = m1 + v1 * t;
 		point.y() = m2 + v2 * t;
 		point.z() = m3 + v3 * t;
+		return true;
 	}
+
+
+
+
 }
 
 bool sortByZS(HE_vert* a, HE_vert* b)

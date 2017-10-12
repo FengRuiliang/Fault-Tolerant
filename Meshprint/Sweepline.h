@@ -9,7 +9,7 @@ class Segment;
 class cutLine;
 struct Event
 {
-	int			type;          // event type: BEGIN or END vertex
+	int			is_fir_;          // event type: BEGIN or END vertex
 	Vec3f		position_;		 // event vertex
 	Segment*	segment_ = ((Segment*)NULL);
 	Event*		epair_;
@@ -56,19 +56,19 @@ struct CompareEvent
 {
 	bool operator ()(Event* a, Event* b)const
 	{
-		if (a->position_.x()-b->position_.x()<-1e-2)
+		if (a->position_.x()-b->position_.x()<-1e-3)
 		{
 			return true;
 		}
-		else if (a->position_.x()-b->position_.x()<1e-2)
+		else if (a->position_.x()-b->position_.x()<1e-3)
 		{
-			if (a->position_.y()-b->position_.y()<-1e-2)
+			if (a->position_.y()-b->position_.y()<-1e-3)
 			{
 				return true;
 			}
-			else if (a->position_.y()-b->position_.y()<1e-2)
+			else if (a->position_.y()-b->position_.y()<1e-3)
 			{
-				if (a->position_.z() - b->position_.z() < -1e-2)
+				if (a->position_.z() - b->position_.z() < -1e-3)
 				{
 					return true;
 				}
@@ -86,6 +86,10 @@ struct CompareEvent
 		}
 	}
 };
+struct CompareSegment
+{
+};
+
 bool compSegment(const Segment* a, const Segment* b);
 bool compareEvent(const Event*  a, const Event*  b);
 class SweepLine

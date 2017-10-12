@@ -160,9 +160,9 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 		for (int i=0;i<faces.size();i++)
 		{
 			Vec3f point_;
-			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vertices_[0]->position(),
+			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vertices_[0],
 				direc, add_pointN, point_);
-			if (PointinTriangle(faces.at(i),point_))
+			if (PointinTriangle(faces.at(i)->vertices_,point_))
 			{
 				ptr_mesh_->SetDirection(i);
 				ptr_mesh_->scalemesh(1.0);
@@ -614,9 +614,9 @@ void RenderingWidget::DrawFace(bool bv)
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
 		glNormal3fv(faces.at(i)->normal());
-		glVertex3fv(faces[i]->vertices_[0]->position());
-		glVertex3fv(faces[i]->vertices_[1]->position());
-		glVertex3fv(faces[i]->vertices_[2]->position());
+		glVertex3fv(faces[i]->vertices_[0]);
+		glVertex3fv(faces[i]->vertices_[1]);
+		glVertex3fv(faces[i]->vertices_[2]);
 	}
 	glEnd();
 }

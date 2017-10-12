@@ -126,11 +126,11 @@ void SweepLine::getContuor(std::map<float, std::vector<std::vector<cutLine>>>& l
 // }
 bool compareEvent(const Event*  a, const Event*  b)
 {
-	if (a->position_.y() < b->position_.y())
+	if (a->position_.y()-b->position_.y()<-1e-3)
 		return true;
-	else if (a->position_.y()==b->position_.y())
+	else if (a->position_.y()-b->position_.y()<1e-3)
 	{
-		return a->position_.x() > b->position_.x();
+		return a->position_.x() - b->position_.x()<-1e-3;
 	}
 	return false;
 }
@@ -142,10 +142,31 @@ bool compSegment(const Segment* a, const Segment* b)
 
 std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
 {
+	if (event_list_.size()==0)
+	{
+		return;
+	}
+	sort(event_list_.begin(), event_list_.end(), compareEvent);
+	Vec3f sta = event_list_.front();
+	Vec3f cur = sta;
+	do 
+	{
+
+	} while ();
+
+
+
+
+
 
 	std::vector<std::vector<std::pair<Vec3f, Vec3f>>> contours_;
-	for (auto iter = points_.begin(); iter != points_.end(); iter++)
+	int k = 0;
+	for (auto iter = points_.begin(); iter != points_.end(); iter++,k++)
 	{
+		if ((*iter)->segment_==NULL)
+		{
+			qDebug() << k;
+		}
 		if ((*iter)->selected_)
 		{
 			continue;
@@ -157,7 +178,7 @@ std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
 		Event* cur_ = sta_;
 		do
 		{
-			if (cur_->segment_==NULL)
+			if (cur_->segment_ == NULL)
 			{
 				cur_->selected_ = true;
 				break;
@@ -175,21 +196,15 @@ std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
 
 void SweepLine::insertSegment(std::pair<Vec3f, Vec3f> pair_points_)
 {
+	
 	Event* a = new Event(pair_points_.first);
 	Event* b = new Event(pair_points_.second);
-	auto pair_ = points_.insert(a);
-	if (!pair_.second)
-	{
-		delete a;
-		a = *pair_.first;
-	}
-	pair_ = points_.insert(b);
-	if (!pair_.second)
-	{
-		delete b;
-		b = *pair_.first;
-	}
+	event_list_.push_back(a);
+	event_list_.push_back(b);
 	Segment* seg = new Segment(a, b);
 	segment_list_.push_back(seg);
 	a->segment_ = seg;
+	a->is_fir_ = true;
+	b->segment_ = seg;
+	b->is_fir_ = false;
 }

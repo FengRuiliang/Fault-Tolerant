@@ -34,8 +34,8 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 	
 		for (int i=0;i<3;i++)
 		{
-			min_height = min(min_height, (*iter_Face)->vertices_[i]->position_.z());
-			max_height = max(max_height, (*iter_Face)->vertices_[i]->position_.z());
+			min_height = min(min_height, (*iter_Face)->vertices_[i].z());
+			max_height = max(max_height, (*iter_Face)->vertices_[i].z());
 		}
 		if (max_height == min_height)// 22/01/2017
 		{
@@ -97,19 +97,21 @@ void SliceCut::CutInPieces()
 {
 	pieces_list_ = new std::vector<std::vector<std::pair<Vec3f, Vec3f>>>[num_pieces_];
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < num_pieces_; i++)
 	{
+		qDebug() << i;
+		if (i!=102)
+		{
+			continue;
+			qDebug() << i;
+		}
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
-		std::vector<cutLine> chain_boundary_;
 		SweepLine sweep_line_;
 		for (int j=0;j<slice_faces_.size();j++)
 		{
-
-			sweep_line_.insertSegment(cutFacet(faces[slice_faces_[j]], cur_height_));
-						
+			sweep_line_.insertSegment(cutFacet(faces[slice_faces_[j]], cur_height_));		
 		}
-	
 		pieces_list_[i]=sweep_line_.polygonization();
 	}
 }
@@ -171,9 +173,6 @@ void SliceCut::cutThrouthVertex()
 	}
 }
 
-
-
-
 void SliceCut::sweepPline()
 {
 
@@ -234,7 +233,7 @@ std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 	Vec3f p[3];
 	for (int m = 0; m < 3; m++)
 	{
-		p[m] = facet->vertices_[m]->position();
+		p[m] = facet->vertices_[m];
 	}
 	Vec3f pos1, pos2;
 	if (p[0].z() >= cur_height_)

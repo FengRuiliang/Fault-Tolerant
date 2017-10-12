@@ -27,14 +27,12 @@ float scaleT = 1.0;
 int sss = 0;
 int fildID = 0;
 //////////////////////////////////////////////////////////////////////////
-bool PointinTriangle(HE_face* face, Vec3f point_in)
+bool PointinTriangle(std::vector<Vec3f> verts, Vec3f point_in)
 {
 
-	std::vector<HE_vert*> verts;
-	verts = face->vertices_;
-	Vec3f A(verts[0]->position().x(), verts[0]->position().y(), 0.0);
-	Vec3f B(verts[1]->position().x(), verts[1]->position().y(), 0.0);
-	Vec3f C(verts[2]->position().x(), verts[2]->position().y(), 0.0);
+	Vec3f A = verts[0];
+	Vec3f B = verts[1];
+	Vec3f C = verts[2];
 	Vec3f P = point_in;
 	Vec3f v0 = C - A;
 	Vec3f v1 = B - A;

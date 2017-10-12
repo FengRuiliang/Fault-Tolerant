@@ -62,7 +62,7 @@ void inline MySwap(T &t1, T &t2)
 	t1 = t2;
 	t2 = tmp;
 };
-extern bool PointinTriangle(HE_face* face, Vec3f point_in);
+extern bool PointinTriangle(std::vector<Vec3f> verts, Vec3f point_in);
 extern bool CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineVector, Vec3f linePoint, Vec3f& point);
 
 

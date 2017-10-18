@@ -192,10 +192,7 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv)
 	int vsize = static_cast<int>(vec_hv.size());
 	pface->valence_ = vsize;
 	pface->vertices_.clear();
-	for (int i=0;i<3;i++)
-	{
-		pface->vertices_.push_back( vec_hv[i]->position_);
-	}
+	pface->vertices_ = vec_hv;
 	HE_edge *he1 = NULL, *he2 = NULL, *he3 = NULL, *he1_pair_ = NULL, *he2_pair_ = NULL, *he3_pair_ = NULL;
 	he1 = InsertEdge(vec_hv[0], vec_hv[1]);
 	he2 = InsertEdge(vec_hv[1], vec_hv[2]);
@@ -229,7 +226,7 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv)
 
 }
 
-HE_face* Mesh3D::InsertFace(std::vector<Vec3f> vec_hv,Vec3f normal_read_)
+HE_face* Mesh3D::InsertFace(std::vector<HE_vert*>& vec_hv,Vec3f normal_read_)
 {
 	if (pfaces_list_ == NULL)
 	{
@@ -239,20 +236,11 @@ HE_face* Mesh3D::InsertFace(std::vector<Vec3f> vec_hv,Vec3f normal_read_)
 	pface->id_ = static_cast<int>(pfaces_list_->size());
 	pfaces_list_->push_back(pface);
 	pface->normal() = normal_read_;
-	//if the normal is wrong ,exchange the order of vec_hv
-	for (int i=0;i<3;i++)
-	{
-		xmin_ = min(xmin_, vec_hv[i].x());
-		ymin_ = min(ymin_, vec_hv[i].y());
-		zmin_ = min(zmin_, vec_hv[i].z());
-		xmax_ = max(xmax_, vec_hv[i].x());
-		ymax_ = max(ymax_, vec_hv[i].y());
-		zmax_ = max(zmax_, vec_hv[i].z());
-	}
-	Vec3f vector1 = vec_hv[1] - vec_hv[0];
-	Vec3f vector2 = vec_hv[2] - vec_hv[0];
+	Vec3f vector1 = vec_hv[1]->position()- vec_hv[0]->position();
+	Vec3f vector2 = vec_hv[2]->position() - vec_hv[0]->position();
 	Vec3f n_ = vector1^vector2;
 	n_.normalize();
+	//if the normal is wrong ,exchange the order of vec_hv
 	if (n_.dot(normal_read_) < -0.98)
 	{
 		for (int j = 0; j < 3; j++)
@@ -260,7 +248,36 @@ HE_face* Mesh3D::InsertFace(std::vector<Vec3f> vec_hv,Vec3f normal_read_)
 	}
 	else
 		pface->vertices_ = vec_hv;
-	
+	float max_ = -1e6;
+	int id = -1;
+	for (int i = 0; i < 3; i++)
+	{
+		if (max_ <= pface->vertices_[i]->position().z())
+		{
+			id = i;
+			max_ = pface->vertices_[i]->position().z();
+		}
+	}
+	HE_vert* t;
+	switch (id)
+	{
+	case 0:
+		t = pface->vertices_[0];
+		pface->vertices_[0] = pface->vertices_[1];
+		pface->vertices_[1] = pface->vertices_[2];
+		pface->vertices_[2] = t;
+		break;
+	case 1:
+		t = pface->vertices_[2];
+		pface->vertices_[2] = pface->vertices_[1];
+		pface->vertices_[1] = pface->vertices_[0];
+		pface->vertices_[0] =t;
+		break;
+	case 2:
+		break;
+	}
+	pface->vertices_[2]->splitFace.push_back(pface->id());
+	pface->vertices_[0]->mergeFace.push_back(pface->id());
 	return pface;
 }
 
@@ -487,7 +504,6 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 	{
 		QTextStream inASCII(file.readAll());
 		ClearData();
-		std::vector<Vec3f> facetpoint;
 		std::vector<HE_vert* > s_faceid;
 		Vec3f normal;
 		QString temp;
@@ -501,18 +517,42 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 			else if (temp == "vertex")
 			{
 			
+				HE_vert* hv;
 				Vec3f nvv;
 				inASCII >> nvv[0] >> nvv[1] >> nvv[2];
-				facetpoint.push_back(nvv);
-				continue;
+				//now we have a new vertex
+				hv = new HE_vert(nvv);
+				if (pvertices_list_ == NULL)
+				{
+					pvertices_list_ = new std::vector<HE_vert*>;
+					hv->set_id(0);
+				}
+				else
+				{
+					hv->set_id(static_cast<int>(pvertices_list_->size()));
+				}
+
+				std::set<HE_vert*, comVertex>::iterator  iterVert = input_vertex_list_.insert(hv).first;//get the 
+				if ((*iterVert)->id() == pvertices_list_->size())
+					//if (hv->id() != (*iterVert)->id() || hv->id() == pvertices_list_->size())
+				{
+					pvertices_list_->push_back(hv);
+				}
+				else
+				{
+					delete hv;
+					hv = *iterVert;
+				}
+				s_faceid.push_back(hv);
 			}
 			else if (temp == "endfacet")
 			{
-				if (facetpoint.size() >= 3)
+				if (s_faceid.size() >= 3)
 				{
-					InsertFace(facetpoint,normal);
+
+					InsertFace(s_faceid,normal)/*->normal_=normal*/;
 				}
-				facetpoint.clear();
+				s_faceid.clear();
 			}
 		}
 	}
@@ -544,7 +584,7 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 			//qDebug() << sizeof(nvv[0]);
 			quint16 info;
 			//qDebug() << sizeof(temp);
-			std::vector<Vec3f> facetpoints;
+			std::vector<HE_vert* > s_faceid;
 			for (int i = 0; i < 3; i++)
 			{
 				quint32 temp[3];
@@ -556,17 +596,41 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 				nvv[0] = *(float*)&temp[0];
 				nvv[1] = *(float*)&temp[1];
 				nvv[2] = *(float*)&temp[2];
-				facetpoints.push_back(nvv);
+				HE_vert* hv = new HE_vert(nvv);
+				if (pvertices_list_ == NULL)
+				{
+					pvertices_list_ = new std::vector<HE_vert*>;
+					hv->set_id(0);
+					//pvertices_list_->push_back(hv);
+				}
+				else
+				{
+					hv->set_id(static_cast<int>(pvertices_list_->size()));
+				}
+
+				std::set<HE_vert*, comVertex>::iterator  iterVert = input_vertex_list_.insert(hv).first;//get the 
+				if ((*iterVert)->id() == pvertices_list_->size())
+				{
+					pvertices_list_->push_back(hv);
+				}
+				else
+				{
+					delete hv;
+					hv = *iterVert;
+				}
+				s_faceid.push_back(hv);
 			}
 			inBinary >> info;
-			InsertFace(facetpoints,nor_);
-			facetpoints.clear();
+			InsertFace(s_faceid,nor_);
+			s_faceid.clear();
 		}
 	}
 	file.close();
 	Unify();
 	return isValid();
 }
+
+
 
 void Mesh3D::UpdateMesh(void)
 {
@@ -822,20 +886,15 @@ void Mesh3D::Unify(float size)
 }
 void Mesh3D::Unify()
 {
+	ComputeBoundingBox();
 	Vec3f centerPos((xmin_ + xmax_) / 2.0, (ymin_ + ymax_) / 2.0, (zmin_));
 	for (int i=0;i<pfaces_list_->size();i++)
 	{
 		for (int j=0;j<3;j++)
 		{
-			pfaces_list_->at(i)->vertices_[j] -= centerPos;
+			pfaces_list_->at(i)->vertices_[j]->position_ -= centerPos;
 		}
 	}
-	xmax_ -= centerPos.x();
-	xmin_ -=centerPos.x();
-	ymax_ -=centerPos.y();
-	ymin_ -=centerPos.y();
-	zmax_ -= centerPos.z();
-	zmin_ -= centerPos.z();
 }
 
 void Mesh3D::ComputeAvarageEdgeLength(void)

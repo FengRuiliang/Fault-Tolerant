@@ -10,7 +10,6 @@ Hatch::Hatch() {};
 
 HatchChessboard::HatchChessboard(SliceCut*parent)
 {
-	boudary_edge_ = parent->GetPieces();
 	offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
 	hatch_ = new std::vector<Vec3f *>[parent->GetNumPieces()];
 	//hatch_type_ = NONE;
@@ -27,12 +26,11 @@ HatchChessboard::HatchChessboard(SliceCut*parent)
 
 HatchChessboard::HatchChessboard(SliceCut*slice_model,SliceCut*slice_support)
 {
-	boudary_edge_ = slice_model->GetPieces();
-	auto temp = slice_support->GetPieces();
-	for (int i=0;i<slice_support->GetNumPieces();i++)
-	{
-		boudary_edge_[i].insert(boudary_edge_[i].end(), temp[i].begin(), temp[i].end());
-	}
+	//auto temp = slice_support->GetPieces();
+// 	for (int i=0;i<slice_support->GetNumPieces();i++)
+// 	{
+// 		boudary_edge_[i].insert(boudary_edge_[i].end(), temp[i].begin(), temp[i].end());
+// 	}
 	offset_vert_ = new std::vector<std::vector<Vec3f>>[slice_model->GetNumPieces()];
 	hatch_ = new std::vector<Vec3f *>[slice_model->GetNumPieces()];
 	//hatch_type_ = NONE;
@@ -818,7 +816,6 @@ void Hatch::doHatch()
 
 HatchStrip::HatchStrip(SliceCut*parent)
 {
-	boudary_edge_ = parent->GetPieces();
 	offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
 	hatch_ = new std::vector<Vec3f *>[parent->GetNumPieces()];
 	//hatch_type_ = NONE;

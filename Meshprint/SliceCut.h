@@ -54,9 +54,10 @@ public:
 	{}
 	SliceCut(Mesh3D* ptr_in, float tn = DEFAULT_T) :mesh_in_(ptr_in)
 		{
+		//thickness_=0.5;//层厚
 		num_pieces_= mesh_in_->getBoundingBox().at(0).at(2) /thickness_+1;//层数
 		storage_Face_list_ = NULL;// new #2/thickness_三角面片分层
-		pieces_list_ = new std::vector<std::vector<std::vector<std::pair<Vec3f, Vec3f>>>>;
+		pieces_list_ = NULL;//层的链表
 	};
 	~SliceCut();
 
@@ -70,15 +71,15 @@ public:
 	void ClearSlice();
 	void CutInPieces();
 
-	void sweepThroughVertex();
+	void cutThrouthVertex();
 
 	void sweepPline();
 
 	std::pair<Vec3f, Vec3f> cutFacet(HE_face * facet, float cur_height_);
 
-	void cutFacetBymiddlePoint();
+	void cutFacetInmiddlePoint();
 	float getThickness() { return thickness_; };
-	std::vector<std::vector < std::vector<std::pair<Vec3f, Vec3f>>>>* GetPieces();
+	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();
 	std::map<float, std::vector<std::vector<cutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	std::vector<int> * StoreFaceIntoSlice();
@@ -90,10 +91,9 @@ private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
 	/* std::vector<cutLine>* circle_list_;*/
-	std::vector<std::vector < std::vector<std::pair<Vec3f,Vec3f>>>>* pieces_list_;
+	std::vector < std::vector<std::pair<Vec3f,Vec3f>>>* pieces_list_;
 	std::map<float, std::vector<std::vector<cutLine>>> cut_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
 	HE_edge*  getLeftEdge(HE_face* face_, float height_);
-	std::vector<std::pair<Vec3f, Vec3f>> face_middle_line_;
 };
 

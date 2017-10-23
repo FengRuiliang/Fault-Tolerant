@@ -129,6 +129,7 @@ public:
 	//std::vector < std::vector<Vec3f>*>*offset_vert_rotate_;
 public:
 	Hatch(SliceCut*parent) {
+		boudary_edge_ = parent->GetPieces();
 		num_pieces_ = parent->GetNumPieces();
 		offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
 		hatch_ = new std::vector<Vec3f *>[parent->GetNumPieces()];

@@ -12,8 +12,6 @@ struct Event
 	int			is_fir_;          // event type: BEGIN or END vertex
 	Vec3f		position_;		 // event vertex
 	Segment*	segment_ = ((Segment*)NULL);
-	std::vector<Segment*> in_seg_;
-	std::vector<Segment*> out_seg_;
 	Event*		epair_;
 	bool		selected_=false;
 	Event(Vec3f v) {

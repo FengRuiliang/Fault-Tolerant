@@ -135,7 +135,7 @@ public:
 	Vec4f		color_;			//!< the color of this face
 	BoundaryTag boundary_flag_;	//!< this flag is used to split the mesh
 	int com_flag;
-	std::vector<HE_vert*> vertices_;
+	std::vector<Vec3f> vertices_;
 public:
 	HE_face()
 		: id_(-1), pedge_(NULL), valence_(0), selected_(UNSELECTED), boundary_flag_(INNER), normal_(0,0,0),com_flag(-1)
@@ -361,7 +361,7 @@ public:
 	*/
 
 HE_face* InsertFace(std::vector<HE_vert* >& vec_hv);
-HE_face * InsertFace(std::vector<HE_vert*>& vec_hv, Vec3f normal_read_);
+HE_face * InsertFace(std::vector<Vec3f> vec_hv, Vec3f normal_read_);
 // FILE IO
 	//! load a 3D mesh from an OBJ format file
 	bool LoadFromOBJFile(const char* fins);

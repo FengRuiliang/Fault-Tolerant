@@ -142,73 +142,65 @@ bool compSegment(const Segment* a, const Segment* b)
 
 std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
 {
-	sort(que_event_.begin(), que_event_.end(), compareEvent);
-	while (!que_event_.empty())
-	{	
-		Vec3f sta = que_event_.back()->position_;
-		Event* cur = que_event_.back();
-		Event* v=new Event(sta);
-		do 
-		{
-			if (cur->is_fir_)
-			{
-				v->out_seg_.push_back(cur->segment_);
-				cur->segment_->first_ = v;
-			}
-			else
-			{
-				v->in_seg_.push_back(cur->segment_);
-				cur->segment_->second_ = v;
-			}
-				
-			delete que_event_.back();
-			que_event_.back() = NULL;
-			que_event_.pop_back();
-			if (que_event_.empty())
-			{
-				break;
-			}
-			cur = que_event_.back();
-		} while ((cur->position_ - sta).length()<5e-4);
-		event_list_.push_back(v);
-	}
-	std::vector<std::vector<std::pair<Vec3f, Vec3f>>> contours_;
-	for (int i=0;i<event_list_.size();i++)
+	if (event_list_.size()==0)
 	{
-		if (event_list_[i]->selected_)
+		return;
+	}
+	sort(event_list_.begin(), event_list_.end(), compareEvent);
+	Vec3f sta = event_list_.front();
+	Vec3f cur = sta;
+	do 
+	{
+
+	} while ();
+
+
+
+
+
+
+	std::vector<std::vector<std::pair<Vec3f, Vec3f>>> contours_;
+	int k = 0;
+	for (auto iter = points_.begin(); iter != points_.end(); iter++,k++)
+	{
+		if ((*iter)->segment_==NULL)
+		{
+			qDebug() << k;
+		}
+		if ((*iter)->selected_)
 		{
 			continue;
 		}
+			
 		std::vector<std::pair<Vec3f, Vec3f>> contour_;
-		Event* sta_ = event_list_[i];
+
+		Event* sta_ = *iter;
 		Event* cur_ = sta_;
 		do
 		{
-			cur_->selected_ = true;
-			if (cur_->out_seg_.size()!=1)
+			if (cur_->segment_ == NULL)
 			{
+				cur_->selected_ = true;
 				break;
 			}
-			std::pair<Vec3f, Vec3f> p2(cur_->out_seg_[0]->first_->position_, cur_->out_seg_[0]->second_->position_);
+			std::pair<Vec3f, Vec3f> p2(cur_->segment_->first_->position_, cur_->segment_->second_->position_);
 			contour_.push_back(p2);
-			cur_ = cur_->out_seg_[0]->second_;
-		} while (!cur_->selected_);
+			cur_ =cur_->segment_->second_;
+			cur_->selected_ = true;
+		} while (cur_ != sta_);
 		contours_.push_back(contour_);
 	}
+
 	return contours_;
 }
 
 void SweepLine::insertSegment(std::pair<Vec3f, Vec3f> pair_points_)
 {
 	
-	if ((pair_points_.first-pair_points_.second).length()<1e-3)
-	{
-	return;
-	}
 	Event* a = new Event(pair_points_.first);
 	Event* b = new Event(pair_points_.second);
-	que_event_.push_back(a);
-	que_event_.push_back(b);
+	event_list_.push_back(a);
+	event_list_.push_back(b);
 	Segment* seg = new Segment(a, b);
 	segment_list_.push_back(seg);
 	a->segment_ = seg;

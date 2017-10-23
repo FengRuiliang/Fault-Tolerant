@@ -162,13 +162,7 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 			Vec3f point_;
 			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vertices_[0],
 				direc, add_pointN, point_);
-			std::vector<Vec3f> tri;
-			for (int j = 0; j < 3; j++)
-			{
-				tri.push_back(faces[i]->vertices_[j]->position());
-
-			}
-			if (PointinTriangle(tri,point_))
+			if (PointinTriangle(faces.at(i)->vertices_,point_))
 			{
 				ptr_mesh_->SetDirection(i);
 				ptr_mesh_->scalemesh(1.0);
@@ -554,16 +548,43 @@ void RenderingWidget::DrawEdge(bool bv)
 	{
 		return;
 	}
-	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
-	for (int i=0;i<ptr_mesh_->num_of_face_list();i++)
+
+	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
+	const std::vector<HE_edge *>& bedges = *(ptr_mesh_->get_bedges_list());
+
+	for (size_t i = 0; i != edges.size(); ++i)
 	{
-		glBegin(GL_LINE_LOOP);
-		glVertex3fv(faces[i]->vertices_[0]->position());
-		glVertex3fv(faces[i]->vertices_[1]->position());
-		glVertex3fv(faces[i]->vertices_[2]->position());
+		glBegin(GL_LINES);
+		glColor3f(0.0, 0.0, 0.0);
+		glNormal3fv(edges[i]->start_->normal().data());
+		glVertex3fv((edges[i]->start_->position()*scaleV).data());
+		glNormal3fv(edges[i]->pvert_->normal().data());
+		glVertex3fv((edges[i]->pvert_->position()*scaleV).data());
 		glEnd();
 	}
-	
+
+	for (size_t i = 0; i != bedges.size(); ++i)
+	{
+		glBegin(GL_LINES);
+		glColor3f(1.0, 0.0, 0.0);
+		glNormal3fv(bedges[i]->start_->normal().data());
+		glVertex3fv((bedges[i]->start_->position()*scaleV).data());
+		glNormal3fv(bedges[i]->pvert_->normal().data());
+		glVertex3fv((bedges[i]->pvert_->position()*scaleV).data());
+		glEnd();
+	}
+	auto bl = ptr_mesh_->GetBLoop();
+	for (size_t i = 0; i != bl.size(); i++)
+	{
+		glBegin(GL_LINE_LOOP);
+		glColor3f(1.0, 0.0, 0.0);
+		for (int j = 0; j < bl[i].size(); j++)
+		{
+			glNormal3fv(bl[i][j]->start_->normal().data());
+			glVertex3fv((bl[i][j]->start_->position()*scaleV).data());
+		}
+		glEnd();
+	}
 }
 void RenderingWidget::DrawFace(bool bv)
 {
@@ -593,9 +614,9 @@ void RenderingWidget::DrawFace(bool bv)
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
 		glNormal3fv(faces.at(i)->normal());
-		glVertex3fv(faces[i]->vertices_[0]->position());
-		glVertex3fv(faces[i]->vertices_[1]->position());
-		glVertex3fv(faces[i]->vertices_[2]->position());
+		glVertex3fv(faces[i]->vertices_[0]);
+		glVertex3fv(faces[i]->vertices_[1]);
+		glVertex3fv(faces[i]->vertices_[2]);
 	}
 	glEnd();
 }
@@ -661,36 +682,36 @@ void RenderingWidget::DrawSlice(bool bv)
 		return;
 	//glLineWidth(1.0);
 	glColor3f(0.0, 1.0, 0.0);
-// 	std::map<float, std::vector<std::vector<cutLine>>> map_cut_ = ptr_slice_->getMapPieces();
-// 	auto layer_ = ptr_slice_->thickf_;
-// 	for (auto iterset = map_cut_.begin(); iterset != map_cut_.end(); iterset++)
-// 	{
-// 		std::vector<std::vector<cutLine>>& loops_ = iterset->second;
-// 		glBegin(GL_LINES);
-// 		for (int j = 0; j < loops_.size(); j++)
-// 		{
-// 			std::vector<cutLine>& one_loop_ = loops_[j];
-// 			for (int k=0;k<one_loop_.size();k++)
-// 			{
-// 				glVertex3fv(one_loop_[k].position_vert[0]);
-// 				glVertex3fv(one_loop_[k].position_vert[1]);
-// 			}
-// 		}
-// 		glEnd();
-// 	}
+	std::map<float, std::vector<std::vector<cutLine>>> map_cut_ = ptr_slice_->getMapPieces();
+	auto layer_ = ptr_slice_->thickf_;
+	for (auto iterset = map_cut_.begin(); iterset != map_cut_.end(); iterset++)
+	{
+		std::vector<std::vector<cutLine>>& loops_ = iterset->second;
+		glBegin(GL_LINES);
+		for (int j = 0; j < loops_.size(); j++)
+		{
+			std::vector<cutLine>& one_loop_ = loops_[j];
+			for (int k=0;k<one_loop_.size();k++)
+			{
+				glVertex3fv(one_loop_[k].position_vert[0]);
+				glVertex3fv(one_loop_[k].position_vert[1]);
+			}
+		}
+		glEnd();
+	}
 	//return;
 
-	auto tc = ptr_slice_->GetPieces();
+	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
 	if (tc==NULL)
 	{
 		return;
 	}
-	for (int i = 0; i <tc->size(); i++)
+	for (int i = 0; i < ptr_slice_->num_pieces_; i++)
 	{
 		glBegin(GL_LINES);
-		for (size_t j = 0; j <tc->at(i).size(); j++)
+		for (size_t j = 0; j < tc[i].size(); j++)
 		{
-			for (int k = 0; k < tc->at(i)[j].size(); k++)
+			for (int k = 0; k < (tc[i])[j].size(); k++)
 			{
 				if (k==0)
 				{
@@ -700,8 +721,8 @@ void RenderingWidget::DrawSlice(bool bv)
 				{
 					glColor3f(0.0, 1.0, 0.0);
 				}
-				glVertex3fv(tc->at(i)[j][k].first);
-				glVertex3fv(tc->at(i)[j][k].second);
+				glVertex3fv(tc[i][j][k].first);
+				glVertex3fv(tc[i][j][k].second);
 			}
 		}
 		glEnd();
@@ -781,10 +802,11 @@ void RenderingWidget::DoSlice()
 		SafeDelete(ptr_slice_);
 	}
 	ptr_slice_ = new SliceCut(ptr_mesh_);
-
-	ptr_slice_->cutFacetBymiddlePoint();
-	ptr_slice_->sweepThroughVertex();
-	//fillPath();
+//  	ptr_slice_->cutThrouthVertex();
+//  	return;
+	ptr_slice_->StoreFaceIntoSlice();
+	ptr_slice_->CutInPieces();
+	fillPath();
 }
 void RenderingWidget::fillPath()
 {

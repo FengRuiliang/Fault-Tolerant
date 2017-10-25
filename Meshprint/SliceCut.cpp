@@ -99,12 +99,7 @@ void SliceCut::CutInPieces()
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	for (size_t i = 0; i < num_pieces_; i++)
 	{
-		qDebug() << i;
-		if (i!=102)
-		{
-			continue;
-			qDebug() << i;
-		}
+
 		std::vector<int>& slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
 		SweepLine sweep_line_;

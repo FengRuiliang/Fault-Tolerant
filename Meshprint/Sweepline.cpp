@@ -30,10 +30,10 @@ SweepLine::~SweepLine()
 	{
 		delete segment_list_.at(i);
 	}
-	for (auto iter=points_.begin();iter!=points_.end();iter++)
-	{
-		delete *iter;
-	}
+// 	for (auto iter=points_.begin();iter!=points_.end();iter++)
+// 	{
+// 		delete *iter;
+// 	}
 	segment_list_.clear();
 	event_list_.clear();
 	points_.clear();
@@ -142,9 +142,6 @@ bool compSegment(const Segment* a, const Segment* b)
 
 std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
 {
-	
-
-
 	std::vector<std::vector<std::pair<Vec3f, Vec3f>>> contours_;
 	for (auto iter = points_.begin(); iter != points_.end(); iter++)
 	{
@@ -181,10 +178,12 @@ void SweepLine::insertSegment(std::pair<Vec3f, Vec3f> pair_points_)
 	Event* b = new Event(pair_points_.second);
 	event_list_.push_back(a);
 	event_list_.push_back(b);
-	points_.insert(a);
-	points_.insert(b);
-	Segment* seg = new Segment(a, b);
+	auto  viter1=points_.insert(a).first;
+	auto  viter2=points_.insert(b).first;
+	Segment* seg = new Segment(*viter1, *viter2);
 	segment_list_.push_back(seg);
+	(*viter1)->segment_ = seg;
+	return;
 	a->segment_ = seg;
 	a->is_fir_ = true;
 	b->segment_ = seg;

@@ -1,9 +1,5 @@
 #ifndef GLOBALFUNCTIONS_H
 #define GLOBALFUNCTIONS_H
-#include "HE_mesh/Mesh3D.h"
-#define SWAP(a,b,T) {T tmp=(a); (a)=(b); (b)=tmp;}
-#define min(a,b) a<b?a:b
-#define max(a,b) a>b?a:b
 extern float field_width_;
 extern float field_height_ ;
 extern float line_width_ ;
@@ -61,6 +57,5 @@ void inline MySwap(T &t1, T &t2)
 	t1 = t2;
 	t2 = tmp;
 };
-extern bool PointinTriangle(HE_face* face, Vec3f point_in);
-extern void CalPlaneLineIntersectPoint(Vec3f planeVector, Vec3f planePoint, Vec3f lineVector, Vec3f linePoint, Vec3f& point);
+
 #endif // GLOBALFUNCTIONS_H

@@ -132,7 +132,6 @@ public:
 	Vec4f		color_;			//!< the color of this face
 	BoundaryTag boundary_flag_;	//!< this flag is used to split the mesh
 	int com_flag;
-	std::vector<HE_vert* > vertices_;
 public:
 	HE_face()
 		: id_(-1), pedge_(NULL), valence_(0), selected_(UNSELECTED), boundary_flag_(INNER), normal_(0,0,0),com_flag(-1)
@@ -173,10 +172,15 @@ public:
 	point center() 
 	{
 		point center;
-		for (int i=0;i<3;i++)
+		HE_edge* pedge = pedge_;
+
+		do 
 		{
-			center += vertices_[i];
-		}
+			center += pedge->pvert_->position();
+			pedge = pedge->pnext_;
+
+		} while (pedge != pedge_);
+
 		center /= 3.0;
 		return center;		
 	}
@@ -349,17 +353,15 @@ public:
 	//! insert an edge
 	HE_edge* InsertEdge(HE_vert* vstart, HE_vert* vend);
 
-	
-
 	//! insert a face
 	/*!
 	*	\param vec_hv the vertex list of a face
 	*	\return a pointer to the created face
 	*/
-HE_face * InsertFace(std::vector<HE_vert*>& vec_hv, Vec3f normal_read_);
+	HE_face* InsertFace(std::vector<HE_vert* >& vec_hv);
 
-HE_face* InsertFace(std::vector<HE_vert* >& vec_hv);
-// FILE IO
+
+	// FILE IO
 	//! load a 3D mesh from an OBJ format file
 	bool LoadFromOBJFile(const char* fins);
 	//! export the current mesh to an OBJ format file
@@ -532,6 +534,6 @@ public:
 	void UpdateBList(void);
 	void computeComponent();
 	void FaceDFS(HE_face* facet, int no);
-	void MarkEdge();
 	std::vector<HE_edge*>* GetBhelist() { return bheList; }
+	void markEdges();
 };

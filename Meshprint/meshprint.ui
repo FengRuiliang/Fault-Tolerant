@@ -9,12 +9,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1265</width>
-    <height>1016</height>
+    <width>1213</width>
+    <height>856</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Meshprint</string>
+   <string>SLM Print</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="enabled">
@@ -40,7 +40,7 @@
    </property>
    <layout class="QHBoxLayout" name="centralLayout" stretch="0,5">
     <item>
-     <layout class="QVBoxLayout" name="operationLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QVBoxLayout" name="operationLayout" stretch="0,0,0,0,0,0,0,0">
       <item>
        <widget class="QGroupBox" name="stateGroupLayout">
         <property name="title">
@@ -129,7 +129,10 @@
             <item>
              <widget class="QPushButton" name="pushButton_3">
               <property name="text">
-               <string>Compute Support Region</string>
+               <string>Show Support Region</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -204,7 +207,10 @@
           <item>
            <widget class="QPushButton" name="pushButton">
             <property name="text">
-             <string>Compute Support Region</string>
+             <string>Show Support Region</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -366,12 +372,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Offset filling hatch</string>
+          <string>Offset Filling hatch</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Strip hatch</string>
+          <string>Meander hatch</string>
          </property>
         </item>
        </widget>
@@ -581,7 +587,7 @@
            <item>
             <widget class="QDoubleSpinBox" name="doubleSpinBox_11">
              <property name="value">
-              <double>0.090000000000000</double>
+              <double>0.050000000000000</double>
              </property>
             </widget>
            </item>
@@ -592,17 +598,17 @@
            <item>
             <widget class="QLabel" name="label_pDiameter_36">
              <property name="text">
-              <string>Line Space</string>
+              <string>Hatch Distance</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinBox_7">
-             <property name="maximum">
-              <number>999</number>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_12">
+             <property name="decimals">
+              <number>3</number>
              </property>
              <property name="value">
-              <number>150</number>
+              <double>0.050000000000000</double>
              </property>
             </widget>
            </item>
@@ -654,35 +660,22 @@
         </widget>
        </widget>
       </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_5" stretch="20,1">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
       <item>
-       <layout class="QHBoxLayout" name="pointLayout1_3" stretch="1,1">
-        <item>
-         <widget class="QLabel" name="label_pDiameter_3">
-          <property name="text">
-           <string>SLICE ID</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="spinBox">
-          <property name="wrapping">
-           <bool>false</bool>
-          </property>
-          <property name="frame">
-           <bool>true</bool>
-          </property>
-          <property name="maximum">
-           <number>10000</number>
-          </property>
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="RenderingWidget" name="openGLWidget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QSlider" name="horizontalSlider_4">
+       <widget class="QSlider" name="horizontalSlider_5">
         <property name="maximum">
          <number>10000</number>
         </property>
@@ -690,77 +683,6 @@
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="pointLayout1_5" stretch="1,1">
-        <item>
-         <widget class="QLabel" name="label_pDiameter_5">
-          <property name="text">
-           <string>FIELD ID</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="spinBox_2">
-          <property name="wrapping">
-           <bool>false</bool>
-          </property>
-          <property name="frame">
-           <bool>true</bool>
-          </property>
-          <property name="maximum">
-           <number>10000</number>
-          </property>
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="checkBox">
-        <property name="text">
-         <string>DISPLY SUPPORT REGION</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="checkBox_2">
-        <property name="text">
-         <string>DISPLY SUPPORT</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="checkBox_3">
-        <property name="text">
-         <string>SHOW ALL HATCH</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="renderingLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="RenderingWidget" name="openGLWidget"/>
       </item>
      </layout>
     </item>
@@ -771,8 +693,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1265</width>
-     <height>23</height>
+     <width>1213</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -879,7 +801,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Open Folder.png</normaloff>:/Meshprint/Resources/images/Open Folder.png</iconset>
    </property>
    <property name="text">
@@ -891,7 +813,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Save-50.png</normaloff>:/Meshprint/Resources/images/Save-50.png</iconset>
    </property>
    <property name="text">
@@ -900,7 +822,7 @@
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Save as.png</normaloff>:/Meshprint/Resources/images/Save as.png</iconset>
    </property>
    <property name="text">
@@ -909,7 +831,7 @@
   </action>
   <action name="actionFront_View">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Front View.png</normaloff>:/Meshprint/Resources/images/Front View.png</iconset>
    </property>
    <property name="text">
@@ -918,7 +840,7 @@
   </action>
   <action name="actionLeft_View">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Left View.png</normaloff>:/Meshprint/Resources/images/Left View.png</iconset>
    </property>
    <property name="text">
@@ -927,7 +849,7 @@
   </action>
   <action name="actionTop_View">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Top View.png</normaloff>:/Meshprint/Resources/images/Top View.png</iconset>
    </property>
    <property name="text">
@@ -936,7 +858,7 @@
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Add File.png</normaloff>:/Meshprint/Resources/images/Add File.png</iconset>
    </property>
    <property name="text">
@@ -948,7 +870,7 @@
   </action>
   <action name="actionIsometric_View">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Orthogonal View.png</normaloff>:/Meshprint/Resources/images/Orthogonal View.png</iconset>
    </property>
    <property name="text">
@@ -960,7 +882,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Cut.png</normaloff>:/Meshprint/Resources/images/Cut.png</iconset>
    </property>
    <property name="text">
@@ -972,7 +894,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Line Chart.png</normaloff>:/Meshprint/Resources/images/Line Chart.png</iconset>
    </property>
    <property name="text">
@@ -987,7 +909,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Sphere.png</normaloff>:/Meshprint/Resources/images/Sphere.png</iconset>
    </property>
    <property name="text">
@@ -996,7 +918,7 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Undo-52.png</normaloff>:/Meshprint/Resources/images/Undo-52.png</iconset>
    </property>
    <property name="text">
@@ -1005,7 +927,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Redo.png</normaloff>:/Meshprint/Resources/images/Redo.png</iconset>
    </property>
    <property name="text">
@@ -1017,7 +939,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Whole Hand-50.png</normaloff>:/Meshprint/Resources/images/Whole Hand-50.png</iconset>
    </property>
    <property name="text">
@@ -1026,7 +948,7 @@
   </action>
   <action name="actionRotate_Camera">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Rotate Camera.png</normaloff>:/Meshprint/Resources/images/Rotate Camera.png</iconset>
    </property>
    <property name="text">
@@ -1038,7 +960,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Rotate Right.png</normaloff>:/Meshprint/Resources/images/Rotate Right.png</iconset>
    </property>
    <property name="text">
@@ -1047,7 +969,7 @@
   </action>
   <action name="actionTranslate_Model">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Resize Four Directions Filled.png</normaloff>:/Meshprint/Resources/images/Resize Four Directions Filled.png</iconset>
    </property>
    <property name="text">
@@ -1059,7 +981,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Activity Grid-50.png</normaloff>:/Meshprint/Resources/images/Activity Grid-50.png</iconset>
    </property>
    <property name="text">
@@ -1068,7 +990,7 @@
   </action>
   <action name="actionBackground">
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Paint Palette-50.png</normaloff>:/Meshprint/Resources/images/Paint Palette-50.png</iconset>
    </property>
    <property name="text">
@@ -1080,7 +1002,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="meshprint.qrc">
+    <iconset>
      <normaloff>:/Meshprint/Resources/images/Light On-50.png</normaloff>:/Meshprint/Resources/images/Light On-50.png</iconset>
    </property>
    <property name="text">
@@ -1095,11 +1017,20 @@
    <extends>QOpenGLWidget</extends>
    <header location="global">renderingwidget.h</header>
    <slots>
+    <slot>cutinPieces()</slot>
     <slot>ReadMesh()</slot>
+    <slot>renderdoHatch()</slot>
     <slot>CheckGrid()</slot>
+    <slot>AutoSupport()</slot>
+    <slot>DeleteSupport()</slot>
     <slot>CheckDrawEdge()</slot>
     <slot>CheckDrawFace()</slot>
+    <slot>AddLineSupport()</slot>
+    <slot>AddPointSupport()</slot>
     <slot>SetBackground()</slot>
+    <slot>SelectFace()</slot>
+    <slot>SetDirection()</slot>
+    <slot>Export()</slot>
     <slot>WriteMesh()</slot>
     <slot>setLaserPower(int)</slot>
     <slot>setLaserSpeed(int)</slot>
@@ -1134,7 +1065,9 @@
     <slot>SclaleModel()</slot>
     <slot>SetAllHatch(bool)</slot>
     <slot>SetSliceCheckIdText(int)</slot>
+    <slot>setHatchDis(int)</slot>
     <slot>DoSlice()</slot>
+    <slot>setHatchDis(double)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -1245,8 +1178,8 @@
    <slot>AddLineSupport()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>259</y>
+     <x>102</x>
+     <y>235</y>
     </hint>
     <hint type="destinationlabel">
      <x>821</x>
@@ -1261,8 +1194,8 @@
    <slot>AddPointSupport()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>260</y>
+     <x>165</x>
+     <y>258</y>
     </hint>
     <hint type="destinationlabel">
      <x>550</x>
@@ -1335,34 +1268,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>horizontalSlider_4</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>SetSliceCheckId(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>250</x>
-     <y>883</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>582</x>
-     <y>860</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>pushButton_XYScan_2</sender>
    <signal>clicked()</signal>
    <receiver>openGLWidget</receiver>
-   <slot>DoSlice()</slot>
+   <slot>renderdoHatch()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>817</y>
+     <x>254</x>
+     <y>815</y>
     </hint>
     <hint type="destinationlabel">
-     <x>601</x>
-     <y>837</y>
+     <x>939</x>
+     <y>797</y>
     </hint>
    </hints>
   </connection>
@@ -1373,8 +1290,8 @@
    <slot>setHatchType(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>354</y>
+     <x>173</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>822</x>
@@ -1390,11 +1307,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>627</y>
+     <y>625</y>
     </hint>
     <hint type="destinationlabel">
-     <x>599</x>
-     <y>824</y>
+     <x>937</x>
+     <y>797</y>
     </hint>
    </hints>
   </connection>
@@ -1406,7 +1323,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>655</y>
+     <y>653</y>
     </hint>
     <hint type="destinationlabel">
      <x>842</x>
@@ -1422,7 +1339,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>683</y>
+     <y>681</y>
     </hint>
     <hint type="destinationlabel">
      <x>515</x>
@@ -1438,7 +1355,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>711</y>
+     <y>709</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -1454,7 +1371,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>429</y>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
      <x>785</x>
@@ -1470,27 +1387,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>457</y>
+     <y>455</y>
     </hint>
     <hint type="destinationlabel">
      <x>781</x>
      <y>531</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>spinBox_7</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>setHatchType(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>318</x>
-     <y>739</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>611</x>
-     <y>765</y>
     </hint>
    </hints>
   </connection>
@@ -1502,7 +1403,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>485</y>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>584</x>
@@ -1518,7 +1419,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>513</y>
+     <y>511</y>
     </hint>
     <hint type="destinationlabel">
      <x>722</x>
@@ -1534,7 +1435,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>767</y>
+     <y>765</y>
     </hint>
     <hint type="destinationlabel">
      <x>597</x>
@@ -1549,8 +1450,8 @@
    <slot>setThreshold(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>172</y>
+     <x>223</x>
+     <y>170</y>
     </hint>
     <hint type="destinationlabel">
      <x>442</x>
@@ -1565,8 +1466,8 @@
    <slot>setGap(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>200</y>
+     <x>223</x>
+     <y>198</y>
     </hint>
     <hint type="destinationlabel">
      <x>494</x>
@@ -1581,8 +1482,8 @@
    <slot>setSeglength(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>228</y>
+     <x>223</x>
+     <y>226</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -1597,8 +1498,8 @@
    <slot>setReso(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>257</y>
+     <x>223</x>
+     <y>255</y>
     </hint>
     <hint type="destinationlabel">
      <x>618</x>
@@ -1613,8 +1514,8 @@
    <slot>setVerticalgap(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>285</y>
+     <x>223</x>
+     <y>283</y>
     </hint>
     <hint type="destinationlabel">
      <x>599</x>
@@ -1629,8 +1530,8 @@
    <slot>AutoSupport()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>315</y>
+     <x>102</x>
+     <y>291</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -1655,54 +1556,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>checkBox</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>CheckRegion(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>183</x>
-     <y>933</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>461</x>
-     <y>882</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_2</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>CheckSupport(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>131</x>
-     <y>955</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>797</x>
-     <y>940</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>spinBox_2</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>setFildID(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>328</x>
-     <y>910</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>791</x>
-     <y>940</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>doubleSpinBox_pDiameter</sender>
    <signal>valueChanged(double)</signal>
    <receiver>openGLWidget</receiver>
@@ -1710,7 +1563,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>314</x>
-     <y>173</y>
+     <y>171</y>
     </hint>
     <hint type="destinationlabel">
      <x>810</x>
@@ -1726,7 +1579,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>314</x>
-     <y>201</y>
+     <y>199</y>
     </hint>
     <hint type="destinationlabel">
      <x>819</x>
@@ -1741,8 +1594,8 @@
    <slot>setLineD(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>172</y>
+     <x>223</x>
+     <y>170</y>
     </hint>
     <hint type="destinationlabel">
      <x>839</x>
@@ -1757,8 +1610,8 @@
    <slot>setLineH(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>200</y>
+     <x>223</x>
+     <y>198</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -1773,8 +1626,8 @@
    <slot>FindRegion()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>231</y>
+     <x>165</x>
+     <y>229</y>
     </hint>
     <hint type="destinationlabel">
      <x>865</x>
@@ -1789,8 +1642,8 @@
    <slot>FindRegion()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>194</x>
-     <y>230</y>
+     <x>102</x>
+     <y>206</y>
     </hint>
     <hint type="destinationlabel">
      <x>824</x>
@@ -1822,7 +1675,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>237</x>
-     <y>98</y>
+     <y>96</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -1838,43 +1691,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>100</y>
+     <y>98</y>
     </hint>
     <hint type="destinationlabel">
      <x>544</x>
      <y>126</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_3</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>SetAllHatch(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>68</x>
-     <y>977</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>407</x>
-     <y>909</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>spinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>openGLWidget</receiver>
-   <slot>SetSliceCheckIdText(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>328</x>
-     <y>854</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>424</x>
-     <y>672</y>
     </hint>
    </hints>
   </connection>
@@ -1886,11 +1707,43 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>599</y>
+     <y>597</y>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
      <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider_5</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetSliceCheckId(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>855</x>
+     <y>825</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>878</x>
+     <y>797</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox_12</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>setHatchDis(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>242</x>
+     <y>731</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>761</y>
     </hint>
    </hints>
   </connection>

@@ -6,7 +6,7 @@
 
 class Meshprint : public QMainWindow
 {
-	//Q_OBJECT
+	Q_OBJECT
 
 public:
 	Ui::MeshprintClass ui;

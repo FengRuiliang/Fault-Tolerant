@@ -51,6 +51,7 @@ public:
 		{
 		//thickness_=0.5;//层厚
 		num_pieces_= mesh_in_->getBoundingBox().at(0).at(2) /thickness_+1;//层数
+		
 		storage_Face_list_ = NULL;// new #2/thickness_三角面片分层
 		pieces_list_ = NULL;//层的链表
 	};
@@ -63,12 +64,13 @@ public:
 		}
 	};
 
-	void ClearSlice();
+	void clearcut();
 	void CutInPieces();
+	void Exportslice();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<cutLine>* >* GetPieces(){ return pieces_list_; }
 	int GetNumPieces() { return num_pieces_; }
-	 std::vector<int> * StoreFaceIntoSlice();
+	 std::vector<int> * storeMeshIntoSlice();
 	 std::vector<int>  *storage_Face_list_;
 
 	int  num_pieces_;
@@ -76,9 +78,9 @@ public:
 private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
-	 std::vector<cutLine>* circle_list_;
+	
 	 std::vector < std::vector<cutLine>* >*pieces_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
-	std::vector<Vec3f> sortVertInFace(HE_face* face_);
+	std::vector<int> sortVertInFace(int faceid);
 };
 

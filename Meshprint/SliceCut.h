@@ -69,6 +69,7 @@ public:
 	};
 
 	void ClearSlice();
+	std::vector<int> sortVertInFace(int faceid);
 	void CutInPieces();
 
 	void cutThrouthVertex();
@@ -80,6 +81,7 @@ public:
 	void cutFacetInmiddlePoint();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();
+	HE_edge * InsertEdgeBySweep(HE_vert * vstart, HE_vert * vend);
 	std::map<float, std::vector<std::vector<cutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	std::vector<int> * StoreFaceIntoSlice();

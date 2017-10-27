@@ -20,6 +20,7 @@ SliceCut::~SliceCut()
 	clearcut();
 	pieces_list_ = NULL;
 	storage_Face_list_ = NULL;
+	clip_list_ = NULL;
 }
 
 std::vector<int> * SliceCut::storeMeshIntoSlice()
@@ -119,6 +120,7 @@ void SliceCut:: clearcut()
 	}
 	delete[]pieces_list_;
 	delete[] storage_Face_list_;
+	delete[] clip_list_;
 }
 
 void SliceCut::CutInPieces()
@@ -307,17 +309,62 @@ void SliceCut::CutInPieces()
 	}
 }
 
-void SliceCut::Exportslice() //shuchu  hanshu
+void SliceCut::clipPolygon()
 {
-	for (int i = 0; i < num_pieces_; i++)
+	if (clip_list_!=NULL)
 	{
-		for (int j = 0; j < pieces_list_[i].size(); j++)
+		delete[] clip_list_;
+	}
+	clip_list_ = new std::vector<std::vector<Vec3f>>[num_pieces_];
+	for (int i=num_pieces_-1;i>1;i--)
+	{
+		//std::vector < std::vector<cutLine>*>*pieces_list_;
+
+		std::vector<std::vector<cutLine>*>& slice = pieces_list_[i];
+		std::vector<std::vector<cutLine>*>& slice_down_= pieces_list_[i-1];
+		Paths sub(slice.size());
+		Paths clip(slice_down_.size());
+		Paths solution;
+		for (int j=0;j<slice.size();j++)
 		{
-			for (int k = 0; k < (pieces_list_[i])[j]->size(); k++)
+			std::vector<cutLine>* loop = slice[j];
+			for (int k=0;k<loop->size();k++)
 			{
-				std::cout << ((pieces_list_[i])[j])->at(k).position_vert[0].x() << ((pieces_list_[i])[j])->at(k).position_vert[0].y() << ((pieces_list_[i])[j])->at(k).position_vert[0].z();
-				std::cout << ((pieces_list_[i])[j])->at(k).position_vert[1].x() << ((pieces_list_[i])[j])->at(k).position_vert[1].y() << ((pieces_list_[i])[j])->at(k).position_vert[1].z();
+				int x_ = loop->at(k).position_vert[0].x()*1e6;
+				int y_ = loop->at(k).position_vert[0].y()*1e6;
+				sub[j] << IntPoint(x_, y_);
 			}
+		}
+		for (int j = 0; j < slice_down_.size(); j++)
+		{
+			std::vector<cutLine>* loop = slice_down_[j];
+			for (int k = 0; k < loop->size(); k++)
+			{
+				int x_ = loop->at(k).position_vert[0].x()*1e6;
+				int y_ = loop->at(k).position_vert[0].y()*1e6;
+				clip[j] << IntPoint(x_, y_);
+			}
+		}
+		Clipper c;
+		c.AddPaths(sub, ptSubject, true);
+// 		for (int m=0;m< slice_down_.size();m++)
+// 		{
+// 		
+// 			c.Clear();
+// 			c.AddPaths(solution, ptSubject, true);
+// 		}
+		c.AddPaths(clip, ptClip, true);
+		c.Execute(ctDifference, solution, pftNonZero, pftNonZero);
+
+		for (int j = 0; j < solution.size(); j++)
+		{
+			std::vector<Vec3f> loop;
+			for (int k = 0; k < solution[j].size(); k++)
+			{
+				Vec3f p(solution[j][k].X*1e-6, solution[j][k].Y*1e-6, i*thickness_);
+				loop.push_back(p);
+			}
+			clip_list_[i].push_back(loop);
 		}
 	}
 }

@@ -1632,9 +1632,31 @@ void RenderingWidget::DrawCutPieces(bool bv)
 		return;
 	}
 	std::vector < std::vector<cutLine>* >*tc = (mycut->GetPieces());
-	glColor3f(0.0, 1.0, 0.0);
-	//for (int i = 0; i<mycut->num_pieces_; i++)
-	for (int i = slice_check_id_; i < slice_check_id_ + 1; i++)
+	std::vector < std::vector<Vec3f>>* clip = mycut->GetClip();
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	//for (int i = 0; i<mycut->num_pieces_; i++)
+// 	for (int i=slice_check_id_;i<slice_check_id_+1;i++)
+// 	{
+// 		
+// 		std::vector < std::vector<Vec3f>>& slice = clip[i];
+// 		for (int j=0;j<slice.size();j++)
+// 		{
+// 			glBegin(GL_LINE_LOOP);
+// 			for (int k=0;k<slice[j].size();k++)
+// 			{
+// 				glVertex3fv(slice[j][k]);
+// 			}
+// 			glEnd();
+// 		}
+// 
+// 	
+// 	}
+	if (tc==NULL)
+	{
+		return;
+	}
+	glColor3f(1.0, 0.0, 0.0);
+	for (int i = slice_check_id_; i < slice_check_id_+1; i++)
 	{
 		glBegin(GL_LINES);
 		for (size_t j = 0; j < tc[i].size(); j++)
@@ -1647,6 +1669,7 @@ void RenderingWidget::DrawCutPieces(bool bv)
 
 		}
 		glEnd();
+		
 	}
 }
 void RenderingWidget::DrawCutPiecesSup(bool bv)
@@ -2288,6 +2311,7 @@ void RenderingWidget::cutinPieces()
 	mycut->clearcut();
 	mycut->storeMeshIntoSlice();
 	mycut->CutInPieces();
+	mycut->clipPolygon();
 	//Export();
 	update();
 }

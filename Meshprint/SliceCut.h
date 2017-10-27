@@ -1,6 +1,8 @@
 #pragma once
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
+#include "clipper.hpp"
+using namespace ClipperLib;
 class Mesh3D;
 class vector;
 class Field;
@@ -66,9 +68,11 @@ public:
 
 	void clearcut();
 	void CutInPieces();
+	void clipPolygon();
 	void Exportslice();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<cutLine>* >* GetPieces(){ return pieces_list_; }
+	std::vector < std::vector<Vec3f>>* GetClip() { return clip_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	 std::vector<int> * storeMeshIntoSlice();
 	 std::vector<int>  *storage_Face_list_;
@@ -79,7 +83,8 @@ private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
 	
-	 std::vector < std::vector<cutLine>* >*pieces_list_;
+	 std::vector < std::vector<cutLine>*>*pieces_list_;
+	 std::vector < std::vector<Vec3f>>* clip_list_{NULL};
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
 	std::vector<int> sortVertInFace(int faceid);
 };

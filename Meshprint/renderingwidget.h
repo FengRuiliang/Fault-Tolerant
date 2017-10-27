@@ -44,6 +44,7 @@ public:
 	void keyReleaseEvent(QKeyEvent *e);
 
 signals:
+	void sendMsgtoDialog(QString);
 	//void meshInfo(int, int, int);
 	//void operatorInfo(QString);
 
@@ -52,6 +53,9 @@ private:
 	void SetLight();
 
 public slots:
+	void ResetView();
+	void RecvMsg(QString);
+	void ApplyMaintenance();
 	void SetBackground();
 	void SetSliceCheckId(int id);
 	void ReadMesh();

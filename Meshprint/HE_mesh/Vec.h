@@ -351,6 +351,13 @@ public:
 		for (size_type i = 0; i < D; i++) swap(v[i], x[i]);
 	}
 
+	//set by Triangle Maintenancer
+	void set(const T &x, const T &y, const T &z)
+	{
+		VEC_STATIC_CHECK(D == 3); v[0] = x; v[1] = y; v[2] = z;
+	}
+
+
 	// Outside of class: + - * / % ^ << >> == != < > <= >=
 
 	// Dot product with another vector (also exists as an operator)

@@ -142,21 +142,10 @@ bool compSegment(const Segment* a, const Segment* b)
 
 std::vector<std::vector<std::pair<Vec3f, Vec3f>>> SweepLine::polygonization()
 {
-	if (event_list_.size()==0)
-	{
-		return;
-	}
+
 	sort(event_list_.begin(), event_list_.end(), compareEvent);
 	Vec3f sta = event_list_.front();
 	Vec3f cur = sta;
-	do 
-	{
-
-	} while ();
-
-
-
-
 
 
 	std::vector<std::vector<std::pair<Vec3f, Vec3f>>> contours_;

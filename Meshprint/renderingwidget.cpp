@@ -162,7 +162,12 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 			Vec3f point_;
 			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vertices_[0],
 				direc, add_pointN, point_);
-			if (PointinTriangle(faces.at(i)->vertices_,point_))
+			std::vector<Vec3f> te;
+			for (int i=0;i<3;i++)
+			{
+				te.push_back(faces[i]->vertices_[i]->position());
+			}
+			if (PointinTriangle(te,point_))
 			{
 				ptr_mesh_->SetDirection(i);
 				ptr_mesh_->scalemesh(1.0);
@@ -548,43 +553,32 @@ void RenderingWidget::DrawEdge(bool bv)
 	{
 		return;
 	}
-
-	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
-	const std::vector<HE_edge *>& bedges = *(ptr_mesh_->get_bedges_list());
-
-	for (size_t i = 0; i != edges.size(); ++i)
+	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
+	const std::vector<HE_edge*>& edges = *(ptr_mesh_->get_edges_list());
+	//////////////////////////////////////////////////////////////////////////
+	//add at 26/10/2017 
+	glBegin(GL_LINES);
+	glColor4ub(0, 0, 0, 255);
+	for (int i=0;i<edges.size();i++)
 	{
-		glBegin(GL_LINES);
-		glColor3f(0.0, 0.0, 0.0);
-		glNormal3fv(edges[i]->start_->normal().data());
-		glVertex3fv((edges[i]->start_->position()*scaleV).data());
-		glNormal3fv(edges[i]->pvert_->normal().data());
-		glVertex3fv((edges[i]->pvert_->position()*scaleV).data());
-		glEnd();
+		glVertex3fv(edges[i]->start_->position());
+		glVertex3fv(edges[i]->pvert_->position());
 	}
-
-	for (size_t i = 0; i != bedges.size(); ++i)
+	glEnd();
+	return;
+	//////////////////////////////////////////////////////////////////////////
+	glBegin(GL_LINES);
+	glColor4ub(0, 0, 0, 255);
+	for (int i=0;i<ptr_mesh_->num_of_face_list();i++)
 	{
-		glBegin(GL_LINES);
-		glColor3f(1.0, 0.0, 0.0);
-		glNormal3fv(bedges[i]->start_->normal().data());
-		glVertex3fv((bedges[i]->start_->position()*scaleV).data());
-		glNormal3fv(bedges[i]->pvert_->normal().data());
-		glVertex3fv((bedges[i]->pvert_->position()*scaleV).data());
-		glEnd();
-	}
-	auto bl = ptr_mesh_->GetBLoop();
-	for (size_t i = 0; i != bl.size(); i++)
-	{
-		glBegin(GL_LINE_LOOP);
-		glColor3f(1.0, 0.0, 0.0);
-		for (int j = 0; j < bl[i].size(); j++)
+		for (int j=0;j<3;j++)
 		{
-			glNormal3fv(bl[i][j]->start_->normal().data());
-			glVertex3fv((bl[i][j]->start_->position()*scaleV).data());
+			glVertex3fv(faces[i]->vertices_[j]->position());
+			glVertex3fv(faces[i]->vertices_[(j + 1) % 3]->position());
 		}
-		glEnd();
 	}
+	glEnd();
+	//////////////////////////////////////////////////////////////////////////
 }
 void RenderingWidget::DrawFace(bool bv)
 {
@@ -614,9 +608,9 @@ void RenderingWidget::DrawFace(bool bv)
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
 		glNormal3fv(faces.at(i)->normal());
-		glVertex3fv(faces[i]->vertices_[0]);
-		glVertex3fv(faces[i]->vertices_[1]);
-		glVertex3fv(faces[i]->vertices_[2]);
+		glVertex3fv(faces[i]->vertices_[0]->position());
+		glVertex3fv(faces[i]->vertices_[1]->position());
+		glVertex3fv(faces[i]->vertices_[2]->position());
 	}
 	glEnd();
 }

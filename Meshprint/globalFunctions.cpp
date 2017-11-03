@@ -25,3 +25,4 @@ float scaleV = 1.0;
 float scaleT = 1.0;
 int sss = 0;
 int fildID = 0;
+float spot_size_ = 0.075;

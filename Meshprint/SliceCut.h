@@ -2,6 +2,7 @@
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
 #include "clipper.hpp"
+#include "Cubes.h"
 using namespace ClipperLib;
 class Mesh3D;
 class vector;
@@ -43,7 +44,6 @@ public:
 };
 
 
-
 class SliceCut
 {
 public:
@@ -69,6 +69,7 @@ public:
 	void clearcut();
 	void CutInPieces();
 	void clipPolygon();
+	void storeClipIntoCube();
 	void Exportslice();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<cutLine>* >* GetPieces(){ return pieces_list_; }

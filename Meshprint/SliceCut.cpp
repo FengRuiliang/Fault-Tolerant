@@ -368,3 +368,17 @@ void SliceCut::clipPolygon()
 		}
 	}
 }
+
+
+void SliceCut::storeClipIntoCube()
+{
+	Cubes cubes_support_;
+	cubes_support_.setUnit(spot_size_, spot_size_, thickness_);
+	for (int i = 0; i < num_pieces_; i++)
+	{
+		for (int j=0;j<clip_list_[i].size();j++)
+		{
+			cubes_support_
+		}
+	}
+}

@@ -3,6 +3,7 @@
 #include "HE_mesh/Mesh3D.h"
 #include "globalFunctions.h"
 #include "SliceCut.h"
+class cutLine;
 class Cubes
 {
 public:

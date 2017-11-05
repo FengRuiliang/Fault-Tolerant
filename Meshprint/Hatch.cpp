@@ -100,6 +100,7 @@ void Hatch::setLaserSpeed(float speed)
 {
 	laser_speed_hatch_ = speed;
 }
+
 void HatchChessboard::clearHatch()
 {
 	boudary_edge_ = NULL;
@@ -108,6 +109,7 @@ void HatchChessboard::clearHatch()
 
 
 }
+
 void HatchMeander::clearHatch()
 {
 	delete[]offset_vert_;
@@ -855,6 +857,7 @@ void Hatch::rotateBack(size_t k)
 		//	qDebug() << (*iterline)[1].x() << (*iterline)[1].y() << (*iterline)[1].z();
 	}
 }
+
 void Hatch::doHatch()
 {
 }

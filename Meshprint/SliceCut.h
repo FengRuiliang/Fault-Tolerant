@@ -11,7 +11,17 @@ class Field;
 typedef trimesh::point point;
 typedef trimesh::vec3  Vec3f;
 typedef trimesh::vec4  Vec4f;
+struct comVec3fBlack
+{
+	bool operator ()(Vec3f a, Vec3f b)const
+	{
 
+
+		if (a.x() - b.x() < -5e-5) return true;//a.x < b.x
+		if (abs(a.x() - b.x()) < 5e-5) return (a.y() - b.y() < -5e-5);
+		return false;
+	}
+};
 class cutLine
 {
 public:

@@ -376,7 +376,6 @@ void SliceCut::storeClipIntoCube()
 		qDebug()<<clip_list_[i].size();
 		for (int j=0;j<clip_list_[i].size();j++)
 		{
-
 			std::multiset<Vec3f, comVec3fBlack> grid_points_;
 			int num = clip_list_[i][j].size();
 			Vec3f a, b, vector_;

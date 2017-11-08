@@ -30,6 +30,7 @@
 class Support;
 class Cubes;
 class Cubes::Box;
+static GLdouble winwidth, winHeight;
 RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	: QOpenGLWidget(parent), ptr_mainwindow_(mainwindow), eye_distance_(5.0),
 	has_lighting_(true), is_draw_point_(false), is_draw_edge_(false), is_draw_face_(true)
@@ -93,13 +94,16 @@ void RenderingWidget::initializeGL()
 void RenderingWidget::resizeGL(int w, int h)
 {
 	h = (h == 0) ? 1 : h;
-
+	winwidth = w;
+	winHeight = h;
 	ptr_arcball_->reSetBound(w, h);
 	ptr_arcball_module_->reSetBound(w, h);
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45, GLdouble(w) / GLdouble(h), 0.1, 1000);
+// 	glOrtho(GLdouble(-winwidth / 2), GLdouble(winwidth / 2),
+// 		GLdouble(-winHeight / 2), GLdouble(winHeight / 2), -1000, 1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -109,7 +113,7 @@ void RenderingWidget::paintGL()
 	glShadeModel(GL_SMOOTH);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -117,6 +121,8 @@ void RenderingWidget::paintGL()
 	gluLookAt(eyepos[0], eyepos[1], eyepos[2],
 		eye_goal_[0], eye_goal_[1], eye_goal_[2],
 		0.0, 1.0, 0.0);
+// 	glOrtho(GLdouble(-winwidth / 2)*0.1, GLdouble(winwidth / 2)*0.1,
+// 		GLdouble(-winHeight / 2)*0.1, GLdouble(winHeight / 2)*0.1, -1000, 1000);
 	if (has_lighting_)
 	{
 		SetLight();
@@ -127,12 +133,10 @@ void RenderingWidget::paintGL()
 		glDisable(GL_LIGHT0);
 	}
 
-// 	//glPushMatrix();
-
+	glPushMatrix();
 	glMultMatrixf(ptr_arcball_->GetBallMatrix());
-
 	Render();
-	//glPopMatrix();
+	glPopMatrix();
 }
 
 void RenderingWidget::timerEvent(QTimerEvent * e)
@@ -375,6 +379,7 @@ void RenderingWidget::wheelEvent(QWheelEvent *e)
 {
 	if (ptr_mesh_ != NULL)
 	{
+		//eye_distance_ -= e->delta()*0.1;
 		eye_distance_ -= e->delta()*ptr_mesh_->getBoundingBox().at(0).at(2)*scaleV / 1000;
 	}
 	eye_distance_ = eye_distance_ < 0 ? 0 : eye_distance_;
@@ -1713,24 +1718,32 @@ void RenderingWidget::drawCub(bool bv)
 	if (mycut == NULL)
 		return;
 	std::set<Cubes::Box, Cubes::sortBox> box=mycut->cubes_support_.GetBoxes();
-	glColor4b(0, 150, 0, 150);
+
+
+
+
+
+	glColor4f(1.0, 0.0, 0.0, 1.0);
+	glBegin(GL_QUADS);
 	for (int i=slice_check_id_;i<slice_check_id_+1;i++)
 	{
-		glBegin(GL_QUADS);
 		for (auto iter=box.begin();iter!=box.end();iter++)
 		{
 			
 			if (iter->getID()[2]==i)
 			{
+
+
 				std::vector<int> id = iter->getID();
 				glVertex3f(id[0] * spot_size_, id[1] * spot_size_, i*thickness_);
 				glVertex3f((id[0]+1) * spot_size_, id[1] * spot_size_, i*thickness_);
 				glVertex3f((id[0]+1) * spot_size_, (id[1]+1) * spot_size_, i*thickness_);
 				glVertex3f(id[0] * spot_size_, (id[1]+1) * spot_size_, i*thickness_);
 			}
+			
 		}
-		glEnd();
 	}
+	glEnd();
 }
 void RenderingWidget::DrawHatch(bool bv)
 {

@@ -248,6 +248,7 @@
     <ClInclude Include="ArcBall.h" />
     <ClInclude Include="clipper.hpp" />
     <ClInclude Include="Cubes.h" />
+    <ClInclude Include="Cutline.h" />
     <ClInclude Include="GeneratedFiles\ui_meshprint.h" />
     <ClInclude Include="GeneratedFiles\ui_oepndialog.h" />
     <ClInclude Include="globalFunctions.h" />

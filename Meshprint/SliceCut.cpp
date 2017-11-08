@@ -368,24 +368,22 @@ void SliceCut::clipPolygon()
 		}
 	}
 }
-
-
 void SliceCut::storeClipIntoCube()
 {
-	Cubes cubes_support_;
 	cubes_support_.setUnit(spot_size_, spot_size_, thickness_);
-	for (int i = 0; i < num_pieces_; i++)
+	for (int i = 2; i < 3; i++)
 	{
-		
+		qDebug()<<clip_list_[i].size();
 		for (int j=0;j<clip_list_[i].size();j++)
 		{
+
 			std::multiset<Vec3f, comVec3fBlack> grid_points_;
 			int num = clip_list_[i][j].size();
 			Vec3f a, b, vector_;
 			for (int k=0;k<clip_list_[i][j].size();k++)
 			{
-				clip_list_[i][j][k];
-				clip_list_[i][j][(k + 1) % num];
+				a=clip_list_[i][j][k];
+				b=clip_list_[i][j][(k + 1) % num];
 				float x_min_ = a.x() <= b.x() ? a.x() : b.x();
 				float x_max_ = a.x() >= b.x() ? a.x() : b.x();
 				int min_wid_id_ = round((x_min_ + spot_size_ * 10000) / spot_size_ - 0.5) - 10000;
@@ -402,6 +400,7 @@ void SliceCut::storeClipIntoCube()
 					}
 				}
 			}
+			qDebug() << grid_points_.size();
 			auto iterB = grid_points_.begin();
 			if (iterB == grid_points_.end())continue;;
 			float x_cur_, y_cur_, x_last_, y_last_;
@@ -451,107 +450,21 @@ void SliceCut::storeClipIntoCube()
 					{
 						cur_id_--;
 					}
-
-					if ((FieldType)(abs(x_id_ + last_id_) % 2) == BLACK)
-					{
-						BField * big_tempDw_ = new BField(x_id_, last_id_, k*thickness_);//new a big grid only has x and y information
-
-						std::set<BField*, compareBField>::iterator iter1 = big_fields_.find(big_tempDw_);
-						if (iter1 == big_fields_.end())//if has not found a big grid
-						{
-
-							if (boundaryPD_.y() - big_tempDw_->bottomcoor_ > 1e-6&&boundaryPD_.y() - big_tempDw_->topcoor_ < -1e-6)
-							{
-								big_tempDw_->Black_hatch_point_.insert(boundaryPD_);
-							}
-							big_fields_.insert(big_tempDw_);
-
-						}
-						else
-						{
-
-							if (boundaryPD_.y() - big_tempDw_->bottomcoor_ > 1e-6&&boundaryPD_.y() - big_tempDw_->topcoor_ < -1e-6)
-							{
-								(*iter1)->Black_hatch_point_.insert(boundaryPD_);
-							}
-							delete big_tempDw_;
-
-						}
-					}
-					boundaryPD_ = *iterB;
-					if ((FieldType)(abs(x_id_ + cur_id_) % 2) == BLACK)
-					{
-						BField * big_tempUp_ = new BField(x_id_, cur_id_, k*thickness_);//new a big grid only has x and y information
-						std::set<BField*, compareBField>::iterator iter2 = big_fields_.find(big_tempUp_);
-						if (iter2 == big_fields_.end())//if has found  a big grid has exist
-						{
-							if (boundaryPD_.y() - big_tempUp_->bottomcoor_ > 1e-6&&boundaryPD_.y() - big_tempUp_->topcoor_ < -1e-6)
-							{
-								big_tempUp_->Black_hatch_point_.insert(boundaryPD_);
-							}
-							big_fields_.insert(big_tempUp_);
-
-						}
-						else/*(iter1 == big_fields_[k].end())*/
-						{
-							if (boundaryPD_.y() - big_tempUp_->bottomcoor_ > 1e-6&&boundaryPD_.y() - big_tempUp_->topcoor_ < -1e-6)
-							{
-								(*iter2)->Black_hatch_point_.insert(boundaryPD_);
-							}
-							delete big_tempUp_;
-						}
-					}
-
 					for (int y_id_ = last_id_; y_id_ <= cur_id_; y_id_++)
 					{
-						if ((FieldType)(abs(x_id_ + y_id_) % 2) == BLACK)
-						{
-							Vec3f low_point_(x_cur_, y_id_*field_height_ + field_overlap_, k*thickness_);
-							Vec3f high_point_(x_cur_, (y_id_ + 1)*field_height_ - field_overlap_, k*thickness_);
-							BField * big_temp_ = new BField(x_id_, y_id_, k*thickness_);//new a big grid only has x and y information
-
-							std::set<BField*, compareBField>::iterator iter3 = big_fields_.find(big_temp_);
-							if (iter3 == big_fields_.end())//if has found a big grid has exist
-							{
-								if (low_point_.y() - y_last_ > 1e-6 &&low_point_.y() - y_cur_ < -1e-6)
-								{
-									big_temp_->Black_hatch_point_.insert(low_point_);
-								}
-								if (high_point_.y() - y_last_ > 1e-6 &&high_point_.y() - y_cur_ < -1e-6)
-								{
-									big_temp_->Black_hatch_point_.insert(high_point_);
-								}
-								big_fields_.insert(big_temp_);
-
-							}
-							else/*(iter1 == big_fields_[k].end())*/
-							{
-								if (low_point_.y() - y_last_ > 1e-6 &&low_point_.y() - y_cur_ < -1e-6)
-								{
-									(*iter3)->Black_hatch_point_.insert(low_point_);
-								}
-								if (high_point_.y() - y_last_ > 1e-6 &&high_point_.y() - y_cur_ < -1e-6)
-								{
-									(*iter3)->Black_hatch_point_.insert(high_point_);
-								}
-								delete big_temp_;
-
-							}
-						}
+						Cubes::Box box_(x_id_, y_id_, i);
+						cubes_support_.insertToBox(box_);
 					}
 				}
 				else if (!atHeadPoint_)// ignore the small grid which has no crosspoint
 				{
 					iterB++;
-					if (iterB != hatch_point_black_.end()) { atHeadPoint_ = true; }
+					if (iterB != grid_points_.end()) { atHeadPoint_ = true; }
 				}
 			}
 
 
-
-
-
-
+			qDebug() << cubes_support_.boxes_.size();
 		}	
 	}
 }

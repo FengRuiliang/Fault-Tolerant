@@ -3,56 +3,13 @@
 #include "globalFunctions.h"
 #include "clipper.hpp"
 #include "Cubes.h"
+#include "Cutline.h"
 using namespace ClipperLib;
 class Mesh3D;
 class vector;
 class Field;
+class cutLine;
 #define DEFAULT_T 0.02f
-typedef trimesh::point point;
-typedef trimesh::vec3  Vec3f;
-typedef trimesh::vec4  Vec4f;
-struct comVec3fBlack
-{
-	bool operator ()(Vec3f a, Vec3f b)const
-	{
-
-
-		if (a.x() - b.x() < -5e-5) return true;//a.x < b.x
-		if (abs(a.x() - b.x()) < 5e-5) return (a.y() - b.y() < -5e-5);
-		return false;
-	}
-};
-class cutLine
-{
-public:
-	cutLine() {};
-	cutLine(point p1, point p2)
-	{
-		position_vert[0] = p1; position_vert[1] = p2;
-		sweep_point_ = p1;
-		sweep_point_Last_ = p1;
-	/*	edgeid_vert[0] = edge1; edgeid_vert[1] = edge2;*/
-	}
-	cutLine(point p1, point p2,int xID,int yID)
-	{
-		position_vert[0] = p1; position_vert[1] = p2;
-		x_field_ = xID;
-		y_field_ = yID;
-		/*	edgeid_vert[0] = edge1; edgeid_vert[1] = edge2;*/
-	}
-	~cutLine()
-	{}
-
-	point position_vert[2];
-	int edgeid_vert[2];
-
-public:
-	Vec3f sweep_point_;
-	Vec3f sweep_point_Last_;
-	int x_field_;
-	int y_field_;
-};
-
 
 class SliceCut
 {
@@ -87,7 +44,7 @@ public:
 	int GetNumPieces() { return num_pieces_; }
 	 std::vector<int> * storeMeshIntoSlice();
 	 std::vector<int>  *storage_Face_list_;
-
+	Cubes cubes_support_;
 	int  num_pieces_;
 	
 private:

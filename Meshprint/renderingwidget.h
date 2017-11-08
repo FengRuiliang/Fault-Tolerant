@@ -163,6 +163,7 @@ private:
 	void DrawGrid(bool bV);
 	void DrawCutPieces(bool bv);
 	void DrawCutPiecesSup(bool bv);
+	void drawCub(bool bv);
 	void DrawHatch(bool bv);
 	void DrawHatchsup(bool bv);
 public:

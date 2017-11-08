@@ -171,5 +171,8 @@
     <ClInclude Include="GeneratedFiles\ui_oepndialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="Cutline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

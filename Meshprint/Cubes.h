@@ -1,24 +1,18 @@
 #pragma once
-#include "HE_mesh/Vec.h"
-#include "HE_mesh/Mesh3D.h"
 #include "globalFunctions.h"
-#include "SliceCut.h"
+#include <vector>
+#include <set>
 class cutLine;
 class Cubes
 {
 public:
 	class Box;
-	Cubes();
-	Cubes(Mesh3D * mesh);
-
-	Cubes(std::vector<HE_face*>* faces);
-	~Cubes();
-	void insertArcToBox(std::vector<cutLine>* pieces_);
+	Cubes() {};
+	~Cubes() {};
 public:
 	void StoreBox();
-	Box* insertToBox(Vec3f pos, HE_face * facet=NULL);
 	Cubes::Box * insertToBox(Vec3f pos, cutLine ab);
-	
+	void insertToBox(Box box);
 	void setUnit(float param1, float p2, float p3) { unit_ = Vec3f(param1, p2, p3); }
 
 public:	struct sortBox
@@ -97,28 +91,22 @@ public:	struct sortBox
 	public:
 		Box();
 		Box(int x,int y, int z,Vec3f hei);
+		Box(int x, int y, int z);
 		void setCube(float x, float y, float z, float h);
 		Vec4f GetCoordinate();
-		std::vector<int> getID();
-		void insertF(HE_face * facet);
+		std::vector<int> getID() const;
 		void insertP(Vec3f point);
 	public:
-		~Box();
+		~Box() {};
 	private:
 		float xmin_, ymin_, zmin_,xlength,ywidth,zheight_;
 		int idX_, idY, idZ_;
 	public:
-		std::vector<HE_face*>* facets;
-		std::set<Vec3f,sortVec>* crosspoint;
 	};
-
+	std::set<Box, sortBox> boxes_;
 	std::set<Box, sortBox> GetBoxes() { return boxes_; }
-
 	Vec3f GetUnit() { return unit_; }
 private:
-	std::set<Box, sortBox> boxes_;
-	Vec3f unit_;
-	std::vector<HE_face*>* ptr_faces_;
-	Mesh3D* mesh_in_;
 	
+	Vec3f unit_;
 };

@@ -11,10 +11,8 @@
 #include <gl/glut.h>
 #include <algorithm>
 #include <queue>
-//#include "mainwindow.h"
 #include "ArcBall.h"
 #include "globalFunctions.h"
-//#include "HE_mesh/Mesh3D.h"
 #include "Support.h"
 #include "SliceCut.h"
 #include "openGLProjector.h"
@@ -28,8 +26,10 @@
 #include <omp.h>
 #include "MeshInfo.h"
 #include <QMessageBox>
+#include "Cubes.h"
 class Support;
-
+class Cubes;
+class Cubes::Box;
 RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	: QOpenGLWidget(parent), ptr_mainwindow_(mainwindow), eye_distance_(5.0),
 	has_lighting_(true), is_draw_point_(false), is_draw_edge_(false), is_draw_face_(true)
@@ -421,6 +421,7 @@ void RenderingWidget::Render()
 	DrawSupFaceZero(false);
 	DrawSupport(is_draw_support_);
 	DrawSegments(true);
+	drawCub(true);
 }
 
 void RenderingWidget::SetLight()
@@ -1651,6 +1652,7 @@ void RenderingWidget::DrawCutPieces(bool bv)
  
  	
  	}
+	return;
 	if (tc==NULL)
 	{
 		return;
@@ -1705,6 +1707,31 @@ void RenderingWidget::DrawCutPiecesSup(bool bv)
 	}
 }
 
+
+void RenderingWidget::drawCub(bool bv)
+{
+	if (mycut == NULL)
+		return;
+	std::set<Cubes::Box, Cubes::sortBox> box=mycut->cubes_support_.GetBoxes();
+	glColor4b(0, 150, 0, 150);
+	for (int i=slice_check_id_;i<slice_check_id_+1;i++)
+	{
+		glBegin(GL_QUADS);
+		for (auto iter=box.begin();iter!=box.end();iter++)
+		{
+			
+			if (iter->getID()[2]==i)
+			{
+				std::vector<int> id = iter->getID();
+				glVertex3f(id[0] * spot_size_, id[1] * spot_size_, i*thickness_);
+				glVertex3f((id[0]+1) * spot_size_, id[1] * spot_size_, i*thickness_);
+				glVertex3f((id[0]+1) * spot_size_, (id[1]+1) * spot_size_, i*thickness_);
+				glVertex3f(id[0] * spot_size_, (id[1]+1) * spot_size_, i*thickness_);
+			}
+		}
+		glEnd();
+	}
+}
 void RenderingWidget::DrawHatch(bool bv)
 {
 	if (!bv)
@@ -2312,6 +2339,7 @@ void RenderingWidget::cutinPieces()
 	mycut->storeMeshIntoSlice();
 	mycut->CutInPieces();
 	mycut->clipPolygon();
+	mycut->storeClipIntoCube();
 	//Export();
 	update();
 }

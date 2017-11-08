@@ -1,4 +1,5 @@
 #include "qmath.h"
+#include "globalFunctions.h"
 float field_width_ = 5.0;
 float field_height_ = 5.0;
 float line_width_ = 0.5;
@@ -26,3 +27,5 @@ float scaleT = 1.0;
 int sss = 0;
 int fildID = 0;
 float spot_size_ = 0.075;
+
+

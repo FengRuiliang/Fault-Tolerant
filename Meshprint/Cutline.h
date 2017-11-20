@@ -19,7 +19,7 @@ class CutPoint
 public:CutPoint(Vec3f a) { pos_ = a; };
 	   ~CutPoint() {};
 	   CutLine* setEdge(CutLine* e) { return pedge_ = e; }
-	   Vec3f getPosition() { return pos_; }
+	   Vec3f& getPosition() { return pos_; }
 private:
 	CutLine* pedge_{ NULL };
 	Vec3f pos_;

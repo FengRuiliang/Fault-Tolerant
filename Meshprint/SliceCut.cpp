@@ -30,7 +30,7 @@ std::vector<int> * SliceCut::storeMeshIntoSlice()
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	const std::vector<HE_vert *>& vertice = *(mesh_in_->get_vertex_list());
 	storage_Face_list_ = new std::vector<int>[num_pieces_];// new #2/thickness_
-	pieces_list_ = new std::vector<std::vector<cutLine>*>[num_pieces_];
+	pieces_list_ = new std::vector<std::vector<CutLine>*>[num_pieces_];
 	
 	//qDebug() << storage_Face_list_->size()<<2/thickness_+1;
 	for (auto iter_Face= faces.begin();iter_Face!= faces.end();iter_Face++ )
@@ -142,7 +142,7 @@ void SliceCut::CutInPieces()
 	
 		// find the longest edge which is been acrossed;
 		std::vector<HE_edge *> layer_hedge_;
-		std::vector<cutLine>* circle_list_;
+		std::vector<CutLine>* circle_list_;
 		for (auto iter = slice_faces_.begin(); iter != slice_faces_.end(); iter++)
 		{
 			//circle_list_ = new std::vector<cutLine>;//new a vector storage
@@ -164,7 +164,7 @@ void SliceCut::CutInPieces()
 			{
 				//if (circle_list_!=NULL)
 				{
-					circle_list_ = new std::vector<cutLine>;//new a vector storage
+					circle_list_ = new std::vector<CutLine>;//new a vector storage
 					pieces_list_[i].push_back(circle_list_);
 				}
 				
@@ -300,7 +300,7 @@ void SliceCut::CutInPieces()
 						{
 							continue;
 						}
- 						circle_list_->push_back(cutLine(pos1,pos2));
+ 						circle_list_->push_back(CutLine(pos1,pos2));
 					} while (cur_edge_->id() != longest_edge_->id() && cur_edge_ ->pface_!= NULL);
 				}
 			}
@@ -320,14 +320,14 @@ void SliceCut::clipPolygon()
 	{
 		//std::vector < std::vector<cutLine>*>*pieces_list_;
 
-		std::vector<std::vector<cutLine>*>& slice = pieces_list_[i];
-		std::vector<std::vector<cutLine>*>& slice_down_= pieces_list_[i-1];
+		std::vector<std::vector<CutLine>*>& slice = pieces_list_[i];
+		std::vector<std::vector<CutLine>*>& slice_down_= pieces_list_[i-1];
 		Paths sub(slice.size());
 		Paths clip(slice_down_.size());
 		Paths solution;
 		for (int j=0;j<slice.size();j++)
 		{
-			std::vector<cutLine>* loop = slice[j];
+			std::vector<CutLine>* loop = slice[j];
 			for (int k=0;k<loop->size();k++)
 			{
 				int x_ = loop->at(k).position_vert[0].x()*1e6;
@@ -337,7 +337,7 @@ void SliceCut::clipPolygon()
 		}
 		for (int j = 0; j < slice_down_.size(); j++)
 		{
-			std::vector<cutLine>* loop = slice_down_[j];
+			std::vector<CutLine>* loop = slice_down_[j];
 			for (int k = 0; k < loop->size(); k++)
 			{
 				int x_ = loop->at(k).position_vert[0].x()*1e6;

@@ -2,7 +2,7 @@
 #include "globalFunctions.h"
 #include <vector>
 #include <set>
-class cutLine;
+class CutLine;
 class Cubes
 {
 public:
@@ -11,7 +11,7 @@ public:
 	~Cubes() {};
 public:
 	void StoreBox();
-	Cubes::Box * insertToBox(Vec3f pos, cutLine ab);
+	Cubes::Box * insertToBox(Vec3f pos, CutLine ab);
 	void insertToBox(Box box);
 	void setUnit(float param1, float p2, float p3) { unit_ = Vec3f(param1, p2, p3); }
 

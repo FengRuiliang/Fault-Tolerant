@@ -8,7 +8,7 @@
 // Triangulation
 #include "triangle/triangle.h"
 using namespace ClipperLib;
-class cutLine;
+class CutLine;
 
 void MeshOctree::DeleteMeshOcTree()
 {

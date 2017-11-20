@@ -7,7 +7,7 @@
 class Cubes;
 class Cubes::Box;
 class Cubes::sortVec;
-class cutLine;
+class CutLine;
 #define ABS_FLOAT_0 1e-3
 
 typedef struct AlignAxisBoundingBox

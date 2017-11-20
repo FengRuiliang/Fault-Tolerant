@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="ArcBall.cpp" />
     <ClCompile Include="clipper.cpp" />
+    <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Cubes.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_MeshInfo.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -247,6 +248,7 @@
   <ItemGroup>
     <ClInclude Include="ArcBall.h" />
     <ClInclude Include="clipper.hpp" />
+    <ClInclude Include="Polygon.h" />
     <ClInclude Include="Cubes.h" />
     <ClInclude Include="Cutline.h" />
     <ClInclude Include="GeneratedFiles\ui_meshprint.h" />

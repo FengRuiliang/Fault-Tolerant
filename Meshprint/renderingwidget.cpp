@@ -653,10 +653,10 @@ void RenderingWidget::Export()
 		outBinary.writeRawData(ts[i], sizeof(char) * (ts[i].size()));
 	}
 	std::vector<Vec3f *>* tc = myhatch->getHatch();
-	std::vector < std::vector<cutLine>* >*tc2 = (mycut->GetPieces());
+	std::vector < std::vector<CutLine>* >*tc2 = (mycut->GetPieces());
 	std::vector < std::vector<Vec3f>>* tc3 = myhatch->getOffsetVertex(); 
 	std::vector<Vec3f *>* tc_s_hatch_ = NULL;
-	std::vector < std::vector<cutLine>* >* tc_s_pieces_=NULL;
+	std::vector < std::vector<CutLine>* >* tc_s_pieces_=NULL;
 	std::vector < std::vector<Vec3f>>* tc_s_offsetvertex_ = NULL;
 	if (mycutsup!=NULL)
 	{
@@ -1637,7 +1637,7 @@ void RenderingWidget::DrawCutPieces(bool bv)
 	{
 		return;
 	}
-	std::vector < std::vector<cutLine>* >*tc = (mycut->GetPieces());
+	std::vector < std::vector<CutLine>* >*tc = (mycut->GetPieces());
 	std::vector < std::vector<Vec3f>>* clip = mycut->GetClip();
  	glColor3f(0.0, 1.0, 0.0);
  	//for (int i = 0; i<mycut->num_pieces_; i++)
@@ -1689,7 +1689,7 @@ void RenderingWidget::DrawCutPiecesSup(bool bv)
 	{
 		return;
 	}
-	std::vector < std::vector<cutLine>* >*tc = (mycutsup->GetPieces());
+	std::vector < std::vector<CutLine>* >*tc = (mycutsup->GetPieces());
 	glColor3f(1.0, 0.0, 0.0);
 	//for (int i = 0; i<mycut->num_pieces_; i++)
 	if (slice_check_id_ >= mycutsup->GetNumPieces())

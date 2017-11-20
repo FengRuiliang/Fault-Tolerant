@@ -101,6 +101,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MeshInfo.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="meshprint.h">
@@ -172,6 +175,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Cutline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

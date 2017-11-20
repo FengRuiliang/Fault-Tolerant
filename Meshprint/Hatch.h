@@ -92,7 +92,7 @@ struct compareBField_y_
 
 struct compare_CUTLINE
 {
-	bool operator ()(cutLine* a, cutLine* b)
+	bool operator ()(CutLine* a, CutLine* b)
 	{
 		if (a->x_field_ < b->x_field_) return true;
 		if (a->x_field_ == b->x_field_) return (a->y_field_ < b->y_field_);
@@ -112,7 +112,7 @@ public:
 	float getThickness() { return thickness_; }
 public:
 	std::vector<Vec3f*>* hatch_;
-	std::vector <std::vector<cutLine>*>*boudary_edge_;
+	std::vector <std::vector<CutLine>*>*boudary_edge_;
 	std::vector < std::vector<Vec3f>>*offset_vert_;
 	int	num_pieces_;
 public:

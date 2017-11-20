@@ -8,7 +8,7 @@ using namespace ClipperLib;
 class Mesh3D;
 class vector;
 class Field;
-class cutLine;
+class CutLine;
 #define DEFAULT_T 0.02f
 
 class SliceCut
@@ -39,7 +39,7 @@ public:
 	void storeClipIntoCube();
 	void Exportslice();
 	float getThickness() { return thickness_; };
-	std::vector < std::vector<cutLine>* >* GetPieces(){ return pieces_list_; }
+	std::vector < std::vector<CutLine>* >* GetPieces(){ return pieces_list_; }
 	std::vector < std::vector<Vec3f>>* GetClip() { return clip_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	 std::vector<int> * storeMeshIntoSlice();
@@ -51,7 +51,7 @@ private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
 	
-	 std::vector < std::vector<cutLine>*>*pieces_list_;
+	 std::vector < std::vector<CutLine>*>*pieces_list_;
 	 std::vector < std::vector<Vec3f>>* clip_list_{NULL};
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
 	std::vector<int> sortVertInFace(int faceid);

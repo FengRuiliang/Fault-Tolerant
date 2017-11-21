@@ -10,18 +10,33 @@ public:
 	{
 		position_vert[0] = p1; position_vert[1] = p2;
 	}
+	CutLine(CutPoint* p1, CutPoint* p2)
+	{
+		cut_point_[0] = p1;
+		cut_point_[1] = p2;
+		position_vert[0] = p1->getPosition();
+		position_vert[1] = p2->getPosition();
+	}
 	~CutLine()
 	{}
 	Vec3f position_vert[2];
+	CutPoint* cut_point_[2];
+	CutLine* pnext_{NULL};
+	float angle_{0};
 };
 class CutPoint
 {
 public:CutPoint(Vec3f a) { pos_ = a; };
 	   ~CutPoint() {};
-	   CutLine* setEdge(CutLine* e) { return pedge_ = e; }
+	   CutLine* setInEdge(CutLine* e) { in_edges_.push_back(e); return e; }
+	   CutLine* setOutEdge(CutLine*e) { out_edges_.push_back(e); return e; }
 	   Vec3f& getPosition() { return pos_; }
+	   std::vector<CutLine*>& getInEdges() { return in_edges_; }
+	   std::vector<CutLine*>& getOutEdges() { return out_edges_; }
+	   int getEdgeSize() { return in_edges_.size() + out_edges_.size(); }
 private:
-	CutLine* pedge_{ NULL };
+	std::vector<CutLine*> in_edges_;
+	std::vector<CutLine*> out_edges_;
 	Vec3f pos_;
 };
 

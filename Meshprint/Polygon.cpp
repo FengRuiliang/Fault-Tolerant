@@ -2,6 +2,7 @@
 #include "Cutline.h"
 #include "HE_mesh/Vec.h"
 #include <algorithm>
+#include "clipper.hpp"
 typedef trimesh::vec3  Vec3f;
 
 Polygon::Polygon()
@@ -19,71 +20,75 @@ CutLine* Polygon::insertEdge(CutLine* e)
 
 CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 {
-	CutLine* e = new CutLine(a, b);
+	
 	CutPoint*   p1 = new CutPoint(a);
 	CutPoint*	p2 = new CutPoint(b);
-	points.push_back(p1);
-	points.push_back(p2);
+	auto pair1_ = points.insert(p1);
+	auto pair2_ = points.insert(p2);
+	CutLine* e = new CutLine(*pair1_.first, *pair2_.first);
+	(*pair1_.first)->setOutEdge(e);
+	(*pair2_.first)->setInEdge(e);
+	if (!pair1_.second)
+		delete p1;
+	if (!pair2_.second)
+		delete p2;
 	edges.push_back(e);
-	p1->setEdge(e);
-	p2->setEdge(e);
 }
 
 void Polygon::sweepPolygon()
 {
-	std::sort(points.begin(), points.end(), sortByX);
-	for (auto iterP = points.begin(); iterP != points.end();)
+	std::set<CutLine*> crossEdges;
+	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
-		std::set<HE_edge*, comHE>::iterator iter = segments.begin();
-		for (auto iterSEG = segments.begin(); iterSEG != segments.end();)
-		{
 
-			(*iterSEG)->is_selected_ = false;
-			Vec3f& rP_ = (*iterSEG)->pvert_->position().x() > (*iterSEG)->start_->position().x() ? (*iterSEG)->pvert_->position() : (*iterSEG)->start_->position();
-			Vec3f& lP_ = (*iterSEG)->pvert_->position().x() < (*iterSEG)->start_->position().x() ? (*iterSEG)->pvert_->position() : (*iterSEG)->start_->position();
-			if ((*iterP)->position().x() - rP_.x() > -1e-5)//É¾³ý??
-			{
-				iterSEG = segments.erase(iterSEG);
-			}
-			else
-			{
-				if ((rP_ - lP_).cross((*iterP)->position() - lP_).z() > 0)// is up the segment
-				{
-					iter = iterSEG;
-				}
-				iterSEG++;
-			}
+		if ((*iter)->getInEdges().size() == 1 && (*iter)->getOutEdges().size() == 1)
+		{
+			(*iter)->getInEdges()[0]->pnext_ = (*iter)->getOutEdges()[0];
 		}
-		(*iter)->is_selected_ = 1;
-		(*++iter)->is_selected_ = 1;
-		--iter;
-
-		Trapezoidal(iter, iterP);
-		if (sss == 110)
+		else if ((*iter)->getInEdges().size() > 0 && (*iter)->getOutEdges().size() > 0)
 		{
-			//break;
+			std::vector<CutLine*> lines;
+			for (auto iterIn = (*iter)->getInEdges().begin(); iterIn != (*iter)->getInEdges().end(); iterIn++)
+			{
+				(*iterIn)->angle_ = angleWithXAxis((*iterIn)->position_vert[0] - (*iterIn)->position_vert[1]);
+				lines.push_back(*iterIn);
+			}
+			for (auto iterOut = (*iter)->getOutEdges().begin(); iterOut != (*iter)->getOutEdges().end(); iterOut++)
+			{
+				(*iterOut)->angle_ = angleWithXAxis((*iterOut)->position_vert[0] - (*iterOut)->position_vert[1]);
+				lines.push_back(*iterOut);
+			}
+			std::sort(lines.begin(), lines.end(), sortByAngle);//ccw
 		}
 	}
-
-
 }
-bool Polygon::sortByX(CutPoint* a,CutPoint* b)
+
+inline float Polygon::angleWithXAxis(Vec3f dir)
 {
-	if (a->getPosition().x() - b->getPosition().x() < -1e-4)
+	if (dir.x == 0.0)
 	{
-		return true;
+		if (dir.y() > 0)
+		{
+			return 90;
+		}
+		else
+		{
+			return 270;
+		}
 	}
-	else if (a->getPosition().x() - b->getPosition().x() < 1e-4)
+	else if (dir.x() < 0)
 	{
-		if (a->getPosition().y() - b->getPosition().y() < -1e-4)
-		{
-			return true;
-		}
-		else if (a->getPosition().y() - b->getPosition().y() < 1e-4)
-		{
-			return a->getPosition().z() - b->getPosition().z() < -1e-4;
-		}
-		return false;
+		return atan(dir.y() / dir.x()) + 180;
 	}
-	return false;
+	else if (dir.y() < 0)
+	{
+		return atan(dir.y() / dir.x()) + 360;
+	}
+	else
+		return atan(dir.y() / dir.x());
+}
+
+bool Polygon::sortByAngle(CutLine* a, CutLine* b)
+{
+	return a->angle_ >b->angle_;
 }

@@ -167,7 +167,7 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 			std::vector<Vec3f> te;
 			for (int i=0;i<3;i++)
 			{
-				te.push_back(faces[i]->vertices_[i]->position());
+				te.push_back(faces[i]->vertices_[i]);
 			}
 			if (PointinTriangle(te,point_))
 			{
@@ -353,6 +353,7 @@ void RenderingWidget::setHatchType(int type_)
 
 //by Triangle Maintenancer
 //Reset Model View
+
 void RenderingWidget::ResetView() {
 
 	ptr_arcball_->InitBall();
@@ -503,15 +504,8 @@ void RenderingWidget::ReadMesh()
 	}
 	else if (fileinfo.suffix() == "stl" || fileinfo.suffix() == "STL")
 	{
-		ptr_mesh_->LoadFromSTLFile(byfilename.data());
+		ptr_mesh_->LoadFromSTLFileOnly3Point(byfilename.data());
 	}
-
-
-	//	m_pMesh->LoadFromOBJFile(filename.toLatin1().data());
-	//emit(operatorInfo(QString("Read Mesh from") + filename + QString(" Done")));
-	//emit(meshInfo(ptr_mesh_->num_of_vertex_list(), ptr_mesh_->num_of_edge_list(), ptr_mesh_->num_of_face_list()));
-
-
 	float max_ = ptr_mesh_->getBoundingBox().at(0).at(0);
 	max_ = max_ > ptr_mesh_->getBoundingBox().at(0).at(1) ? max_ : ptr_mesh_->getBoundingBox().at(0).at(1);
 	max_ = max_ > ptr_mesh_->getBoundingBox().at(0).at(2) ? max_ : ptr_mesh_->getBoundingBox().at(0).at(2);
@@ -683,8 +677,8 @@ void RenderingWidget::DrawEdge(bool bv)
 	{
 		for (int j=0;j<3;j++)
 		{
-			glVertex3fv(faces[i]->vertices_[j]->position());
-			glVertex3fv(faces[i]->vertices_[(j + 1) % 3]->position());
+			glVertex3fv(faces[i]->vertices_[j]);
+			glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
 		}
 	}
 	glEnd();
@@ -718,9 +712,9 @@ void RenderingWidget::DrawFace(bool bv)
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
 		glNormal3fv(faces.at(i)->normal());
-		glVertex3fv(faces[i]->vertices_[0]->position());
-		glVertex3fv(faces[i]->vertices_[1]->position());
-		glVertex3fv(faces[i]->vertices_[2]->position());
+		glVertex3fv(faces[i]->vertices_[0]);
+		glVertex3fv(faces[i]->vertices_[1]);
+		glVertex3fv(faces[i]->vertices_[2]);
 	}
 	glEnd();
 }
@@ -784,33 +778,9 @@ void RenderingWidget::DrawSlice(bool bv)
 {
 	if (!bv||ptr_slice_==NULL)
 		return;
-	//glLineWidth(1.0);
 	glColor3f(0.0, 1.0, 0.0);
-	std::map<float, std::vector<std::vector<cutLine>>> map_cut_ = ptr_slice_->getMapPieces();
-	auto layer_ = ptr_slice_->thickf_;
-	for (auto iterset = map_cut_.begin(); iterset != map_cut_.end(); iterset++)
-	{
-		std::vector<std::vector<cutLine>>& loops_ = iterset->second;
-		glBegin(GL_LINES);
-		for (int j = 0; j < loops_.size(); j++)
-		{
-			std::vector<cutLine>& one_loop_ = loops_[j];
-			for (int k=0;k<one_loop_.size();k++)
-			{
-				glVertex3fv(one_loop_[k].position_vert[0]);
-				glVertex3fv(one_loop_[k].position_vert[1]);
-			}
-		}
-		glEnd();
-	}
-	//return;
-
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
-	if (tc==NULL)
-	{
-		return;
-	}
-	for (int i = 0; i < ptr_slice_->num_pieces_; i++)
+	for (int i = slice_check_id_; i < slice_check_id_+1; i++)
 	{
 		glBegin(GL_LINES);
 		for (size_t j = 0; j < tc[i].size(); j++)
@@ -906,13 +876,10 @@ void RenderingWidget::DoSlice()
 		SafeDelete(ptr_slice_);
 	}
 	ptr_slice_ = new SliceCut(ptr_mesh_);
-//  	ptr_slice_->cutThrouthVertex();
-//  	return;
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();
-	fillPath();
 }
-void RenderingWidget::fillPath()
+void RenderingWidget::FillPath()
 {
 	if (ptr_mesh_->num_of_vertex_list() == 0)
 	{

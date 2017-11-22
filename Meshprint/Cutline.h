@@ -40,6 +40,8 @@ public:
 	CutPoint* cut_point_[2];
 	CutLine* pnext_{NULL};
 	float angle_{0};
+	bool visit{ false };
 };
+
 
 

@@ -68,7 +68,7 @@ public slots:
 	void CheckDrawTexture();
 	void CheckDrawAxes();
 	void DoSlice();
-	void fillPath();
+	void FillPath();
 	void setHatchType(int type_);
 	void setThickness(double t) { 
 		thickness_ = t; }

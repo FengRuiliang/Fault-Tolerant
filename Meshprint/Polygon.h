@@ -25,6 +25,7 @@ struct comPoints
 		return false;
 	}
 };
+
 bool sortByAngle(const CutLine* a, const CutLine* b)
 {
 	return a->angle_ > b->angle_;
@@ -42,5 +43,7 @@ private:
 	std::set<CutPoint*,comPoints> points;
 
 	float angleWithXAxis(Vec3f dir);
+public:
+	void storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_list_,int id);
 };
 

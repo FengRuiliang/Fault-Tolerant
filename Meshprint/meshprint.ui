@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1098</width>
-    <height>1016</height>
+    <width>1311</width>
+    <height>1012</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -775,8 +775,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1098</width>
-     <height>23</height>
+     <width>1311</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1114,7 +1114,7 @@
    <slots>
     <slot>cutinPieces()</slot>
     <slot>ReadMesh()</slot>
-    <slot>renderdoHatch()</slot>
+    <slot>DoSlice()</slot>
     <slot>CheckGrid()</slot>
     <slot>AutoSupport()</slot>
     <slot>DeleteSupport()</slot>
@@ -1273,7 +1273,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>102</x>
-     <y>163</y>
+     <y>235</y>
     </hint>
     <hint type="destinationlabel">
      <x>821</x>
@@ -1288,8 +1288,8 @@
    <slot>AddPointSupport()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>260</y>
+     <x>165</x>
+     <y>258</y>
     </hint>
     <hint type="destinationlabel">
      <x>550</x>
@@ -1368,8 +1368,8 @@
    <slot>SetSliceCheckId(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>250</x>
-     <y>883</y>
+     <x>260</x>
+     <y>881</y>
     </hint>
     <hint type="destinationlabel">
      <x>582</x>
@@ -1381,11 +1381,11 @@
    <sender>pushButton_XYScan_2</sender>
    <signal>clicked()</signal>
    <receiver>openGLWidget</receiver>
-   <slot>renderdoHatch()</slot>
+   <slot>DoSlice()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>817</y>
+     <x>243</x>
+     <y>815</y>
     </hint>
     <hint type="destinationlabel">
      <x>601</x>
@@ -1400,8 +1400,8 @@
    <slot>setHatchType(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>354</y>
+     <x>173</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>822</x>
@@ -1417,7 +1417,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>627</y>
+     <y>625</y>
     </hint>
     <hint type="destinationlabel">
      <x>599</x>
@@ -1433,7 +1433,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>655</y>
+     <y>653</y>
     </hint>
     <hint type="destinationlabel">
      <x>842</x>
@@ -1449,7 +1449,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>683</y>
+     <y>681</y>
     </hint>
     <hint type="destinationlabel">
      <x>515</x>
@@ -1465,7 +1465,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>711</y>
+     <y>709</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -1481,7 +1481,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>429</y>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
      <x>785</x>
@@ -1497,7 +1497,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>457</y>
+     <y>455</y>
     </hint>
     <hint type="destinationlabel">
      <x>781</x>
@@ -1513,7 +1513,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>739</y>
+     <y>737</y>
     </hint>
     <hint type="destinationlabel">
      <x>611</x>
@@ -1529,7 +1529,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>485</y>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>584</x>
@@ -1545,7 +1545,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>513</y>
+     <y>511</y>
     </hint>
     <hint type="destinationlabel">
      <x>722</x>
@@ -1561,7 +1561,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>767</y>
+     <y>765</y>
     </hint>
     <hint type="destinationlabel">
      <x>597</x>
@@ -1576,8 +1576,8 @@
    <slot>setThreshold(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>181</y>
+     <x>223</x>
+     <y>170</y>
     </hint>
     <hint type="destinationlabel">
      <x>442</x>
@@ -1592,8 +1592,8 @@
    <slot>setGap(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>185</y>
+     <x>223</x>
+     <y>198</y>
     </hint>
     <hint type="destinationlabel">
      <x>494</x>
@@ -1608,8 +1608,8 @@
    <slot>setSeglength(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>188</y>
+     <x>223</x>
+     <y>226</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -1624,8 +1624,8 @@
    <slot>setReso(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>192</y>
+     <x>223</x>
+     <y>255</y>
     </hint>
     <hint type="destinationlabel">
      <x>618</x>
@@ -1640,8 +1640,8 @@
    <slot>setVerticalgap(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>195</y>
+     <x>223</x>
+     <y>283</y>
     </hint>
     <hint type="destinationlabel">
      <x>599</x>
@@ -1657,7 +1657,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>102</x>
-     <y>169</y>
+     <y>291</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -1688,8 +1688,8 @@
    <slot>CheckRegion(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
-     <y>933</y>
+     <x>193</x>
+     <y>931</y>
     </hint>
     <hint type="destinationlabel">
      <x>461</x>
@@ -1704,8 +1704,8 @@
    <slot>CheckSupport(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>131</x>
-     <y>955</y>
+     <x>141</x>
+     <y>953</y>
     </hint>
     <hint type="destinationlabel">
      <x>797</x>
@@ -1721,7 +1721,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>328</x>
-     <y>910</y>
+     <y>908</y>
     </hint>
     <hint type="destinationlabel">
      <x>791</x>
@@ -1737,7 +1737,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>314</x>
-     <y>173</y>
+     <y>171</y>
     </hint>
     <hint type="destinationlabel">
      <x>810</x>
@@ -1753,7 +1753,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>314</x>
-     <y>201</y>
+     <y>199</y>
     </hint>
     <hint type="destinationlabel">
      <x>819</x>
@@ -1768,8 +1768,8 @@
    <slot>setLineD(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>181</y>
+     <x>223</x>
+     <y>170</y>
     </hint>
     <hint type="destinationlabel">
      <x>839</x>
@@ -1784,8 +1784,8 @@
    <slot>setLineH(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>185</y>
+     <x>223</x>
+     <y>198</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -1800,8 +1800,8 @@
    <slot>FindRegion()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>231</y>
+     <x>165</x>
+     <y>229</y>
     </hint>
     <hint type="destinationlabel">
      <x>865</x>
@@ -1817,7 +1817,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>102</x>
-     <y>159</y>
+     <y>206</y>
     </hint>
     <hint type="destinationlabel">
      <x>824</x>
@@ -1849,7 +1849,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>237</x>
-     <y>98</y>
+     <y>96</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -1865,7 +1865,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>100</y>
+     <y>98</y>
     </hint>
     <hint type="destinationlabel">
      <x>544</x>
@@ -1880,8 +1880,8 @@
    <slot>SetAllHatch(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>68</x>
-     <y>977</y>
+     <x>78</x>
+     <y>975</y>
     </hint>
     <hint type="destinationlabel">
      <x>407</x>
@@ -1897,7 +1897,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>328</x>
-     <y>854</y>
+     <y>852</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -1913,7 +1913,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>318</x>
-     <y>599</y>
+     <y>597</y>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
@@ -1950,6 +1950,22 @@
     <hint type="destinationlabel">
      <x>712</x>
      <y>525</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>SetSliceCheckId(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>842</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>565</x>
+     <y>962</y>
     </hint>
    </hints>
   </connection>

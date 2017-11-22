@@ -12,6 +12,15 @@ Polygon::Polygon()
 
 Polygon::~Polygon()
 {
+	for (auto iter=edges.begin();iter!=edges.end();iter++)
+	{
+		delete *iter;
+	}
+	for (auto iter=points.begin();iter!=points.end();iter++)
+	{
+		delete *iter;
+	}
+
 }
 CutLine* Polygon::insertEdge(CutLine* e)
 {
@@ -39,7 +48,6 @@ CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 
 void Polygon::sweepPolygon()
 {
-	std::set<CutLine*> crossEdges;
 	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
 
@@ -108,5 +116,25 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 	}
 	else
 		return atan(dir.y() / dir.x());
+}
+
+void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_list_, int id)
+{
+	for (int i=0;i<edges.size();i++)
+	{
+		if (!edges[i]->visit)
+		{
+			std::vector<std::pair<Vec3f, Vec3f>> circle_;
+			CutLine* sta = edges[i];
+			CutLine* cur = sta;
+			do 
+			{
+				cur->visit = true;
+				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
+				cur = cur->pnext_;
+			} while (cur!=NULL&&cur!=sta);
+			pieces_list_[i].push_back(circle_);
+		}
+	}
 }
 

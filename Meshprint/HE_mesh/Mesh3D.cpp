@@ -597,7 +597,6 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 				{
 
 					InsertFace(s_faceid)/*->normal_=normal*/;
-					num_facet++;
 				}
 				s_faceid.clear();
 			}

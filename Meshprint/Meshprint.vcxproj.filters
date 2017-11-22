@@ -62,9 +62,6 @@
     <ClCompile Include="clipper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cubes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="globalFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,29 +74,14 @@
     <ClCompile Include="SliceCut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="space2dKDTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Support.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HE_mesh\Mesh3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="triangle\triangle.cpp">
+    <ClCompile Include="Sweepline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MeshInfo.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MeshInfo.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Polygon.cpp">
       <Filter>Source Files</Filter>
@@ -118,12 +100,6 @@
     <CustomBuild Include="renderingwidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="oepndialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MeshInfo.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_meshprint.h">
@@ -133,9 +109,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="clipper.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cubes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="globalFunctions.h">
@@ -153,32 +126,26 @@
     <ClInclude Include="SliceCut.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="space2dKDTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Support.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HE_mesh\Mesh3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HE_mesh\Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="triangle\triangle.h">
+    <ClInclude Include="Sweepline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cutline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_oepndialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cutline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

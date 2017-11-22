@@ -9,26 +9,6 @@ using namespace ClipperLib;
 class QLine;
 class cutLine;
 // extern float offset_dis_;
-struct comVec3fBlack
-{
-	bool operator ()(Vec3f a, Vec3f b)const
-	{
-		if (a.x() - b.x() < -5e-5) return true;//a.x < b.x
-		if (abs(a.x() - b.x()) < 5e-5) return (a.y() - b.y() < -5e-5);
-		return false;
-	}
-};
-struct comVec3fWhite
-{
-	bool operator ()(Vec3f a, Vec3f b)const
-	{
-		if (a.y() - b.y() < -5e-5) return true;//a.x < b.x
-		if (abs(a.y() - b.y()) < 5e-5) return (a.x() - b.x() < -5e-5);
-		return false;
-	}
-};
-//extern enum hatchType;
-//static float getthickness() { return HatchChessboard::getThickness(); }
 enum FieldType
 {
 	WHITE = 0,

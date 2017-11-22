@@ -22,7 +22,7 @@ SliceCut::~SliceCut()
 	clearcut();
 	pieces_list_ = NULL;
 	storage_Face_list_ = NULL;
-	clip_list_ = NULL;
+// 	clip_list_ = NULL;
 }
 
 std::vector<int> * SliceCut::StoreFaceIntoSlice()
@@ -32,7 +32,6 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	const std::vector<HE_vert *>& vertice = *(mesh_in_->get_vertex_list());
 	storage_Face_list_ = new std::vector<int>[num_pieces_];// new #2/thickness_
-	pieces_list_ = new std::vector<std::vector<CutLine>*>[num_pieces_];
 	
 	//qDebug() << storage_Face_list_->size()<<2/thickness_+1;
 	for (auto iter_Face= faces.begin();iter_Face!= faces.end();iter_Face++ )
@@ -534,7 +533,6 @@ std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* SliceCut::GetPieces()
 	
 	 return pieces_list_; 
 }
-
 
 HE_edge* SliceCut::InsertEdgeBySweep(HE_vert* vstart, HE_vert* vend)
 {

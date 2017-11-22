@@ -1,5 +1,6 @@
 #pragma once
 #include "HE_mesh/Vec.h"
+#include <vector>
 typedef trimesh::vec3  Vec3f;
 class CutLine;
 class CutPoint

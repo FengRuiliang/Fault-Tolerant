@@ -3,6 +3,7 @@
 #include "globalFunctions.h"
 #include "clipper.hpp"
 #include "Sweepline.h"
+#include "Cutline.h"
 class Mesh3D;
 class vector;
 class Field;
@@ -66,7 +67,7 @@ public:
 		}
 	};
 
-	void ClearSlice();
+	void clearcut();
 	std::vector<int> sortVertInFace(int faceid);
 	void CutInPieces();
 

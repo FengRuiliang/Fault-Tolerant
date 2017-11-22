@@ -86,6 +86,21 @@
     <ClCompile Include="Polygon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="maintenance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_maintenance.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_maintenance.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="MSAABB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleglobalFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="meshprint.h">
@@ -99,6 +114,12 @@
     </CustomBuild>
     <CustomBuild Include="renderingwidget.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="maintenance.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="maintenance.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +163,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Polygon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_maintenance.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MSAABB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleglobalFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

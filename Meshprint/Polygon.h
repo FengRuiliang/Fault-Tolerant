@@ -25,7 +25,10 @@ struct comPoints
 		return false;
 	}
 };
-
+bool sortByAngle(const CutLine* a, const CutLine* b)
+{
+	return a->angle_ > b->angle_;
+}
 class Polygon
 {
 public:
@@ -39,6 +42,5 @@ private:
 	std::set<CutPoint*,comPoints> points;
 
 	float angleWithXAxis(Vec3f dir);
-	bool sortByAngle(CutLine * a, CutLine * b);
 };
 

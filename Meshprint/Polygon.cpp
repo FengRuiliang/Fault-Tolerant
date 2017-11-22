@@ -16,6 +16,7 @@ Polygon::~Polygon()
 CutLine* Polygon::insertEdge(CutLine* e)
 {
 	edges.push_back(e);
+	return e;
 }
 
 CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
@@ -33,6 +34,7 @@ CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 	if (!pair2_.second)
 		delete p2;
 	edges.push_back(e);
+	return e;
 }
 
 void Polygon::sweepPolygon()
@@ -59,13 +61,33 @@ void Polygon::sweepPolygon()
 				lines.push_back(*iterOut);
 			}
 			std::sort(lines.begin(), lines.end(), sortByAngle);//ccw
+			while (lines.size()>1)
+			{
+				int count = lines.size();
+				while (count > 0 &&
+					(lines.back()->cut_point_[1] != *iter ||
+						lines[lines.size() - 1]->cut_point_[0] != *iter))
+				{
+					lines.insert(lines.begin(), lines.back());
+					lines.pop_back();
+					count--;
+				}
+				if (count!=0)
+				{
+					CutLine* in_ = lines.back();
+					lines.pop_back();
+					in_->pnext_ = lines.back();
+					lines.pop_back();
+				}
+				
+			}			
 		}
 	}
 }
 
 inline float Polygon::angleWithXAxis(Vec3f dir)
 {
-	if (dir.x == 0.0)
+	if (dir.x() == 0.0)
 	{
 		if (dir.y() > 0)
 		{
@@ -88,7 +110,3 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 		return atan(dir.y() / dir.x());
 }
 
-bool Polygon::sortByAngle(CutLine* a, CutLine* b)
-{
-	return a->angle_ >b->angle_;
-}

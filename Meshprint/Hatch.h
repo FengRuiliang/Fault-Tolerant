@@ -90,15 +90,6 @@ struct compareBField_y_
 	}
 };
 
-struct compare_CUTLINE
-{
-	bool operator ()(CutLine* a, CutLine* b)
-	{
-		if (a->x_field_ < b->x_field_) return true;
-		if (a->x_field_ == b->x_field_) return (a->y_field_ < b->y_field_);
-		return false;
-	}
-};
 
 class Hatch
 {

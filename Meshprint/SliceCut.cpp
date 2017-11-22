@@ -467,3 +467,9 @@ void SliceCut::storeClipIntoCube()
 		}	
 	}
 }
+
+
+void SliceCut::cutFaces()
+{
+	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
+}

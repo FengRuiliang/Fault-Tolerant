@@ -37,7 +37,7 @@ public:
 	void CutInPieces();
 	void clipPolygon();
 	void storeClipIntoCube();
-	void Exportslice();
+	void cutFaces();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<CutLine>* >* GetPieces(){ return pieces_list_; }
 	std::vector < std::vector<Vec3f>>* GetClip() { return clip_list_; }

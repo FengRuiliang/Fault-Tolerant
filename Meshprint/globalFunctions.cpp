@@ -1,5 +1,6 @@
 #include "qmath.h"
 #include "globalFunctions.h"
+
 float field_width_ = 5.0;
 float field_height_ = 5.0;
 float line_width_ = 0.5;
@@ -26,6 +27,9 @@ float scaleV = 1.0;
 float scaleT = 1.0;
 int sss = 0;
 int fildID = 0;
+
+
+
 //////////////////////////////////////////////////////////////////////////
 bool PointinTriangle(std::vector<Vec3f> verts, Vec3f point_in)
 {

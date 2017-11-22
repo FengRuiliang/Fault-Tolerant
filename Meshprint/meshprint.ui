@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1265</width>
+    <width>1098</width>
     <height>1016</height>
    </rect>
   </property>
@@ -760,7 +760,11 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="RenderingWidget" name="openGLWidget"/>
+       <widget class="RenderingWidget" name="openGLWidget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -771,7 +775,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1265</width>
+     <width>1098</width>
      <height>23</height>
     </rect>
    </property>
@@ -875,6 +879,7 @@
    <addaction name="actionTranslate_Model"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
+   <addaction name="actionMaintenance"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -1087,6 +1092,18 @@
     <string>aLight</string>
    </property>
   </action>
+  <action name="actionMaintenance">
+   <property name="icon">
+    <iconset resource="meshprint.qrc">
+     <normaloff>:/Meshprint/Resources/images/Maintenance.png</normaloff>:/Meshprint/Resources/images/Maintenance.png</iconset>
+   </property>
+   <property name="text">
+    <string>Maintenance</string>
+   </property>
+   <property name="toolTip">
+    <string>Maintenance</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1095,11 +1112,20 @@
    <extends>QOpenGLWidget</extends>
    <header location="global">renderingwidget.h</header>
    <slots>
+    <slot>cutinPieces()</slot>
     <slot>ReadMesh()</slot>
+    <slot>renderdoHatch()</slot>
     <slot>CheckGrid()</slot>
+    <slot>AutoSupport()</slot>
+    <slot>DeleteSupport()</slot>
     <slot>CheckDrawEdge()</slot>
     <slot>CheckDrawFace()</slot>
+    <slot>AddLineSupport()</slot>
+    <slot>AddPointSupport()</slot>
     <slot>SetBackground()</slot>
+    <slot>SelectFace()</slot>
+    <slot>SetDirection()</slot>
+    <slot>Export()</slot>
     <slot>WriteMesh()</slot>
     <slot>setLaserPower(int)</slot>
     <slot>setLaserSpeed(int)</slot>
@@ -1134,7 +1160,8 @@
     <slot>SclaleModel()</slot>
     <slot>SetAllHatch(bool)</slot>
     <slot>SetSliceCheckIdText(int)</slot>
-    <slot>DoSlice()</slot>
+    <slot>ResetView()</slot>
+    <slot>ApplyMaintenance()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -1354,7 +1381,7 @@
    <sender>pushButton_XYScan_2</sender>
    <signal>clicked()</signal>
    <receiver>openGLWidget</receiver>
-   <slot>DoSlice()</slot>
+   <slot>renderdoHatch()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>232</x>
@@ -1895,18 +1922,34 @@
    </hints>
   </connection>
   <connection>
-   <sender>spinBox</sender>
-   <signal>valueChanged(int)</signal>
+   <sender>actionMaintenance</sender>
+   <signal>triggered()</signal>
    <receiver>openGLWidget</receiver>
-   <slot>SetSliceCheckId(int)</slot>
+   <slot>ApplyMaintenance()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>202</x>
-     <y>844</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>464</x>
-     <y>964</y>
+     <x>712</x>
+     <y>523</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionIsometric_View</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>ResetView()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>712</x>
+     <y>525</y>
     </hint>
    </hints>
   </connection>

@@ -3,6 +3,7 @@
 #include "HE_mesh/Vec.h"
 #include <vector>
 #include "HE_mesh/Mesh3D.h"
+
 #define SWAP(a,b,T) {T tmp=(a); (a)=(b); (b)=tmp;}
 #define min(a,b) a<b?a:b
 #define max(a,b) a>b?a:b

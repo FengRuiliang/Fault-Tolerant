@@ -4,7 +4,9 @@
 #include <map>
 #include "Vec.h"
 #include <set>
+#include "Triangle.h"
 
+#define PARTTABLENUM 32
 // forward declarations of mesh classes
 class HE_vert;
 class HE_edge;
@@ -268,6 +270,12 @@ private:
 	std::vector<int> wro_Nor_facets_;
 
 public:
+	std::vector<Triangle> Tria; //用来判断三角面的位置关系
+	std::vector<Triangle> Tri; //用来判断三角面的位置关系
+
+	std::vector<Triangle *> partitionTable_Z[PARTTABLENUM]; //分区检测Z轴
+
+public:
 	//! associate two end vertex with its edge: only useful in creating mesh
 	std::map<std::pair<HE_vert*, HE_vert* >, HE_edge* >    edgemap_;
 
@@ -375,6 +383,39 @@ HE_face* InsertFace(std::vector<HE_vert*> vec_hv, Vec3f normal_read_);
 	void WriteToOBJFile(const char* fouts);
 
 	bool LoadFromSTLFile(const char * fins);
+
+	//by Triangle Maintenancer
+
+	//银行家舍入法,在加载数据文件时
+	float getRound(float num);
+
+	//检测三角面是否相交
+	void TriangleIntersect();
+
+	//转录面片到Tria
+	void transcriptionFaces(void);
+
+	//自动修复三角面片的相交
+	bool Maintenance();
+
+	//擦除标记
+	void ClearMark();
+
+	//Tria转到Tri 为了使标记相交button有效
+	void TriaToTri();
+
+	//新增三角面片,以连接点的方式
+	void CreateTriangle();
+
+	//修复孔洞
+	void RepairHole();
+
+
+	//计算bloop (只是将bhelist中的边分一下类，edge之间没有关系)
+	void setBloopFromBhelist();
+
+	//DFS的方式，为每个面打上com_flag的标记，区分不同阵营
+	void VertexDFS(HE_vert * v);
 
 	//! update mesh:
 	/*! 

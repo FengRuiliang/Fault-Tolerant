@@ -19,14 +19,22 @@ typedef std::pair<HE_vert*, HE_vert* > PAIR_VERTEX;
 
 SliceCut::~SliceCut()
 {
-	ClearSlice();
+	clearcut();
+	pieces_list_ = NULL;
+	storage_Face_list_ = NULL;
+	clip_list_ = NULL;
 }
 
 std::vector<int> * SliceCut::StoreFaceIntoSlice()
 {
+
+	//qDebug() << mesh_in_->get_faces_list()->size();
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
+	const std::vector<HE_vert *>& vertice = *(mesh_in_->get_vertex_list());
 	storage_Face_list_ = new std::vector<int>[num_pieces_];// new #2/thickness_
+	pieces_list_ = new std::vector<std::vector<CutLine>*>[num_pieces_];
 	
+	//qDebug() << storage_Face_list_->size()<<2/thickness_+1;
 	for (auto iter_Face= faces.begin();iter_Face!= faces.end();iter_Face++ )
 	{
 		double max_height = MIN_FLOAT_VALUE;
@@ -44,6 +52,7 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 		//the num of layer equal to 
 		for (int j= min_height / thickness_+1;j<=max_height / thickness_;j++)
 		{
+			
 			storage_Face_list_[j].push_back((*iter_Face)->id());
 		}
 	}
@@ -79,7 +88,7 @@ HE_edge* SliceCut::getLeftEdge(HE_face* face_,float height_)
 	return NULL;
 }
 
-void SliceCut:: ClearSlice()
+void SliceCut:: clearcut()
 {
 	if (pieces_list_==NULL)
 	{

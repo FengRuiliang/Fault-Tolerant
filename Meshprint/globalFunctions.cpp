@@ -2,7 +2,7 @@
 #include "globalFunctions.h"
 float field_width_ = 5.0;
 float field_height_ = 5.0;
-float line_width_ = 0.150;
+float line_width_ = 0.5;
 float field_overlap_ = 0.09;
 float unit = 0.01;
 int units_y_ = field_height_ / line_width_;
@@ -44,13 +44,6 @@ bool PointinTriangle(std::vector<Vec3f> verts, Vec3f point_in)
 	float dot11 = v1.dot(v1);
 	float dot12 = v1.dot(v2);
 
-	float inverDeno = 1 / (dot00 * dot11 - dot01 * dot01);
-
-	float u = (dot11 * dot02 - dot01 * dot12) * inverDeno;
-	if (u < 0 || u > 1) // if u out of range, return directly
-	{
-		return false;
-	}
 
 	float v = (dot00 * dot12 - dot01 * dot02) * inverDeno;
 	if (v < 0 || v > 1) // if v out of range, return directly

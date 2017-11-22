@@ -1,3 +1,4 @@
+
 *.txt
 Meshprint/GeneratedFiles/
 Meshprint/Resources/models/
@@ -259,4 +260,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
-*.filters
+/Meshprint/stl_mental_db
+/Meshprint/Resources/stl_mental_db
+/Meshprint/Resources/models

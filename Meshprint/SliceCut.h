@@ -8,9 +8,6 @@ class vector;
 class Field;
 class SweepLine;
 #define DEFAULT_T 0.02f
-typedef trimesh::point point;
-typedef trimesh::vec3  Vec3f;
-typedef trimesh::vec4  Vec4f;
 
 class cutLine
 {
@@ -56,6 +53,7 @@ public:
 		{
 		//thickness_=0.5;//层厚
 		num_pieces_= mesh_in_->getBoundingBox().at(0).at(2) /thickness_+1;//层数
+		
 		storage_Face_list_ = NULL;// new #2/thickness_三角面片分层
 		pieces_list_ = NULL;//层的链表
 	};

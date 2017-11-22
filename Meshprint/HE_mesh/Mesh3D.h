@@ -176,10 +176,15 @@ public:
 	point center() 
 	{
 		point center;
-		for (int i=0;i<3;i++)
+		HE_edge* pedge = pedge_;
+
+		do 
 		{
-			center += vertices_[i];
-		}
+			center += pedge->pvert_->position();
+			pedge = pedge->pnext_;
+
+		} while (pedge != pedge_);
+
 		center /= 3.0;
 		return center;		
 	}
@@ -541,4 +546,5 @@ public:
 	void MarkEdge();
 	void sweepToBuildMesh();
 	std::vector<HE_edge*>* GetBhelist() { return bheList; }
+	void markEdges();
 };

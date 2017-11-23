@@ -18,6 +18,21 @@ struct comPoints
 		return false;
 	}
 };
+struct comPointsLarge
+{
+	bool  operator ()(CutPoint* a, CutPoint* b)const
+	{
+		if (a->getPosition().x() - b->getPosition().x() < -5*LIMIT)
+		{
+			return true;
+		}
+		else if (a->getPosition().x() - b->getPosition().x() < 5*LIMIT)
+		{
+			return a->getPosition().y() - b->getPosition().y() < -5*LIMIT;
+		}
+		return false;
+	}
+};
 
 class Polygon
 {

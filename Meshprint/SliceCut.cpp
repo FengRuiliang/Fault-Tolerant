@@ -163,10 +163,7 @@ void SliceCut::CutInPieces()
 			//circle_.push_back(t);
 		}
 		//pieces_list_[i].push_back(circle_);
-		qDebug() << i << slice_faces_.size()
-			<< polygon_.num_of_edges()
-			<< polygon_.num_of_points()
-			<< polygon_.sweepPolygon();
+		polygon_.sweepPolygon();
 		polygon_.storePathToPieces(pieces_list_, i);
 	}
 }
@@ -333,6 +330,10 @@ std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 				(e_[2]->pnext_->pnext_->position_vert[1] - e_[2]->pnext_->pnext_->position_vert[0]).z()*
 				(e_[2]->pnext_->pnext_->position_vert[1] - e_[2]->pnext_->pnext_->position_vert[0]);
 		}
+	}
+	for (int i=0;i<3;i++)
+	{
+		delete e_[i];
 	}
 	return std::pair<Vec3f, Vec3f>(pos1, pos2);
 }

@@ -56,6 +56,7 @@ CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 
 int Polygon::sweepPolygon()
 {
+	std::set<CutPoint*, comPointsLarge> tempPoints;
 	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
 
@@ -100,20 +101,29 @@ int Polygon::sweepPolygon()
 		}
 		else
 		{
-			qDebug()<<(*iter)->getPosition().x()<< (*iter)->getPosition().y();
+
+			//qDebug()<<(*iter)->getPosition().x()<< (*iter)->getPosition().y();
+			auto iterTem=tempPoints.insert(*iter);
+			if (!iterTem.second)
+			{
+				(*iterTem.first)->getInEdges().insert((*iterTem.first)->getInEdges().end(),
+					(*iter)->getInEdges().begin(), (*iter)->getInEdges().end());
+				(*iterTem.first)->getOutEdges().insert((*iterTem.first)->getOutEdges().end(),
+					(*iter)->getOutEdges().begin(), (*iter)->getOutEdges().end());
+			}
 		}
 			
 	}
-	int sum = 0;
-	for (auto iter=edges.begin();iter!=edges.end();iter++)
+	for (auto iter=tempPoints.begin();iter!=tempPoints.end();iter++)
 	{
-
-		if ((*iter)->pnext_==NULL)
+		if ((*iter)->getInEdges().size() == 1 && (*iter)->getOutEdges().size() == 1)
 		{
-			sum++;
+			(*iter)->getInEdges()[0]->pnext_ = (*iter)->getOutEdges()[0];
 		}
+		else
+			qDebug() << "connect chains wrong";
 	}
-	return sum;
+	return 0;
 }
 
 inline float Polygon::angleWithXAxis(Vec3f dir)
@@ -159,5 +169,6 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 			pieces_list_[id].push_back(circle_);
 		}
 	}
+	qDebug() << id << pieces_list_[id].size();
 }
 

@@ -658,18 +658,6 @@ void RenderingWidget::DrawEdge(bool bv)
 		return;
 	}
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
-	const std::vector<HE_edge*>& edges = *(ptr_mesh_->get_edges_list());
-	//////////////////////////////////////////////////////////////////////////
-	//add at 26/10/2017 
-	glBegin(GL_LINES);
-	glColor4ub(0, 0, 0, 255);
-	for (int i=0;i<edges.size();i++)
-	{
-		glVertex3fv(edges[i]->start_->position());
-		glVertex3fv(edges[i]->pvert_->position());
-	}
-	glEnd();
-	return;
 	//////////////////////////////////////////////////////////////////////////
 	glBegin(GL_LINES);
 	glColor4ub(0, 0, 0, 255);

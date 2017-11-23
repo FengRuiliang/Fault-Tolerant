@@ -6,7 +6,7 @@
 #include "globalFunctions.h"
 class Event;
 class Segment;
-class cutLine;
+class CutLine;
 struct Event
 {
 	int			is_fir_;          // event type: BEGIN or END vertex
@@ -96,9 +96,9 @@ class SweepLine
 {
 public:
 	SweepLine() {};
-	SweepLine(std::vector<cutLine> P);
+	SweepLine(std::vector<CutLine> P);
 	~SweepLine() ;
-	void getContuor(std::map<float, std::vector<std::vector<cutLine>>>& layer_edge_);
+	void getContuor(std::map<float, std::vector<std::vector<CutLine>>>& layer_edge_);
 private:
 	std::vector<Event*>		que_event_;
 	std::vector<Segment*>	qsegment_;

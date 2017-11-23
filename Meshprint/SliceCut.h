@@ -10,38 +10,6 @@ class Field;
 class SweepLine;
 #define DEFAULT_T 0.02f
 
-class cutLine
-{
-public:
-	cutLine() {};
-	cutLine(point p1, point p2)
-	{
-		position_vert[0] = p1; position_vert[1] = p2;
-		sweep_point_ = p1;
-		sweep_point_Last_ = p1;
-		next_line_ = NULL;
-	/*	edgeid_vert[0] = edge1; edgeid_vert[1] = edge2;*/
-	}
-	cutLine(point p1, point p2,int xID,int yID)
-	{
-		position_vert[0] = p1; position_vert[1] = p2;
-		x_field_ = xID;
-		y_field_ = yID;
-		/*	edgeid_vert[0] = edge1; edgeid_vert[1] = edge2;*/
-	}
-	~cutLine()
-	{}
-
-	point position_vert[2];
-	int edgeid_vert[2];
-
-public:
-	Vec3f sweep_point_;
-	Vec3f sweep_point_Last_;
-	cutLine* next_line_;
-	int x_field_;
-	int y_field_;
-};
 
 
 
@@ -81,7 +49,7 @@ public:
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();
 	HE_edge * InsertEdgeBySweep(HE_vert * vstart, HE_vert * vend);
-	std::map<float, std::vector<std::vector<cutLine>>> getMapPieces() { return cut_list_; }
+	std::map<float, std::vector<std::vector<CutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	std::vector<int> * StoreFaceIntoSlice();
 	std::vector<int>  *storage_Face_list_;
@@ -93,7 +61,7 @@ private:
 	Mesh3D* mesh_in_;
 	/* std::vector<cutLine>* circle_list_;*/
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>>>* pieces_list_;
-	std::map<float, std::vector<std::vector<cutLine>>> cut_list_;
+	std::map<float, std::vector<std::vector<CutLine>>> cut_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
 	HE_edge*  getLeftEdge(HE_face* face_, float height_);
 };

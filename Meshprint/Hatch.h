@@ -7,7 +7,7 @@
 #include "clipper.hpp"
 using namespace ClipperLib;
 class QLine;
-class cutLine;
+class CutLine;
 // extern float offset_dis_;
 enum FieldType
 {
@@ -86,15 +86,6 @@ struct compareBField_y_
 	}
 };
 
-struct compare_CUTLINE
-{
-	bool operator ()(cutLine* a, cutLine* b)
-	{
-		if (a->x_field_ < b->x_field_) return true;
-		if (a->x_field_ == b->x_field_) return (a->y_field_ < b->y_field_);
-		return false;
-	}
-};
 
 class Hatch 
 {

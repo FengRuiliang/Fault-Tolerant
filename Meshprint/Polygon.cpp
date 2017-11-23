@@ -3,7 +3,12 @@
 #include "HE_mesh/Vec.h"
 #include <algorithm>
 #include "clipper.hpp"
+#include "QDebug"
 typedef trimesh::vec3  Vec3f;
+static bool sortByAngle(const CutLine* a, const CutLine* b)
+{
+	return a->angle_ > b->angle_;
+}
 
 Polygon::Polygon()
 {
@@ -30,7 +35,10 @@ CutLine* Polygon::insertEdge(CutLine* e)
 
 CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 {
-	
+	if ((a - b).length() < 1.414*LIMIT)
+	{
+		return NULL;
+	}
 	CutPoint*   p1 = new CutPoint(a);
 	CutPoint*	p2 = new CutPoint(b);
 	auto pair1_ = points.insert(p1);
@@ -46,7 +54,7 @@ CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 	return e;
 }
 
-void Polygon::sweepPolygon()
+int Polygon::sweepPolygon()
 {
 	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
@@ -69,7 +77,7 @@ void Polygon::sweepPolygon()
 				lines.push_back(*iterOut);
 			}
 			std::sort(lines.begin(), lines.end(), sortByAngle);//ccw
-			while (lines.size()>1)
+			while (lines.size() > 1)
 			{
 				int count = lines.size();
 				while (count > 0 &&
@@ -80,17 +88,32 @@ void Polygon::sweepPolygon()
 					lines.pop_back();
 					count--;
 				}
-				if (count!=0)
+				if (count != 0)
 				{
 					CutLine* in_ = lines.back();
 					lines.pop_back();
 					in_->pnext_ = lines.back();
 					lines.pop_back();
 				}
-				
-			}			
+
+			}
+		}
+		else
+		{
+			qDebug()<<(*iter)->getPosition().x()<< (*iter)->getPosition().y();
+		}
+			
+	}
+	int sum = 0;
+	for (auto iter=edges.begin();iter!=edges.end();iter++)
+	{
+
+		if ((*iter)->pnext_==NULL)
+		{
+			sum++;
 		}
 	}
+	return sum;
 }
 
 inline float Polygon::angleWithXAxis(Vec3f dir)
@@ -133,7 +156,7 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
 				cur = cur->pnext_;
 			} while (cur!=NULL&&cur!=sta);
-			pieces_list_[i].push_back(circle_);
+			pieces_list_[id].push_back(circle_);
 		}
 	}
 }

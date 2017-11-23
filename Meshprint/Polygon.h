@@ -2,34 +2,23 @@
 #include <vector>
 #include <set>
 #include "Cutline.h"
+#define  LIMIT 1e-3
 struct comPoints
 {
 	bool  operator ()(CutPoint* a, CutPoint* b)const
 	{
-		if (a->getPosition().x() - b->getPosition().x() < -1e-4)
+		if (a->getPosition().x() - b->getPosition().x() < -LIMIT)
 		{
 			return true;
 		}
-		else if (a->getPosition().x() - b->getPosition().x() < 1e-4)
+		else if (a->getPosition().x() - b->getPosition().x() < LIMIT)
 		{
-			if (a->getPosition().y() - b->getPosition().y() < -1e-4)
-			{
-				return true;
-			}
-			else if (a->getPosition().y() - b->getPosition().y() < 1e-4)
-			{
-				return a->getPosition().z() - b->getPosition().z() < -1e-4;
-			}
-			return false;
+			return a->getPosition().y() - b->getPosition().y()<-LIMIT;
 		}
 		return false;
 	}
 };
 
-bool sortByAngle(const CutLine* a, const CutLine* b)
-{
-	return a->angle_ > b->angle_;
-}
 class Polygon
 {
 public:
@@ -37,7 +26,9 @@ public:
 	~Polygon();
 	CutLine* insertEdge(CutLine * e);
 	CutLine* insertEdge(Vec3f a, Vec3f b);
-	void sweepPolygon();
+	int sweepPolygon();
+	int num_of_edges() { return edges.size(); }
+	int num_of_points() { return points.size(); }
 private:
 	std::vector<CutLine*> edges;
 	std::set<CutPoint*,comPoints> points;

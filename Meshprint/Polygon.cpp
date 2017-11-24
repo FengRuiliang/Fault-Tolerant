@@ -7,7 +7,21 @@
 typedef trimesh::vec3  Vec3f;
 static bool sortByAngle(const CutLine* a, const CutLine* b)
 {
-	return a->angle_ > b->angle_;
+
+	if (a->angle_ - b->angle_ < -1e-2)
+	{
+		return true;
+	}
+	else if (a->angle_ - b->angle_ < 1e-2)
+	{
+		if (a->isoutedge&&!b->isoutedge)
+		{
+			return false;
+		}
+		return true;
+	}
+	else
+		return false;
 }
 
 Polygon::Polygon()
@@ -66,29 +80,37 @@ int Polygon::sweepPolygon()
 		}
 		else if ((*iter)->getInEdges().size() > 0 && (*iter)->getOutEdges().size() > 0)
 		{
+			
 			std::vector<CutLine*> lines;
 			for (auto iterIn = (*iter)->getInEdges().begin(); iterIn != (*iter)->getInEdges().end(); iterIn++)
 			{
 				(*iterIn)->angle_ = angleWithXAxis((*iterIn)->position_vert[0] - (*iterIn)->position_vert[1]);
+				(*iterIn)->isoutedge = false;
 				lines.push_back(*iterIn);
 			}
 			for (auto iterOut = (*iter)->getOutEdges().begin(); iterOut != (*iter)->getOutEdges().end(); iterOut++)
 			{
-				(*iterOut)->angle_ = angleWithXAxis((*iterOut)->position_vert[0] - (*iterOut)->position_vert[1]);
+				(*iterOut)->angle_ = angleWithXAxis((*iterOut)->position_vert[1] - (*iterOut)->position_vert[0]);
+				(*iterOut)->isoutedge = true;
 				lines.push_back(*iterOut);
 			}
-			std::sort(lines.begin(), lines.end(), sortByAngle);//ccw
+			std::sort(lines.begin(), lines.end(), sortByAngle);//ccw  allow the two line at the same angle
 			while (lines.size() > 1)
 			{
 				int count = lines.size();
-				while (count > 0 &&
-					(lines.back()->cut_point_[1] != *iter ||
-						lines[lines.size() - 1]->cut_point_[0] != *iter))
+				while (count)
 				{
-					lines.insert(lines.begin(), lines.back());
-					lines.pop_back();
-					count--;
-				}
+					if (!lines.back()->isoutedge&&lines[lines.size()-2]->isoutedge)
+					{
+						break;
+					}
+					else
+					{
+						lines.insert(lines.begin(), lines.back());
+						lines.pop_back();
+						count--;
+					}
+				}				
 				if (count != 0)
 				{
 					CutLine* in_ = lines.back();
@@ -96,15 +118,20 @@ int Polygon::sweepPolygon()
 					in_->pnext_ = lines.back();
 					lines.pop_back();
 				}
-
+				else
+				{
+					qDebug() << "still  have not finish connected";
+					lines.clear();
+				}
+					
 			}
 		}
-		else
+		else if((*iter)->getEdgeSize()==1)
 		{
+			qDebug() << (*iter)->getPosition().x() << (*iter)->getPosition().y() << (*iter)->getPosition().z();
 
-			//qDebug()<<(*iter)->getPosition().x()<< (*iter)->getPosition().y();
 			auto iterTem=tempPoints.insert(*iter);
-			if (!iterTem.second)
+			if (!iterTem.second)//if  insert failed
 			{
 				(*iterTem.first)->getInEdges().insert((*iterTem.first)->getInEdges().end(),
 					(*iter)->getInEdges().begin(), (*iter)->getInEdges().end());
@@ -153,22 +180,58 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 
 void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_list_, int id)
 {
-	for (int i=0;i<edges.size();i++)
+//#define  MORETHANTWOTEST
+#ifdef MORETHANTWOTEST
+//to test more than two line cross one point 
+ 	std::vector<std::pair<Vec3f, Vec3f>> circle;
+	int mark =-1 ;
+	for (auto iter = points.begin(); iter != points.end(); iter++)
+	{
+		if ((*iter)->getEdgeSize() > 2&&mark++>0)
+		{
+
+			qDebug() <<(*iter)->getEdgeSize()<< (*iter)->getPosition().x() << (*iter)->getPosition().y() << (*iter)->getPosition().z();
+			auto in = (*iter)->getInEdges();
+			auto out = (*iter)->getOutEdges();
+			for (int i = 0; i < in.size(); i++)
+			{
+				std::pair<Vec3f, Vec3f> linein(in[i]->position_vert[0], in[i]->position_vert[1]);
+				circle.push_back(linein);
+				qDebug() << "in"<<linein.first.x() << linein.first.y() << linein.first.z();
+				qDebug() << "in"<<linein.second.x() << linein.second.y() << linein.second.z();
+			}
+			for (int j = 0; j < out.size(); j++)
+			{
+				std::pair<Vec3f, Vec3f> linein(out[j]->position_vert[0], out[j]->position_vert[1]);
+				circle.push_back(linein);
+				qDebug() << "out"<<linein.first.x() << linein.first.y() << linein.first.z();
+				qDebug() << "out"<<linein.second.x() << linein.second.y() << linein.second.z();
+			}
+		}
+	}
+	pieces_list_[id].push_back(circle);
+	return;
+	//end test
+#endif
+
+#ifndef MORETHANTWOTEST
+	for (int i = 0; i < edges.size(); i++)
 	{
 		if (!edges[i]->visit)
 		{
 			std::vector<std::pair<Vec3f, Vec3f>> circle_;
 			CutLine* sta = edges[i];
 			CutLine* cur = sta;
-			do 
+			do
 			{
 				cur->visit = true;
 				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
 				cur = cur->pnext_;
-			} while (cur!=NULL&&cur!=sta);
+			} while (cur != NULL&&cur!=sta);
 			pieces_list_[id].push_back(circle_);
 		}
 	}
 	qDebug() << id << pieces_list_[id].size();
+#endif
 }
 

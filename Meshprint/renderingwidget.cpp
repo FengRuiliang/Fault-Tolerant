@@ -345,7 +345,10 @@ void RenderingWidget::SetSliceCheckId(int id)
 	}
 	update();
 }
-
+void RenderingWidget::setFildID(int id) { 
+	field_id = id;
+	update();
+}
 void RenderingWidget::setHatchType(int type_)
 {
 	hatch_type_ = (hatchType)type_;
@@ -699,10 +702,11 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		glNormal3fv(faces.at(i)->normal());
-		glVertex3fv(faces[i]->vertices_[0]);
-		glVertex3fv(faces[i]->vertices_[1]);
-		glVertex3fv(faces[i]->vertices_[2]);
+		
+			glNormal3fv(faces.at(i)->normal());
+			glVertex3fv(faces[i]->vertices_[0]);
+			glVertex3fv(faces[i]->vertices_[1]);
+			glVertex3fv(faces[i]->vertices_[2]);
 	}
 	glEnd();
 }
@@ -771,20 +775,33 @@ void RenderingWidget::DrawSlice(bool bv)
 	for (int i = slice_check_id_; i < slice_check_id_+1; i++)
 	{
 		glBegin(GL_LINES);
+		glColor3f(1.0, 0.0, 0.0);
+		for (size_t j = field_id; j < field_id+1; j++)
+		{
+			if (j>=tc[i].size())
+			{
+				break;
+			}
+			for (int k = 0; k < (tc[i])[j].size(); k++)
+			{
+				if (k == 0)
+				{
+					glColor3f(0.0, 0.0, 1.0);
+				}
+				else
+					glColor3f(1.0, 0.0, 0.0);
+				glVertex3fv(tc[i][j][k].first+Vec3f(0.0,0.0,10*thickness_));
+				glVertex3fv(tc[i][j][k].second+ Vec3f(0.0, 0.0, 10*thickness_));
+			}
+		}
+		glColor3f(0.0, 1.0, 0.0);
 		for (size_t j = 0; j < tc[i].size(); j++)
 		{
 			for (int k = 0; k < (tc[i])[j].size(); k++)
 			{
-				if (k==0)
-				{
-					glColor3f(1.0, 0.0, 0.0);
-				}
-				else
-				{
-					glColor3f(0.0, 1.0, 0.0);
-				}
+			
 				glVertex3fv(tc[i][j][k].first);
-				glVertex3fv(tc[i][j][k].second);
+				glVertex3fv(tc[i][j][k].second );
 			}
 		}
 		glEnd();

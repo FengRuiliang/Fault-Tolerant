@@ -304,6 +304,10 @@ HE_face* Mesh3D::InsertFace(std::vector<Vec3f> vec_hv,Vec3f normal_read_)
 	}
 	HE_face *pface = new HE_face;
 	pface->id_ = static_cast<int>(pfaces_list_->size());
+	if (pface->id()==9398)
+	{
+		qDebug() << "pay attention the insert face function at line 309,in mesh3d.cpp ";
+	}
 	pfaces_list_->push_back(pface);
 	pface->normal() = normal_read_;
 	//if the normal is wrong ,exchange the order of vec_hv

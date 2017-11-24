@@ -14,9 +14,10 @@ public:CutPoint(Vec3f a) { pos_ = a; };
 	   std::vector<CutLine*>& getOutEdges() { return out_edges_; }
 	   int getEdgeSize() { return in_edges_.size() + out_edges_.size(); }
 private:
+	Vec3f pos_;
 	std::vector<CutLine*> in_edges_;
 	std::vector<CutLine*> out_edges_;
-	Vec3f pos_;
+	
 };
 
 class CutLine
@@ -41,6 +42,7 @@ public:
 	CutLine* pnext_{NULL};
 	float angle_{0};
 	bool visit{ false };
+	bool isoutedge{ false };
 };
 
 

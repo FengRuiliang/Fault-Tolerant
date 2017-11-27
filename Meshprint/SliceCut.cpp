@@ -151,8 +151,7 @@ void SliceCut::CutInPieces()
 
 	for (int i = 0; i < num_pieces_; i++)
 	{
-	
-		if (i!=190)
+		if (i != 111)
 		{
 			continue;
 		}
@@ -175,7 +174,7 @@ void SliceCut::CutInPieces()
 			else
 			{
 				count_++;
-				cir.push_back(std::pair<Vec3f, Vec3f>(Vec3f(-100, 100, 0.0), Vec3f(0, 0, 0.0)));
+				cir.push_back(std::pair<Vec3f, Vec3f>(Vec3f(-100+count_*10, 100, 0.0), Vec3f(0, 0, 0.0)));
 				pieces_list_[i].push_back(cir);
 			}
 		}
@@ -191,8 +190,6 @@ void SliceCut::CutInPieces()
 		polygon_.sweepPolygon();
 		polygon_.storePathToPieces(pieces_list_, i);
 #endif
-
-		qDebug() << i << slice_faces_.size() << polygon_.num_of_edges() << polygon_.num_of_points();
 	}
 }
 
@@ -308,6 +305,7 @@ static bool sortCutLineByZ(const CutLine* a,const CutLine* b )
 	return abs((a->position_vert[0] - a->position_vert[1]).z()) <
 		abs((b->position_vert[0] - b->position_vert[1]).z());
 }
+
 std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 {
 	std::vector<Vec3f>& p = facet->vertices_;

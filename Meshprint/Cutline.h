@@ -40,6 +40,7 @@ public:
 	Vec3f position_vert[2];
 	CutPoint* cut_point_[2];
 	CutLine* pnext_{NULL};
+	CutLine* pprev_{ NULL };
 	float angle_{0};
 	bool visit{ false };
 	bool isoutedge{ false };

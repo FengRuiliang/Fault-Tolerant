@@ -59,6 +59,7 @@ public slots:
 	void SetBackground();
 	void SetSliceCheckId(int id);
 	void setFildID(int id);
+	void SetLineId(int id);
 	void ReadMesh();
 	void WriteMesh();
 	void CheckDrawPoint();
@@ -114,7 +115,8 @@ public:
 	bool						is_show_all;
 private:
 	int							slice_check_id_;
-	int field_id;
+	int field_id{0};
+	int line_id_{0};
 };
 
 #endif // RENDERINGWIDGET_H

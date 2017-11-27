@@ -349,6 +349,11 @@ void RenderingWidget::setFildID(int id) {
 	field_id = id;
 	update();
 }
+void RenderingWidget::SetLineId(int id) {
+	line_id_ = id;
+	update();
+}
+
 void RenderingWidget::setHatchType(int type_)
 {
 	hatch_type_ = (hatchType)type_;
@@ -792,6 +797,12 @@ void RenderingWidget::DrawSlice(bool bv)
 					glColor3f(1.0, 0.0, 0.0);
 				glVertex3fv(tc[i][j][k].first+Vec3f(0.0,0.0,10*thickness_));
 				glVertex3fv(tc[i][j][k].second+ Vec3f(0.0, 0.0, 10*thickness_));
+			}
+			glColor3f(1.0, 1.0, 0.0);
+			for (int k = 0; k < line_id_&&k < (tc[i])[j].size(); k++)
+			{
+				glVertex3fv(tc[i][j][k].first + Vec3f(0.0, 0.0, 20 * thickness_));
+				glVertex3fv(tc[i][j][k].second + Vec3f(0.0, 0.0, 20 * thickness_));
 			}
 		}
 		glColor3f(0.0, 1.0, 0.0);

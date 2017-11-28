@@ -53,6 +53,11 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 		for (int j= min_height / thickness_+1;j<=max_height / thickness_;j++)
 		{
 			storage_Face_list_[j].push_back((*iter_Face)->id());
+			if (j==350)
+			{
+				(*iter_Face)->selected_ = true;
+			}
+			
 		}
 	}
 	return storage_Face_list_;
@@ -151,6 +156,10 @@ void SliceCut::CutInPieces()
 
 	for (int i = 0; i < num_pieces_; i++)
 	{
+		if (i!=350)
+		{
+			continue;
+		}
 		Polygon polygon_;
 		std::vector<int>&slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
@@ -165,12 +174,6 @@ void SliceCut::CutInPieces()
 			{
 				
 				cir.push_back(std::pair<Vec3f, Vec3f>(et_->position_vert[0], et_->position_vert[1]));
-				pieces_list_[i].push_back(cir);
-			}
-			else
-			{
-				count_++;
-				cir.push_back(std::pair<Vec3f, Vec3f>(Vec3f(-100+count_*10, 100, 0.0), Vec3f(0, 0, 0.0)));
 				pieces_list_[i].push_back(cir);
 			}
 		}
@@ -317,12 +320,16 @@ std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 	if (dir.z()<0)
 	{
 		pos1 = e_[2]->position_vert[0] + (cur_height_ - e_[2]->position_vert[0].z())/(dir.z())*dir;
-		if (e_[2]->pnext_->position_vert[1].z()<=cur_height_)
+		if (e_[2]->pnext_->position_vert[1].z()-cur_height_<-1e-3)
 		{
 			pos2 = e_[2]->pnext_->pnext_->position_vert[0] +
 				(cur_height_ - e_[2]->pnext_->pnext_->position_vert[0].z())/
 				(e_[2]->pnext_->pnext_->position_vert[1]- e_[2]->pnext_->pnext_->position_vert[0]).z()*
 				(e_[2]->pnext_->pnext_->position_vert[1] - e_[2]->pnext_->pnext_->position_vert[0]);
+		}
+		else if (e_[2]->pnext_->position_vert[1].z() - cur_height_<1e-3)
+		{
+			pos2 = e_[2]->pnext_->position_vert[1];
 		}
 		else
 		{
@@ -335,12 +342,16 @@ std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 	else
 	{
 		pos2 = e_[2]->position_vert[0] + (cur_height_ - e_[2]->position_vert[0].z())/dir.z()*dir;
-		if (e_[2]->pnext_->position_vert[1].z() <= cur_height_)
+		if (e_[2]->pnext_->position_vert[1].z()-cur_height_<-1e-3)
 		{
 			pos1 = e_[2]->pnext_->position_vert[0] +
 				(cur_height_ - e_[2]->pnext_->position_vert[0].z())/
 				(e_[2]->pnext_->position_vert[1] - e_[2]->pnext_->position_vert[0]).z()*
 				(e_[2]->pnext_->position_vert[1] - e_[2]->pnext_->position_vert[0]);
+		}
+		else if (e_[2]->pnext_->position_vert[1].z() - cur_height_<1e-3)
+		{
+			pos1 = e_[2]->pnext_->position_vert[1];
 		}
 		else
 		{

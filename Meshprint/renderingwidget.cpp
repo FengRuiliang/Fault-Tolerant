@@ -671,11 +671,15 @@ void RenderingWidget::DrawEdge(bool bv)
 	glColor4ub(0, 0, 0, 255);
 	for (int i=0;i<ptr_mesh_->num_of_face_list();i++)
 	{
-		for (int j=0;j<3;j++)
+		if (faces[i]->selected())
 		{
-			glVertex3fv(faces[i]->vertices_[j]);
-			glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
+			for (int j = 0; j < 3; j++)
+			{
+				glVertex3fv(faces[i]->vertices_[j]);
+				glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
+			}
 		}
+		
 	}
 	glEnd();
 	//////////////////////////////////////////////////////////////////////////
@@ -707,11 +711,13 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
+		if (faces[i]->selected())
+		{
 		
 			glNormal3fv(faces.at(i)->normal());
 			glVertex3fv(faces[i]->vertices_[0]);
 			glVertex3fv(faces[i]->vertices_[1]);
-			glVertex3fv(faces[i]->vertices_[2]);
+			glVertex3fv(faces[i]->vertices_[2]);}
 	}
 	glEnd();
 }

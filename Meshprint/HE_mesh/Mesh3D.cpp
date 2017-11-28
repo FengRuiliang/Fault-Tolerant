@@ -1515,6 +1515,7 @@ void Mesh3D::Unify()
 			zmax_ = max(zmax_, pfaces_list_->at(i)->vertices_[j].z());
 		}
 	}
+
 	Vec3f centerPos((xmin_ + xmax_) / 2.0, (ymin_ + ymax_) / 2.0, (zmin_));
 	for (size_t i = 0; i != pfaces_list_->size(); i++)
 	{

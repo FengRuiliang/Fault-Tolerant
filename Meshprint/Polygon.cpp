@@ -388,7 +388,7 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 
 void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_list_, int id)
 {
-	//#define  MORETHANTWOTEST
+//#define  MORETHANTWOTEST
 #ifdef MORETHANTWOTEST
 //to test more than two line cross one point 
 	std::vector<std::pair<Vec3f, Vec3f>> circle;

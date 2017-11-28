@@ -659,7 +659,6 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 
 bool Mesh3D::LoadFromSTLFileOnly3Point(const char* fins)
 {
-
 	QString filename = QString::fromLocal8Bit(fins);
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
@@ -667,10 +666,7 @@ bool Mesh3D::LoadFromSTLFileOnly3Point(const char* fins)
 		std::cerr << "Cannot open file for reading:" << qPrintable(file.errorString()) << std::endl;
 		return false;
 	}
-
 	ClearData();
-
-
 	// read ASCII .stl file
 	if (file.read(1) == "s")
 	{
@@ -1525,6 +1521,12 @@ void Mesh3D::Unify()
 		for (int j = 0; j < 3; j++)
 			pfaces_list_->at(i)->vertices_[j] -= centerPos;
 	}
+	xmin_ -= centerPos.x();
+	xmax_ -= centerPos.x();
+	ymin_ -= centerPos.y();
+	ymax_ -= centerPos.y();
+	zmin_ -= centerPos.z();
+	zmax_ -= centerPos.z();
 }
 
 void Mesh3D::ComputeAvarageEdgeLength(void)

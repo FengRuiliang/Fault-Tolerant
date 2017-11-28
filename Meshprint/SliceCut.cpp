@@ -151,10 +151,6 @@ void SliceCut::CutInPieces()
 
 	for (int i = 0; i < num_pieces_; i++)
 	{
-		if (i != 111)
-		{
-			continue;
-		}
 		Polygon polygon_;
 		std::vector<int>&slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;

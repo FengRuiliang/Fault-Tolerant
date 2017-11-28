@@ -38,13 +38,13 @@ struct comPointsHuge
 {
 	bool  operator ()(CutPoint* a, CutPoint* b)const
 	{
-		if (a->getPosition().x() - b->getPosition().x() < -11 * LIMIT)
+		if (a->getPosition().x() - b->getPosition().x() < -17 * LIMIT)
 		{
 			return true;
 		}
-		else if (a->getPosition().x() - b->getPosition().x() < 11 * LIMIT)
+		else if (a->getPosition().x() - b->getPosition().x() < 17 * LIMIT)
 		{
-			return a->getPosition().y() - b->getPosition().y() < -11 * LIMIT;
+			return a->getPosition().y() - b->getPosition().y() < -17 * LIMIT;
 		}
 		return false;
 	}

@@ -23,9 +23,9 @@
 
 
 class Support;
-
+static GLfloat win,hei;
 RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
-	: QOpenGLWidget(parent), ptr_mainwindow_(mainwindow), eye_distance_(5.0),
+	: QOpenGLWidget(parent), ptr_mainwindow_(mainwindow), eye_distance_(200),
 	has_lighting_(true), is_draw_point_(false), is_draw_edge_(false), is_draw_face_(true)
 {
 	ptr_arcball_ = new CArcBall(width(), height());
@@ -81,15 +81,17 @@ void RenderingWidget::initializeGL()
 void RenderingWidget::resizeGL(int w, int h)
 {
 	h = (h == 0) ? 1 : h;
-
+	win = w;
+	hei = h;
 	ptr_arcball_->reSetBound(w, h);
-
-
-	glViewport(0, 0, w, h);
+	//glViewport(0, 0, w, h);
+	glViewport(0, 0, (GLfloat)eye_distance_*win, (GLfloat)eye_distance_*hei);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-
-	gluPerspective(45.0, GLdouble(w) / GLdouble(h), 0.1, 10000);
+	if (w <= h)
+		glOrtho(-eye_distance_, eye_distance_, -eye_distance_ * (GLfloat)h / (GLfloat)w, eye_distance_ * (GLfloat)h / (GLfloat)w, -200.0, 200.0);
+	else
+		glOrtho(-eye_distance_*(GLfloat)w / (GLfloat)h, eye_distance_*(GLfloat)w / (GLfloat)h, -eye_distance_, eye_distance_, -200.0, 200.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -110,20 +112,23 @@ void RenderingWidget::paintGL()
 		glDisable(GL_LIGHTING);
 		glDisable(GL_LIGHT0);
 	}
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	if (win <= hei)
+		glOrtho(-eye_distance_+eye_goal_[0], eye_distance_ + eye_goal_[0],
+			-eye_distance_ * (GLfloat)hei / (GLfloat)win + eye_goal_[1], eye_distance_ * (GLfloat)hei / (GLfloat)win + eye_goal_[1],
+			-200.0, 200.0);
+	else
+		glOrtho(-eye_distance_ * (GLfloat)win / (GLfloat)hei + eye_goal_[0], eye_distance_ * (GLfloat)win / (GLfloat)hei + eye_goal_[0],
+			-eye_distance_ + eye_goal_[1], eye_distance_ + eye_goal_[1], -200.0, 200.0);
+
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
-	register vec eyepos = eye_distance_*eye_direction_;
-	gluLookAt(eyepos[0], eyepos[1], eyepos[2],
-		eye_goal_[0], eye_goal_[1], eye_goal_[2],
-		0.0, 1.0, 0.0);
-	//glPushMatrix();
-
 	glMultMatrixf(ptr_arcball_->GetBallMatrix());
 
 	Render();
-	//glPopMatrix();
+
 }
 
 void RenderingWidget::timerEvent(QTimerEvent * e)
@@ -240,7 +245,7 @@ void RenderingWidget::wheelEvent(QWheelEvent *e)
 {
 	if (ptr_mesh_ != NULL)
 	{
-		eye_distance_ -= e->delta()*ptr_mesh_->getBoundingBox().at(0).at(2)*scaleV / 1000;
+		eye_distance_ -= e->delta()/100;
 	}
 	eye_distance_ = eye_distance_ < 0 ? 0 : eye_distance_;
 	update();
@@ -711,7 +716,7 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		if (faces[i]->selected())
+		//if (faces[i]->selected())
 		{
 		
 			glNormal3fv(faces.at(i)->normal());

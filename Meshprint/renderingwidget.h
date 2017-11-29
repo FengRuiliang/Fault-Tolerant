@@ -96,7 +96,7 @@ public:
 	bool						is_load_texture_;
 
 	// eye
-	GLfloat						eye_distance_;
+	GLfloat						eye_distance_{5.0};
 	point						eye_goal_;
 	vec							eye_direction_;
 	QPoint						current_position_;

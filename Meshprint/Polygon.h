@@ -34,6 +34,7 @@ struct comPointsLarge
 	}
 };
 
+
 struct comPointsHuge
 {
 	bool  operator ()(CutPoint* a, CutPoint* b)const
@@ -67,7 +68,10 @@ private:
 	std::set<CutPoint*,comPoints> points;
 
 	float angleWithXAxis(Vec3f dir);
+	void UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_line_, std::vector<CutLine *>& left_line_, std::vector<CutLine *>& righ_line_, std::vector<CutLine *>& cros_line_);
 public:
 	void storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_list_,int id);
+	void FindNewEvent(CutLine * down, CutLine * up, CutPoint * point, std::vector<CutPoint*> queue);
+private:
 };
 

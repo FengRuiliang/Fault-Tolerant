@@ -34,16 +34,21 @@ public:
 		cut_point_[1] = p2;
 		position_vert[0] = p1->getPosition();
 		position_vert[1] = p2->getPosition();
+		order_pos_[0] = p1->getPosition() < p2->getPosition() ? p1 : p2;
+		order_pos_[1] = p1->getPosition() > p2->getPosition() ? p1 : p2;
 	}
 	~CutLine()
 	{}
 	Vec3f position_vert[2];
+	CutPoint* order_pos_[2];
 	CutPoint* cut_point_[2];
+	
 	CutLine* pnext_{NULL};
 	CutLine* pprev_{ NULL };
 	float angle_{0};
 	bool visit{ false };
 	bool isoutedge{ false };
+	Vec3f cross_point_;
 };
 
 

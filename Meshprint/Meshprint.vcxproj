@@ -201,7 +201,6 @@
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="renderingwidget.cpp" />
     <ClCompile Include="SliceCut.cpp" />
-    <ClCompile Include="Sweepline.cpp" />
     <ClCompile Include="TriangleglobalFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -280,7 +279,6 @@
     <ClInclude Include="openGLProjector.h" />
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="SliceCut.h" />
-    <ClInclude Include="Sweepline.h" />
     <CustomBuild Include="renderingwidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing renderingwidget.h...</Message>

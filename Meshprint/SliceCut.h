@@ -2,7 +2,6 @@
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
 #include "clipper.hpp"
-#include "Sweepline.h"
 #include "Cutline.h"
 class Mesh3D;
 class vector;
@@ -38,17 +37,9 @@ public:
 	void clearcut();
 	std::vector<int> sortVertInFace(int faceid);
 	void CutInPieces();
-
-	void cutThrouthVertex();
-
-	void sweepPline();
-
 	std::pair<Vec3f, Vec3f> cutFacet(HE_face * facet, float cur_height_);
-
-	void cutFacetInmiddlePoint();
 	float getThickness() { return thickness_; };
 	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();
-	HE_edge * InsertEdgeBySweep(HE_vert * vstart, HE_vert * vend);
 	std::map<float, std::vector<std::vector<CutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
 	std::vector<int> * StoreFaceIntoSlice();

@@ -77,9 +77,6 @@
     <ClCompile Include="HE_mesh\Mesh3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sweepline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -151,9 +148,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HE_mesh\Vec.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sweepline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cutline.h">

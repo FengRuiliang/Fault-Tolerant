@@ -60,7 +60,8 @@ public:
 	~Polygon();
 	CutLine* insertEdge(CutLine * e);
 	CutLine* insertEdge(Vec3f a, Vec3f b);
-	int sweepPolygon();
+	int FindIntersection();
+	void ConnectCutline();
 	int num_of_edges() { return edges.size(); }
 	int num_of_points() { return points.size(); }
 private:

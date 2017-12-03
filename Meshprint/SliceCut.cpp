@@ -186,7 +186,7 @@ void SliceCut::CutInPieces()
 			auto t = cutFacet(faces[slice_faces_[j]], cur_height_);
 			polygon_.insertEdge(t.first, t.second);
 		}
-		polygon_.sweepPolygon();
+		polygon_.FindIntersection();
 		polygon_.storePathToPieces(pieces_list_, i);
 #endif
 	}

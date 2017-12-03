@@ -37,11 +37,11 @@ static bool sortByXYCOR(const CutPoint* a, const CutPoint* b)
 {
 	Vec3f pos1 = a->getPosition();
 	Vec3f pos2 = b->getPosition();
-	if (pos1.x()-pos2.x()<-1e-2)
+	if (pos1.x() - pos2.x() < -1e-2)
 	{
 		return true;
 	}
-	else if (pos1.x()-pos2.x()<1e-2)
+	else if (pos1.x() - pos2.x() < 1e-2)
 	{
 		return pos1.y() - pos2.y() < -1e-2;
 	}
@@ -94,12 +94,11 @@ CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 	return e;
 }
 
-int Polygon::sweepPolygon()
+int Polygon::FindIntersection()
 {
-	std::set<CutPoint*, comPointsLarge> tempPoints;
 	std::vector<CutLine*> str_line_;
 	std::vector<CutPoint*> queue_;
-	for (auto iter=points.rbegin();iter!=points.rend();iter++)
+	for (auto iter = points.rbegin(); iter != points.rend(); iter++)
 	{
 		queue_.push_back(*iter);
 	}
@@ -110,7 +109,7 @@ int Polygon::sweepPolygon()
 		std::vector<CutLine*> left_line_, righ_line_, cros_line_;
 		UpdateStructure(ptr_point_, str_line_, left_line_, righ_line_, cros_line_);
 		Vec3f cur_pos_ = ptr_point_->getPosition();
-		if (left_line_.size() + cros_line_.size() == 0)
+		if (righ_line_.size() == 0)
 		{
 			CutLine* down_{ NULL }, *up_{ NULL };
 			Vec3f criterion, line_a_;
@@ -128,7 +127,35 @@ int Polygon::sweepPolygon()
 			}
 			FindNewEvent(down_, up_, ptr_point_, queue_);
 		}
+		else
+		{
+			CutLine* down_{ NULL }, *up_{ NULL };
+
+			for (auto iter = str_line_.begin(); iter != str_line_.end(); iter++)
+			{
+				if ((*iter)->cross_point_.y() < righ_line_.front()->cross_point_.y())
+				{
+					down_ = *iter;
+				}
+			}
+			for (auto iter = str_line_.rbegin(); iter != str_line_.rend(); iter++)
+			{
+				if ((*iter)->cross_point_.y() > righ_line_.back()->cross_point_.y())
+				{
+					up_ = *iter;
+				}
+			}
+			FindNewEvent(down_, righ_line_.front(), ptr_point_, queue_);
+			FindNewEvent(righ_line_.back(), up_, ptr_point_, queue_);
+		}
 	}
+	return 0;
+
+}
+
+void Polygon::ConnectCutline()
+{
+	std::set<CutPoint*, comPointsLarge> tempPoints;
 	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
 		if ((*iter)->getInEdges().size() == 1 && (*iter)->getOutEdges().size() == 1)
@@ -211,7 +238,7 @@ int Polygon::sweepPolygon()
 			{
 				(*iter)->getInEdges()[0]->visit = true;//this edge become no use;
 				continue;
-			}				
+			}
 			auto iterTem = tempPoints.insert(*iter);
 			if (!iterTem.second)//if  insert failed
 			{
@@ -355,7 +382,7 @@ int Polygon::sweepPolygon()
 		}
 
 	}
-	
+
 	for (auto iter = LargePoints.begin(); iter != LargePoints.end(); iter++)
 	{
 
@@ -412,8 +439,8 @@ int Polygon::sweepPolygon()
 		}
 
 	}
-return 0;
-	
+
+
 }
 
 inline float Polygon::angleWithXAxis(Vec3f dir)
@@ -436,21 +463,21 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 	else if (dir.y() < 0)
 	{
 		return atan(dir.y() / dir.x()) + 360;
-				}
+	}
 	else
 		return atan(dir.y() / dir.x());
-			}
+}
 
 void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_line_, std::vector<CutLine *>& left_line_, std::vector<CutLine *>& righ_line_, std::vector<CutLine *>& cros_line_)
 {
 	auto lines_in_ = ptr_point_->getInEdges();
 	auto line_ou_ = ptr_point_->getOutEdges();
 	for (int i = 0; i < lines_in_.size(); i++)
-	{	
+	{
 		if (lines_in_[i]->order_pos_[1] == ptr_point_)
 		{
 			Vec3f p1 = lines_in_[i]->order_pos_[0];
-			Vec3f p2 = lines_in_ [i]->order_pos_[1];
+			Vec3f p2 = lines_in_[i]->order_pos_[1];
 			Vec3f Q = (ptr_point_)->getPosition();
 			if ((p2 - p1).x() < LIMIT)
 			{
@@ -483,7 +510,7 @@ void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_
 			righ_line_.push_back(line_ou_[i]);
 		}
 	}
-	for (auto iter=str_line_.begin();iter!=str_line_.end();)
+	for (auto iter = str_line_.begin(); iter != str_line_.end();)
 	{
 		Vec3f p1 = (*iter)->position_vert[0];
 		Vec3f p2 = (*iter)->position_vert[1];
@@ -495,50 +522,52 @@ void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_
 		}
 		else if (((Q - p1) ^ (p2 - p1)).length() < 1e-2)
 		{
-				cros_line_.push_back((*iter));
-				CutLine* l1_ = new CutLine((*iter)->cut_point_[0], ptr_point_);
-				CutLine* l2_ = new CutLine(ptr_point_, (*iter)->cut_point_[1]);
-				edges.push_back(l1_);
-				edges.push_back(l2_);
-				l1_->pprev_ = (*iter)->pprev_;
-				l1_->pnext_ = l2_;
-				l2_->pnext_ = (*iter)->pnext_;
-				l2_->pprev_ = l1_;
-				CutPoint* cur = (*iter)->cut_point_[0];
-				auto to_split_ = find(cur->getOutEdges().begin(), cur->getOutEdges().end(), (*iter));
-				cur->getOutEdges().erase(to_split_);
-				cur->getOutEdges().push_back(l1_);
-				cur = (*iter)->cut_point_[1];
-				to_split_ = find(cur->getInEdges().begin(), cur->getInEdges().end(), (*iter));
-				cur->getInEdges().erase(to_split_);
-				cur->getInEdges().push_back(l2_);
-				str_line_.erase(iter);
-				if (l1_->order_pos_[1] == ptr_point_)
+			cros_line_.push_back(*iter);
+			CutLine* l1_ = new CutLine((*iter)->cut_point_[0], ptr_point_);
+			CutLine* l2_ = new CutLine(ptr_point_, (*iter)->cut_point_[1]);
+			edges.push_back(l1_);
+			edges.push_back(l2_);
+			l1_->pprev_ = (*iter)->pprev_;
+			l1_->pnext_ = l2_;
+			l2_->pnext_ = (*iter)->pnext_;
+			l2_->pprev_ = l1_;
+			CutPoint* cur = (*iter)->cut_point_[0];
+			auto to_split_ = find(cur->getOutEdges().begin(), cur->getOutEdges().end(), (*iter));
+			cur->getOutEdges().erase(to_split_);
+			cur->getOutEdges().push_back(l1_);
+			cur = (*iter)->cut_point_[1];
+			to_split_ = find(cur->getInEdges().begin(), cur->getInEdges().end(), (*iter));
+			cur->getInEdges().erase(to_split_);
+			cur->getInEdges().push_back(l2_);
+			str_line_.erase(iter);
+			if (l1_->order_pos_[1] == ptr_point_)
+			{
+				if ((p2 - p1).x() < LIMIT)
 				{
-					if ((p2 - p1).x() < LIMIT)
-					{
-						Q.y() = 10000;
-						l1_->cross_point_ = Q;
-					}
-					else
-					{
-						l1_->cross_point_ = p1 + (Q.x() + (float)LIMIT - p2.x()) / (p2 - p1).x()*(p2 - p1);
-					}
-					str_line_.push_back(l1_);
+					Q.y() = 10000;
+					l1_->cross_point_ = Q;
 				}
 				else
 				{
-					if ((p2 - p1).x() < LIMIT)
-					{
-						Q.y() = 10000;
-						l2_->cross_point_ = Q;
-					}
-					else
-					{
-						l2_->cross_point_ = p1 + (Q.x() + (float)LIMIT - p2.x()) / (p2 - p1).x()*(p2 - p1);
-					}
-					str_line_.push_back(l2_);
+					l1_->cross_point_ = p1 + (Q.x() + (float)LIMIT - p2.x()) / (p2 - p1).x()*(p2 - p1);
 				}
+				righ_line_.push_back(l1_);
+				str_line_.push_back(l1_);
+			}
+			else
+			{
+				if ((p2 - p1).x() < LIMIT)
+				{
+					Q.y() = 10000;
+					l2_->cross_point_ = Q;
+				}
+				else
+				{
+					l2_->cross_point_ = p1 + (Q.x() + (float)LIMIT - p2.x()) / (p2 - p1).x()*(p2 - p1);
+				}
+				righ_line_.push_back(l2_);
+				str_line_.push_back(l2_);
+			}
 
 		}
 		else
@@ -557,11 +586,12 @@ void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_
 	}
 	str_line_.insert(str_line_.end(), righ_line_.begin(), righ_line_.end());
 	std::sort(str_line_.begin(), str_line_.end(), sortByCrossPoint);
+	std::sort(righ_line_.begin(), righ_line_.end(), sortByCrossPoint);
 }
 
 void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_list_, int id)
 {
-//#define  MORETHANTWOTEST
+	//#define  MORETHANTWOTEST
 #ifdef MORETHANTWOTEST
 //to test more than two line cross one point 
 	std::vector<std::pair<Vec3f, Vec3f>> circle;
@@ -641,37 +671,52 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 		}
 	}
 	qDebug() << id << pieces_list_[id].size();
-	
+
 #endif
 }
 
-void Polygon::FindNewEvent(CutLine* down,CutLine* up,CutPoint* point, std::vector<CutPoint*> queue)
+void Polygon::FindNewEvent(CutLine* down, CutLine* up, CutPoint* point, std::vector<CutPoint*> queue)
 {
-	if (down->order_pos_[1]!=up->order_pos_[1])
+	if (down->order_pos_[1] != up->order_pos_[1])
 	{
 
 		Vec3f A = down->order_pos_[0]->getPosition();
 		Vec3f B = down->order_pos_[1]->getPosition();
-		Vec3f C = down->order_pos_[0]->getPosition();
-		Vec3f D = down->order_pos_[1]->getPosition();
+		Vec3f C = up->order_pos_[0]->getPosition();
+		Vec3f D = up->order_pos_[1]->getPosition();
 		float aeraDAB = ((D - A) ^ (B - A)).z();
 		float aeraCAB = ((C - A) ^ (B - A)).z();
 		float aeraACD = ((A - C) ^ (D - C)).z();
 		float aeraBCD = ((B - C) ^ (D - C)).z();
 		if (aeraDAB*aeraCAB < 0 && aeraACD*aeraBCD < 0)
 		{
-			Vec3f intersect_p_ = A + abs(aeraACD)/(abs(aeraACD)+abs(aeraBCD))*(B - A);
-			CutPoint* new_event_=new CutPoint(intersect_p_);
-			points.insert(new_event_);
-			queue.push_back(new_event_);
+			Vec3f intersect_p_ = A + abs(aeraACD) / (abs(aeraACD) + abs(aeraBCD))*(B - A);
+			CutPoint* point_new_ = new CutPoint(intersect_p_);
+			CutLine* line_in_1_ = new CutLine(down->cut_point_[0], point_new_);
+			CutLine* line_out_1_ = new CutLine(point_new_, down->cut_point_[1]);
+			CutLine* line_in_2_ = new CutLine(up->cut_point_[0], point_new_);
+			CutLine* line_out_2_ = new CutLine(point_new_, up->cut_point_[1]);
+			point_new_->getInEdges().push_back(line_in_1_);
+			point_new_->getInEdges().push_back(line_in_2_);
+			point_new_->getOutEdges().push_back(line_out_1_);
+			point_new_->getOutEdges().push_back(line_out_2_);
+			auto to_split_ = find(down->cut_point_[0]->getOutEdges().begin(), down->cut_point_[0]->getOutEdges().end(), down);
+			down->cut_point_[0]->getOutEdges().erase(to_split_);
+			down->cut_point_[0]->getOutEdges().push_back(line_in_1_);
+			to_split_ = find(down->cut_point_[1]->getInEdges().begin(), down->cut_point_[1]->getInEdges().end(), down);
+			down->cut_point_[1]->getInEdges().erase(to_split_);
+			down->cut_point_[1]->getInEdges().push_back(line_out_1_);
+			to_split_ = find(up->cut_point_[0]->getOutEdges().begin(), up->cut_point_[0]->getOutEdges().end(), up);
+			up->cut_point_[0]->getOutEdges().erase(to_split_);
+			up->cut_point_[0]->getOutEdges().push_back(line_in_2_);
+			to_split_ = find(up->cut_point_[1]->getInEdges().begin(), up->cut_point_[1]->getInEdges().end(), up);
+			up->cut_point_[1]->getInEdges().erase(to_split_);
+			up->cut_point_[1]->getInEdges().push_back(line_out_2_);
+			points.insert(point_new_);
+			queue.push_back(point_new_);
 			sort(queue.begin(), queue.end(), sortByCrossPoint);
 		}
-
 	}
-
-	
-
-
 }
 
 

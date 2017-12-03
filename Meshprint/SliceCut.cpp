@@ -187,6 +187,7 @@ void SliceCut::CutInPieces()
 			polygon_.insertEdge(t.first, t.second);
 		}
 		polygon_.FindIntersection();
+		polygon_.ConnectCutline();
 		polygon_.storePathToPieces(pieces_list_, i);
 #endif
 	}

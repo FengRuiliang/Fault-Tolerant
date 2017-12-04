@@ -461,8 +461,6 @@ void SliceCut::storeClipIntoCube()
 					if (iterB != grid_points_.end()) { atHeadPoint_ = true; }
 				}
 			}
-
-
 			qDebug() << cubes_support_.boxes_.size();
 		}	
 	}

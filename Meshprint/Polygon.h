@@ -42,5 +42,6 @@ private:
 	std::set<CutPoint*,comPoints> points;
 
 	float angleWithXAxis(Vec3f dir);
+	void Voronoi();
 };
 

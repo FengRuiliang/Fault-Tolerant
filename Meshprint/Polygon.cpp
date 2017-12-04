@@ -110,3 +110,7 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 		return atan(dir.y() / dir.x());
 }
 
+void Polygon::Voronoi()
+{
+
+}

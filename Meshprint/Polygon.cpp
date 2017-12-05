@@ -9,13 +9,17 @@ typedef trimesh::vec3  Vec3f;
 static bool sortByAngle(const CutLine* a, const CutLine* b)
 {
 
-	if (a->angle_ - b->angle_ < -1e-3)
+	if (a->angle_ - b->angle_ < -1e-2)
 	{
 		return true;
 	}
-	else if (a->angle_ - b->angle_ < 1e-3)
+	else if (a->angle_ - b->angle_ < 1e-2)
 	{
-		return(!a->isoutedge&&b->isoutedge);
+		if (a->isoutedge && !b->isoutedge)
+		{
+			return false;
+		}
+		return true;
 	}
 	else
 		return false;
@@ -33,13 +37,13 @@ static bool sortByXYCOR(const CutPoint* a, const CutPoint* b)
 {
 	Vec3f pos1 = a->getPosition();
 	Vec3f pos2 = b->getPosition();
-	if (pos1.x() - pos2.x() < -1e-3)
+	if (pos1.x() - pos2.x() < -1e-2)
 	{
 		return true;
 	}
-	else if (pos1.x() - pos2.x() < 1e-3)
+	else if (pos1.x() - pos2.x() < 1e-2)
 	{
-		return pos1.y() - pos2.y() < -1e-3;
+		return pos1.y() - pos2.y() < -1e-2;
 	}
 	return false;
 }
@@ -93,15 +97,17 @@ CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 int Polygon::FindIntersection()
 {
 	std::vector<CutLine*> str_line_;
-	std::vector<CutPoint*> new_points_;
-	std::sort(queue_.begin(), queue_.end(), sortByXYCOR);
-
+	std::vector<CutPoint*> queue_;
+	for (auto iter = points.rbegin(); iter != points.rend(); iter++)
+	{
+		queue_.push_back(*iter);
+	}
 	while (!queue_.empty())
 	{
 		CutPoint* ptr_point_ = queue_.back();
 		queue_.pop_back();
 		std::vector<CutLine*> left_line_, righ_line_, cros_line_;
-		UpdateStructure(ptr_point_, str_line_, left_line_, righ_line_, cros_line_,new_points_);
+		UpdateStructure(ptr_point_, str_line_, left_line_, righ_line_, cros_line_);
 		Vec3f cur_pos_ = ptr_point_->getPosition();
 		if (righ_line_.size() == 0)
 		{
@@ -121,7 +127,7 @@ int Polygon::FindIntersection()
 			}
 			if (down_&&up_)
 			{
-				FindNewEvent(down_, up_, ptr_point_, queue_, new_points_);
+				FindNewEvent(down_, up_, ptr_point_, queue_);
 			}
 
 		}
@@ -145,89 +151,19 @@ int Polygon::FindIntersection()
 			}
 			if (down_)
 			{
-				FindNewEvent(down_, righ_line_.front(), ptr_point_, queue_, new_points_);
+				FindNewEvent(down_, righ_line_.front(), ptr_point_, queue_);
 			}
 			if (up_)
 			{
-				FindNewEvent(righ_line_.back(), up_, ptr_point_, queue_, new_points_);
+				FindNewEvent(righ_line_.back(), up_, ptr_point_, queue_);
 			}
 
 
 		}
 	}
-	for (auto iter=new_points_.begin();iter!=new_points_.end();iter++)
-	{
-		if ((*iter)->getInEdges().size() == 1 && (*iter)->getOutEdges().size() == 1)
-		{
-			(*iter)->getInEdges()[0]->pnext_ = (*iter)->getOutEdges()[0];
-			(*iter)->getOutEdges()[0]->pprev_ = (*iter)->getInEdges()[0];
-		}
-		else if ((*iter)->getInEdges().size() > 0 && (*iter)->getOutEdges().size() > 0)
-		{
-			std::vector<CutLine*> lines;
-			for (auto iterIn = (*iter)->getInEdges().begin(); iterIn != (*iter)->getInEdges().end(); iterIn++)
-			{
-				(*iterIn)->angle_ = angleWithXAxis((*iterIn)->position_vert[0] - (*iterIn)->position_vert[1]);
-				(*iterIn)->isoutedge = false;
-				lines.push_back(*iterIn);
-			}
-			for (auto iterOut = (*iter)->getOutEdges().begin(); iterOut != (*iter)->getOutEdges().end(); iterOut++)
-			{
-				(*iterOut)->angle_ = angleWithXAxis((*iterOut)->position_vert[1] - (*iterOut)->position_vert[0]);
-				(*iterOut)->isoutedge = true;
-				lines.push_back(*iterOut);
-			}
-			std::sort(lines.begin(), lines.end(), sortByAngle);//ccw  allow the two line at the same angle
-			int count = lines.size();
-			while (count)
-			{
-				count = lines.size() == 1 ? 0 : lines.size();
-				while (count)
-				{
-					if (!lines.back()->isoutedge&&lines[lines.size() - 2]->isoutedge)
-					{
-						break;
-					}
-					else
-					{
-						lines.insert(lines.begin(), lines.back());
-						lines.pop_back();
-						count--;
-					}
-				}
-				if (count != 0)
-				{
-					CutLine* in_ = lines.back();
-					lines.pop_back();
-					in_->pnext_ = lines.back();
-					lines.back()->pprev_ = in_;
-					lines.pop_back();
-				}
-				else
-				{
-					(*iter)->getOutEdges().clear();
-					(*iter)->getInEdges().clear();
-					for (int i = 0; i < lines.size(); i++)
-					{
-						if (lines[i]->isoutedge)
-						{
-							(*iter)->getOutEdges().push_back(lines[i]);
-						}
-						else {
-							(*iter)->getInEdges().push_back(lines[i]);
-						}
-					}
-				}
-			}
-		}
-
-	}
-
 	return 0;
 
 }
-
-
 
 void Polygon::ConnectCutline()
 {
@@ -236,13 +172,11 @@ void Polygon::ConnectCutline()
 	{
 		if ((*iter)->getInEdges().size() == 1 && (*iter)->getOutEdges().size() == 1)
 		{
-			queue_.push_back(*iter);
 			(*iter)->getInEdges()[0]->pnext_ = (*iter)->getOutEdges()[0];
 			(*iter)->getOutEdges()[0]->pprev_ = (*iter)->getInEdges()[0];
 		}
 		else if ((*iter)->getInEdges().size() > 0 && (*iter)->getOutEdges().size() > 0)
 		{
-			queue_.push_back(*iter);
 			std::vector<CutLine*> lines;
 			for (auto iterIn = (*iter)->getInEdges().begin(); iterIn != (*iter)->getInEdges().end(); iterIn++)
 			{
@@ -312,12 +246,11 @@ void Polygon::ConnectCutline()
 			CutPoint* p0 = (*iter)->getInEdges()[0]->cut_point_[0];
 			CutPoint*p1 = (*iter)->getInEdges()[0]->cut_point_[1];
 			Vec3f length = p0->getPosition() - p1->getPosition();
-			if (p0->getEdgeSize() == 1 && abs(length.x()) < 5 * LIMIT&&abs(length.y()) < 5 * LIMIT)
+			if (p0->getEdgeSize() == 1 && abs(length.x()) < 75 * LIMIT&&abs(length.y()) < 75 * LIMIT)
 			{
 				(*iter)->getInEdges()[0]->visit = true;//this edge become no use;
 				continue;
 			}
-			queue_.push_back(*iter);
 			auto iterTem = tempPoints.insert(*iter);
 			if (!iterTem.second)//if  insert failed
 			{
@@ -332,12 +265,11 @@ void Polygon::ConnectCutline()
 			CutPoint* p0 = (*iter)->getOutEdges()[0]->cut_point_[0];
 			CutPoint*p1 = (*iter)->getOutEdges()[0]->cut_point_[1];
 			Vec3f length = p0->getPosition() - p1->getPosition();
-			if (p1->getEdgeSize() == 1 && abs(length.x()) < 5 * LIMIT&&abs(length.y()) < 5 * LIMIT)
+			if (p1->getEdgeSize() == 1 && abs(length.x()) < 3 * LIMIT&&abs(length.y()) < 3 * LIMIT)
 			{
 				(*iter)->getOutEdges()[0]->visit = true;//this edge become no use;
 				continue;
 			}
-			queue_.push_back(*iter);
 			auto iterTem = tempPoints.insert(*iter);
 			if (!iterTem.second)//if  insert failed
 			{
@@ -548,9 +480,7 @@ inline float Polygon::angleWithXAxis(Vec3f dir)
 		return atan(dir.y() / dir.x());
 }
 
-void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_line_,
-	std::vector<CutLine *>& left_line_, std::vector<CutLine *>& righ_line_,
-	std::vector<CutLine *>& cros_line_,std::vector<CutPoint*>&newpoints)
+void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_line_, std::vector<CutLine *>& left_line_, std::vector<CutLine *>& righ_line_, std::vector<CutLine *>& cros_line_)
 {
 
 	std::vector<CutLine*> point_lines_;
@@ -582,15 +512,12 @@ void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_
 		Vec3f p1 = (*iter)->position_vert[0];
 		Vec3f p2 = (*iter)->position_vert[1];
 		Vec3f Q = (ptr_point_)->getPosition();
-		float rate1 = (p2.y() - p1.y()) / (p2.x() - p1.x());
-		float rate2= (Q.y() - p1.y()) / (Q.x() - p1.x());
-		
 		if ((*iter)->order_point_[1] == ptr_point_)
 		{
 			left_line_.push_back(*iter);
 			iter=str_line_.erase(iter);
 		}
-		else if (abs(rate2-rate1)<1e-2)
+		else if (((Q - p1) ^ (p2 - p1)).length() < 1e-2)
 		{
 			cros_line_.push_back(*iter);
 			CutLine* l1_ = new CutLine((*iter)->cut_point_[0], ptr_point_);
@@ -602,13 +529,10 @@ void Polygon::UpdateStructure(CutPoint* ptr_point_, std::vector<CutLine *>& str_
 			l2_->pnext_ = (*iter)->pnext_;
 			l2_->pprev_ = l1_;
 			CutPoint* cur = (*iter)->cut_point_[0];
-			newpoints.push_back(cur);
 			auto to_split_ = find(cur->getOutEdges().begin(), cur->getOutEdges().end(), (*iter));
 			cur->getOutEdges().erase(to_split_);
 			cur->getOutEdges().push_back(l1_);
 			cur = (*iter)->cut_point_[1];
-			newpoints.push_back(cur);
-			newpoints.push_back(ptr_point_);
 			to_split_ = find(cur->getInEdges().begin(), cur->getInEdges().end(), (*iter));
 			cur->getInEdges().erase(to_split_);
 			cur->getInEdges().push_back(l2_);
@@ -720,31 +644,25 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 			{
 				cur->visit = true;
 				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
-			
 				length = cur->position_vert[0] - cur->position_vert[1];
-				if (abs(length.x()) > 75 * LIMIT || abs(length.y()) > 75 * LIMIT)
+				if (abs(length.x()) > 5 * LIMIT || abs(length.y()) > 5 * LIMIT)
 					can_be_regarded_as_one = false;
 				cur = cur->pnext_;
 			} while (cur != NULL && !cur->visit);
-
+			if (cur == NULL)//means this path is one open path
+			{
+				qDebug() << "this layer has one open path";
+				Vec3f p0 = circle_.back().second;
+				Vec3f p1 = circle_.front().first;
+				if ((p0 - p1).length() < 75 * LIMIT)
+					circle_.push_back(std::pair<Vec3f, Vec3f>(p0, p1));
+				else
+					qDebug() << "this layer has one open path";
+			}
 			if (!can_be_regarded_as_one)
 			{
-				if (cur == NULL)//means this path is one open path
-				{
-					
-					Vec3f p0 = circle_.back().second;
-					Vec3f p1 = circle_.front().first;
-					if ((p0 - p1).length() < 75 * LIMIT)
-					{
-						circle_.push_back(std::pair<Vec3f, Vec3f>(p0, p1));
-					}
-					else
-					{
-						qDebug() << "this layer has one open path";
-					}
-
-				}
 				pieces_list_[id].push_back(circle_);
+
 			}
 		}
 	}
@@ -753,11 +671,7 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 #endif
 }
 
-void Polygon::FindNewEvent(CutLine* down, CutLine* up, CutPoint* point, 
-	std::vector<CutPoint*> queue,
-	std::vector<CutPoint*>& newpoints	
-
-)
+void Polygon::FindNewEvent(CutLine* down, CutLine* up, CutPoint* point, std::vector<CutPoint*> queue)
 {
 	if (down->order_point_[1] != up->order_point_[1])
 	{
@@ -800,11 +714,6 @@ void Polygon::FindNewEvent(CutLine* down, CutLine* up, CutPoint* point,
 			up->cut_point_[1]->getInEdges().push_back(line_out_2_);
 			points.insert(point_new_);
 			queue.push_back(point_new_);
-			newpoints.push_back(point_new_);
-			newpoints.push_back(up->cut_point_[0]);
-			newpoints.push_back(up->cut_point_[1]);
-			newpoints.push_back(down->cut_point_[0]);
-			newpoints.push_back(down->cut_point_[1]);
 			sort(queue.begin(), queue.end(), sortByXYCOR);
 			up->visit=true;
 			down->visit=true;

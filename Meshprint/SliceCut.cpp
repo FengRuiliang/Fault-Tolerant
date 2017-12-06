@@ -51,7 +51,7 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 		for (int j= min_height / thickness_+1;j<=max_height / thickness_;j++)
 		{
 			storage_Face_list_[j].push_back((*iter_Face)->id());
-			if (j==350)
+			if (j==83)
 			{
 				(*iter_Face)->selected_ = true;
 			}
@@ -154,7 +154,7 @@ void SliceCut::CutInPieces()
 
 	for (int i = 0; i < num_pieces_; i++)
 	{
-		if (i!=350)
+		if (i!=83)
 		{
 			continue;
 		}

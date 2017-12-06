@@ -73,24 +73,17 @@ CutLine* Polygon::insertEdge(CutLine* e)
 
 CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 {
-
-	CutPoint*   p1 = new CutPoint(a);
-	CutPoint*	p2 = new CutPoint(b);
-	auto pair1_ = points.insert(p1);
-	auto pair2_ = points.insert(p2);
-	if (pair1_.first == pair2_.first)
+	if ((a-b).length()<1e-3)
 	{
 		return NULL;
 	}
-
-	CutLine* e = new CutLine(*pair1_.first, *pair2_.first);
-	(*pair1_.first)->setOutEdge(e);
-	(*pair2_.first)->setInEdge(e);
-	if (!pair1_.second)
-		delete p1;
-	if (!pair2_.second)
-		delete p2;
+	CutPoint*   p1 = new CutPoint(a);
+	CutPoint*	p2 = new CutPoint(b);
+	points_yasheng.push_back(p1);
+	points_yasheng.push_back(p2);
+	CutLine* e = new CutLine(p1, p2);
 	edges.push_back(e);
+
 	return e;
 }
 
@@ -167,6 +160,33 @@ int Polygon::FindIntersection()
 
 void Polygon::ConnectCutline()
 {
+	for (auto iter = edges.begin(); iter != edges.end(); iter++)
+	{
+		Vec3f endpoint = (*iter)->position_vert[1];
+		CutLine* mindisedge;
+		float dis = 1e6;
+		for (auto iter2 = edges.begin(); iter2 != edges.end(); iter2++)
+		{
+			if ((*iter2)->visit)
+			{
+				continue;
+			}
+			if (*iter2!=*iter)
+			{
+			
+			Vec3f start = (*iter2)->position_vert[0];
+			if ((endpoint-start).length() < dis)
+			{
+				mindisedge = *iter2;
+				dis = (endpoint-start).length();
+			}
+			}
+		}
+		(*iter)->pnext_ = mindisedge;
+		mindisedge->pprev_ = *iter;
+		mindisedge->visit = 1;
+	}
+	return;
 	std::set<CutPoint*, comPointsLarge> tempPoints;
 	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
@@ -623,9 +643,9 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 
 #ifndef MORETHANTWOTEST
 	for (int i = 0; i < edges.size(); i++)
+		edges[i]->visit = false;
+	for (int i = 0; i < edges.size(); i++)
 	{
-		bool can_be_regarded_as_one{ true };
-		Vec3f length;
 		if (!edges[i]->visit)
 		{
 			std::vector<std::pair<Vec3f, Vec3f>> circle_;
@@ -633,40 +653,23 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 			CutLine* cur = sta;
 			do
 			{
-				if (cur->pprev_ == NULL)
-				{
-					break;
-				}
-				cur = cur->pprev_;
-
-			} while (cur != sta);
-			do
-			{
-				cur->visit = true;
+				cur->visit = true;	
+				//qDebug() << cur->position_vert[0].x()<<cur->position_vert[0].y() << cur->position_vert[1].x() << cur->position_vert[1].y();
 				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
-				length = cur->position_vert[0] - cur->position_vert[1];
-				if (abs(length.x()) > 5 * LIMIT || abs(length.y()) > 5 * LIMIT)
-					can_be_regarded_as_one = false;
 				cur = cur->pnext_;
-			} while (cur != NULL && !cur->visit);
-			if (cur == NULL)//means this path is one open path
-			{
-				qDebug() << "this layer has one open path";
-				Vec3f p0 = circle_.back().second;
-				Vec3f p1 = circle_.front().first;
-				if ((p0 - p1).length() < 75 * LIMIT)
-					circle_.push_back(std::pair<Vec3f, Vec3f>(p0, p1));
-				else
-					qDebug() << "this layer has one open path";
+			
+			} while (cur != sta&&!cur->visit);
+			if (circle_.size())
+			{	pieces_list_[id].push_back(circle_);
 			}
-			if (!can_be_regarded_as_one)
-			{
-				pieces_list_[id].push_back(circle_);
+		
 
-			}
 		}
 	}
 	qDebug() << id << pieces_list_[id].size();
+	for(int i=0;i<pieces_list_[id].size();i++)
+		qDebug() << pieces_list_[id][i].size();
+
 
 #endif
 }

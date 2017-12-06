@@ -154,10 +154,10 @@ void SliceCut::CutInPieces()
 
 	for (int i = 0; i < num_pieces_; i++)
 	{
-		if (i!=350)
-		{
-			continue;
-		}
+// 		if (i!=49)
+// 		{
+// 			continue;
+// 		}
 		Polygon polygon_;
 		std::vector<int>&slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
@@ -184,8 +184,8 @@ void SliceCut::CutInPieces()
 			auto t = cutFacet(faces[slice_faces_[j]], cur_height_);
 			polygon_.insertEdge(t.first, t.second);
 		}
-		polygon_.FindIntersection();
 		polygon_.ConnectCutline();
+		//polygon_.FindIntersection();
 		polygon_.storePathToPieces(pieces_list_, i);
 #endif
 	}

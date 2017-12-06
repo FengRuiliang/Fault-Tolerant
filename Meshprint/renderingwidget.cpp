@@ -671,20 +671,22 @@ void RenderingWidget::DrawEdge(bool bv)
 		return;
 	}
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
+	if (ptr_slice_ == NULL)
+	{
+		return;
+	}
+	const std::vector<int> layerface = ptr_slice_->storage_Face_list_[slice_check_id_];
 	//////////////////////////////////////////////////////////////////////////
 	glBegin(GL_LINES);
 	glColor4ub(0, 0, 0, 255);
-	for (int i=0;i<ptr_mesh_->num_of_face_list();i++)
+	for (int i=0;i<layerface.size();i++)
 	{
-		if (faces[i]->selected())
-		{
+		
 			for (int j = 0; j < 3; j++)
 			{
-				glVertex3fv(faces[i]->vertices_[j]);
-				glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
+				glVertex3fv(faces[layerface[i]]->vertices_[j]);
+				glVertex3fv(faces[layerface[i]]->vertices_[(j + 1) % 3]);
 			}
-		}
-		
 	}
 	glEnd();
 	//////////////////////////////////////////////////////////////////////////
@@ -712,17 +714,22 @@ void RenderingWidget::DrawFace(bool bv)
 // 	}
 // 	glEnd();
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
+	if (ptr_slice_==NULL)
+	{
+		return;
+	}
+	const std::vector<int> layerface = ptr_slice_->storage_Face_list_[slice_check_id_];
 	glBegin(GL_TRIANGLES);
 	glColor4ub(0, 170, 0, 255);
-	for (size_t i = 0; i < faces.size(); ++i)
+	for (size_t i = 0; i < layerface.size(); ++i)
 	{
-		//if (faces[i]->selected())
+		/*if (faces[i]->selected())*/
 		{
 		
-			glNormal3fv(faces.at(i)->normal());
-			glVertex3fv(faces[i]->vertices_[0]);
-			glVertex3fv(faces[i]->vertices_[1]);
-			glVertex3fv(faces[i]->vertices_[2]);}
+			glNormal3fv(faces[layerface[i]]->normal());
+			glVertex3fv(faces[layerface[i]]->vertices_[0]);
+			glVertex3fv(faces[layerface[i]]->vertices_[1]);
+			glVertex3fv(faces[layerface[i]]->vertices_[2]);}
 	}
 	glEnd();
 }

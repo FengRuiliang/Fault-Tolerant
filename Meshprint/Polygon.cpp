@@ -15,11 +15,7 @@ static bool sortByAngle(const CutLine* a, const CutLine* b)
 	}
 	else if (a->angle_ - b->angle_ < 1e-2)
 	{
-		if (a->isoutedge && !b->isoutedge)
-		{
-			return false;
-		}
-		return true;
+		return (!a->isoutedge&&b->isoutedge);
 	}
 	else
 		return false;
@@ -645,13 +641,15 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 				cur->visit = true;
 				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
 				length = cur->position_vert[0] - cur->position_vert[1];
-				if (abs(length.x()) > 5 * LIMIT || abs(length.y()) > 5 * LIMIT)
+				if (abs(length.x()) > 75* LIMIT || abs(length.y()) > 75* LIMIT)
 					can_be_regarded_as_one = false;
 				cur = cur->pnext_;
 			} while (cur != NULL && !cur->visit);
-			if (cur == NULL)//means this path is one open path
+			
+			if (!can_be_regarded_as_one)
 			{
-				qDebug() << "this layer has one open path";
+				if (cur == NULL)//means this path is one open path
+			{
 				Vec3f p0 = circle_.back().second;
 				Vec3f p1 = circle_.front().first;
 				if ((p0 - p1).length() < 75 * LIMIT)
@@ -659,8 +657,6 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 				else
 					qDebug() << "this layer has one open path";
 			}
-			if (!can_be_regarded_as_one)
-			{
 				pieces_list_[id].push_back(circle_);
 
 			}

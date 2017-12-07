@@ -10,8 +10,6 @@ class SweepLine;
 #define DEFAULT_T 0.02f
 
 
-
-
 class SliceCut
 {
 public:

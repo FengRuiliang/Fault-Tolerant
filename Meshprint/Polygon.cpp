@@ -69,15 +69,12 @@ CutLine* Polygon::insertEdge(CutLine* e)
 
 CutLine* Polygon::insertEdge(Vec3f a, Vec3f b)
 {
-
+	if (fabs(a.x() - b.x()) < LIMIT&&fabs(a.y() - b.y()) < LIMIT)
+		return NULL;
 	CutPoint*   p1 = new CutPoint(a);
 	CutPoint*	p2 = new CutPoint(b);
 	auto pair1_ = points.insert(p1);
 	auto pair2_ = points.insert(p2);
-	if (pair1_.first == pair2_.first)
-	{
-		return NULL;
-	}
 
 	CutLine* e = new CutLine(*pair1_.first, *pair2_.first);
 	(*pair1_.first)->setOutEdge(e);
@@ -163,6 +160,7 @@ int Polygon::FindIntersection()
 
 void Polygon::ConnectCutline()
 {
+
 	std::set<CutPoint*, comPointsLarge> tempPoints;
 	for (auto iter = points.begin(); iter != points.end(); iter++)
 	{
@@ -355,7 +353,7 @@ void Polygon::ConnectCutline()
 			CutPoint* p0 = (*iter)->getInEdges()[0]->cut_point_[0];
 			CutPoint*p1 = (*iter)->getInEdges()[0]->cut_point_[1];
 			Vec3f length = p0->getPosition() - p1->getPosition();
-			if (p0->getEdgeSize() == 1 && abs(length.x()) < 17 * LIMIT&&abs(length.y()) < 17 * LIMIT)
+			if (p0->getEdgeSize() == 1 && abs(length.x()) < 77 * LIMIT&&abs(length.y()) < 77 * LIMIT)
 			{
 				(*iter)->getInEdges()[0]->visit = true;//this edge become no use;
 				continue;
@@ -374,7 +372,7 @@ void Polygon::ConnectCutline()
 			CutPoint* p0 = (*iter)->getOutEdges()[0]->cut_point_[0];
 			CutPoint* p1 = (*iter)->getOutEdges()[0]->cut_point_[1];
 			Vec3f length = p0->getPosition() - p1->getPosition();
-			if (p1->getEdgeSize() == 1 && abs(length.x()) < 17 * LIMIT&&abs(length.y()) < 17 * LIMIT)
+			if (p1->getEdgeSize() == 1 && abs(length.x()) < 77 * LIMIT&&abs(length.y()) < 77 * LIMIT)
 			{
 				(*iter)->getOutEdges()[0]->visit = true;//this edge become no use;
 				continue;
@@ -620,7 +618,7 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 #ifndef MORETHANTWOTEST
 	for (int i = 0; i < edges.size(); i++)
 	{
-		bool can_be_regarded_as_one{ true };
+		bool can_be_regarded_as_one{ false };
 		Vec3f length;
 		if (!edges[i]->visit)
 		{
@@ -641,22 +639,31 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 				cur->visit = true;
 				circle_.push_back(std::pair<Vec3f, Vec3f>(cur->position_vert[0], cur->position_vert[1]));
 				length = cur->position_vert[0] - cur->position_vert[1];
-				if (abs(length.x()) > 75* LIMIT || abs(length.y()) > 75* LIMIT)
-					can_be_regarded_as_one = false;
+				//if (abs(length.x()) > 75* LIMIT || abs(length.y()) > 75* LIMIT)
+				//	can_be_regarded_as_one = false;
 				cur = cur->pnext_;
-			} while (cur != NULL && !cur->visit);
+			} while (cur != NULL &&!cur->visit);
 			
 			if (!can_be_regarded_as_one)
 			{
-				if (cur == NULL)//means this path is one open path
-			{
 				Vec3f p0 = circle_.back().second;
 				Vec3f p1 = circle_.front().first;
-				if ((p0 - p1).length() < 75 * LIMIT)
-					circle_.push_back(std::pair<Vec3f, Vec3f>(p0, p1));
-				else
-					qDebug() << "this layer has one open path";
-			}
+				qDebug() << pieces_list_[id].size() << circle_.size()<< p0.x() << p0.y() << p1.x() << p1.y();
+				if (cur == NULL)
+					qDebug() << "this path is one open path";
+			//	if (cur == NULL)//means this path is one open path
+			//{
+			//	
+			//
+			//	if ((p0 - p1).length() < 75 * LIMIT)
+			//		circle_.push_back(std::pair<Vec3f, Vec3f>(p0, p1));
+			//	else
+			//	{
+			//		qDebug() << pieces_list_[id].size();
+			//		qDebug() << p0.x() << p0.y() << p1.x() << p1.y() << "this layer has one open path";
+
+			//	}
+			//}
 				pieces_list_[id].push_back(circle_);
 
 			}
@@ -716,5 +723,3 @@ void Polygon::FindNewEvent(CutLine* down, CutLine* up, CutPoint* point, std::vec
 		}
 	}
 }
-
-

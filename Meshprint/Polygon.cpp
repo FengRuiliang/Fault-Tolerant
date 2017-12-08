@@ -648,9 +648,9 @@ void Polygon::storePathToPieces(std::vector<std::vector<std::pair<Vec3f, Vec3f>>
 			{
 				Vec3f p0 = circle_.back().second;
 				Vec3f p1 = circle_.front().first;
-				qDebug() << pieces_list_[id].size() << circle_.size()<< p0.x() << p0.y() << p1.x() << p1.y();
-				if (cur == NULL)
-					qDebug() << "this path is one open path";
+				//qDebug() << pieces_list_[id].size() << circle_.size()<< p0.x() << p0.y() << p1.x() << p1.y();
+				//if (cur == NULL)
+				//	qDebug() << "this path is one open path";
 			//	if (cur == NULL)//means this path is one open path
 			//{
 			//	

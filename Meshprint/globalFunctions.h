@@ -2,8 +2,27 @@
 #define GLOBALFUNCTIONS_H
 #include "HE_mesh/Vec.h"
 #include <vector>
+#include <utility>
 #include "HE_mesh/Mesh3D.h"
+#define ScaleNumber 1e6
+#define SmoothRatio 0.05
+#define MIN_DIS 0.8
+#define eps 1e-9
+#define MaxNumContours 1000
 
+typedef std::pair<double, double> pa;
+struct LayerGrid
+{
+	std::vector<std::pair<pa, pa> > grids[MaxNumContours];
+};
+struct LayerOffDis
+{
+	std::vector<double> dis[MaxNumContours];
+};
+struct New2Origin
+{
+	std::map<int, int>  layermap[MaxNumContours];
+};
 #define SWAP(a,b,T) {T tmp=(a); (a)=(b); (b)=tmp;}
 #define min(a,b) a<b?a:b
 #define max(a,b) a>b?a:b

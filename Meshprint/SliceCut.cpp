@@ -1,7 +1,7 @@
 #pragma once
 #include "SliceCut.h"
 #include "QDebug"
-#include <omp.h>
+#include "Polygon.h"
 #define MAX_FLOAT_VALUE (static_cast<float>(10e10))
 #define MIN_FLOAT_VALUE	(static_cast<float>(-10e10))
 //CHANGE
@@ -15,39 +15,44 @@ typedef std::vector<HE_face* >::reverse_iterator FACE_RITER;
 typedef std::vector<HE_edge* >::reverse_iterator EDGE_RITER;
 typedef std::pair<HE_vert*, HE_vert* > PAIR_VERTEX;
 
+
 SliceCut::~SliceCut()
 {
 	clearcut();
 	pieces_list_ = NULL;
 	storage_Face_list_ = NULL;
-	clip_list_ = NULL;
+// 	clip_list_ = NULL;
 }
 
-std::vector<int> * SliceCut::storeMeshIntoSlice()
+std::vector<int> * SliceCut::StoreFaceIntoSlice()
 {
 
 	//qDebug() << mesh_in_->get_faces_list()->size();
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	const std::vector<HE_vert *>& vertice = *(mesh_in_->get_vertex_list());
 	storage_Face_list_ = new std::vector<int>[num_pieces_];// new #2/thickness_
-	pieces_list_ = new std::vector<std::vector<CutLine>*>[num_pieces_];
 	
 	//qDebug() << storage_Face_list_->size()<<2/thickness_+1;
 	for (auto iter_Face= faces.begin();iter_Face!= faces.end();iter_Face++ )
 	{
-		
-		//minimal 2 and maximal 0
-		float min_z_ = vertice.at(sortVertInFace((*iter_Face)->id()).at(2))->position().z();
-		float max_z_ = vertice.at(sortVertInFace((*iter_Face)->id()).at(0))->position().z();
-		if (min_z_==max_z_)// 22/01/2017
+		double max_height = MIN_FLOAT_VALUE;
+		double min_height = MAX_FLOAT_VALUE;
+	
+		for (int i=0;i<3;i++)
+		{
+			min_height = min(min_height, (*iter_Face)->vertices_[i].z());
+			max_height = max(max_height, (*iter_Face)->vertices_[i].z());
+		}
+		if (max_height-min_height<1e-3)// 22/01/2017
 		{
 			continue;
 		}
 		//the num of layer equal to 
-		for (int j= min_z_ / thickness_;j<=max_z_ / thickness_;j++)
+		int j = min_height / thickness_;
+		if (j*thickness_ != min_height)j++;
+		for (;j* thickness_<max_height ;j++)
 		{
-			
-			storage_Face_list_[j].push_back((*iter_Face)->id());
+			storage_Face_list_[j].push_back((*iter_Face)->id());	
 		}
 	}
 	return storage_Face_list_;
@@ -65,6 +70,35 @@ int SliceCut::isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface){
 		return temp_edge->id();
 	}
 	return -1;
+}
+
+HE_edge* SliceCut::getLeftEdge(HE_face* face_,float height_)
+{
+	HE_edge* sta_ = face_->pedge_;
+	HE_edge* cur_ = face_->pedge_;
+	do 
+	{
+		if (cur_->pvert_->position().z()<=height_&&cur_->start_->position().z()>=height_)
+		{
+			return cur_;
+		}
+		cur_ = cur_->pnext_;
+	} while (cur_!=sta_);
+	return NULL;
+}
+
+void SliceCut:: clearcut()
+{
+	if (pieces_list_==NULL)
+	{
+		return;
+	}
+	delete[]pieces_list_;
+	delete[] storage_Face_list_;
+	pieces_list_ = NULL;
+	storage_Face_list_ = NULL;
+
+	
 }
 
 std::vector<int> SliceCut::sortVertInFace(int faceid)
@@ -104,370 +138,125 @@ std::vector<int> SliceCut::sortVertInFace(int faceid)
 	return vertex_list;
 }
 
-void SliceCut:: clearcut()
-{
-	if (pieces_list_==NULL)
-	{
-		return;
-	}
-	for (size_t i=0;i<num_pieces_;i++)
-	{
-		for (size_t j=0;j<pieces_list_[i].size();j++)
-		{
-			pieces_list_[i][j]->clear();
-			delete pieces_list_[i][j];
-		}
-	}
-	delete[]pieces_list_;
-	delete[] storage_Face_list_;
-	delete[] clip_list_;
-}
-
 void SliceCut::CutInPieces()
 {
+//#define  SHOWLINES
 	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
 	const std::vector<HE_vert *>& verts = *(mesh_in_->get_vertex_list());
-
-#pragma omp parallel for
-	for (int i = 0; i <num_pieces_; i++)
+	if (pieces_list_ != NULL)
 	{
-	
+		delete[]pieces_list_;
+	}
+	pieces_list_ = new std::vector<std::vector<std::pair<Vec3f, Vec3f>>>[num_pieces_];
+
+	for (int i = 0; i < num_pieces_; i++)
+	{
+		Polygon polygon_;
 		std::vector<int>&slice_faces_ = storage_Face_list_[i];
-		//qDebug() <<i<< slice_faces_.size();
 		float cur_height_ = i*thickness_;
-		HE_edge * cur_edge_=NULL;
-		HE_edge * longest_edge_=NULL;
-		HE_edge * cut_edge = NULL;
-		std::vector<int> vert_sort;
-	
-		// find the longest edge which is been acrossed;
-		std::vector<HE_edge *> layer_hedge_;
-		std::vector<CutLine>* circle_list_;
-		for (auto iter = slice_faces_.begin(); iter != slice_faces_.end(); iter++)
+#ifdef SHOWLINES
+		int count_ = 0;
+		std::vector<std::pair<Vec3f, Vec3f>> cir;
+		for (int j = 0; j < slice_faces_.size(); j++)
 		{
-			//circle_list_ = new std::vector<cutLine>;//new a vector storage
-			//pieces_list_[i].push_back(circle_list_);
-			if (*iter == -1)
+			auto t = cutFacet(faces[slice_faces_[j]], cur_height_);
+			CutLine* et_ = polygon_.insertEdge(t.first, t.second);
+			if (et_ != NULL)
 			{
-				continue;
-			}
-			cur_edge_ = faces.at(*iter)->pedge_;
-			vert_sort = sortVertInFace(*iter);//sort the three vertex in z position of No *iter face.
-			//lowest point shall  not higher than current height
-			//qDebug() << *iter;
-			if (verts.at(vert_sort[2])->position().z()>cur_height_|| (faces.at(*iter)->normal().x()==0& faces.at(*iter)->normal().y()==0))//in this layer,eliminate the higher one
-			{
-				*iter=-1;
-				continue;
-			}
-			else
-			{
-				//if (circle_list_!=NULL)
-				{
-					circle_list_ = new std::vector<CutLine>;//new a vector storage
-					pieces_list_[i].push_back(circle_list_);
-				}
 				
-				if (cur_edge_->pvert_->id()==vert_sort[0])//当前边的end是最高点
-				{
-					if (cur_edge_->pprev_->pvert_->id() == vert_sort[1])//但前边的start是中间高度点。
-					{
-						longest_edge_ = cur_edge_->pnext_;
-					}
-					else
-					{
-						longest_edge_ = cur_edge_;
-					}
-						
-				}
-				else if (cur_edge_->pvert_->id()==vert_sort[1])
-				{
-					longest_edge_ = cur_edge_->pprev_;
-				}
-				else
-				{
-					if (cur_edge_->pprev_->pvert_->id()==vert_sort[1])
-					{
-						longest_edge_ = cur_edge_->pnext_;
-					}
-					else
-					{
-						longest_edge_ = cur_edge_;
-					}
-						
-				}
-				cur_edge_ = longest_edge_;
-				if (cur_edge_ != NULL)
-				{
-					int index = 0;
-					do
-					{
-						index++;
-						Vec3f cur_vector_(cur_edge_->pvert_->position() - cur_edge_->pprev_->pvert_->position());
-
-						point pos1, pos2;
-						if (cur_vector_.z() == 0)//it means the face is lay flat in the cut face.
-						{
-							cur_edge_ = cur_edge_->pnext_->ppair_;//28/11/2016
-							continue;
-						}
-						else
-						{
-							//if (cur_edge_->pvert_->position().z() > cur_height_)//the cur_edge_ is up vector
-							if (cur_vector_.z() > 0 )// modify at 2017/2/28
-							{
-								cut_edge = cur_edge_;
-								pos2 = cur_edge_->pvert_->position() - cur_vector_*(cur_edge_->pvert_->position().z() - cur_height_) / cur_vector_.z();
-								if (cur_edge_->pnext_->pvert_->position().z() > cur_height_)
-								{
-									cur_edge_ = cur_edge_->pprev_;
-									cur_vector_ = (cur_edge_->pvert_->position() - cur_edge_->pprev_->pvert_->position());
-									pos1 = cur_edge_->pvert_->position() - cur_vector_*(cur_edge_->pvert_->position().z() - cur_height_) / cur_vector_.z();
-									
-								}
-								else if (cur_edge_->pnext_->pvert_->position().z() < cur_height_)
-								{
-									cur_edge_ = cur_edge_->pnext_;
-									cur_vector_ = (cur_edge_->pvert_->position() - cur_edge_->pprev_->pvert_->position());
-									pos1 = cur_edge_->pvert_->position() - cur_vector_*(cur_edge_->pvert_->position().z() - cur_height_) / cur_vector_.z();
-
-								}
-								else
-								{
-									pos1 = cur_edge_->pnext_->pvert_->position();
-									cur_edge_ = cur_edge_->pnext_;//2016/11/28
-								}
-								
-							}
-							else  //(cur_edge_->pvert_->position().z() <=cur_height_),the cur_edge_ is down vector
-							{
-
-								pos1 = cur_edge_->pvert_->position() - cur_vector_*(cur_edge_->pvert_->position().z() - cur_height_) / cur_vector_.z();
-
-								if (cur_edge_->pnext_->pvert_->position().z() < cur_height_)
-								{
-									
-									cur_edge_ = cur_edge_->pprev_;
-									cur_vector_ = (cur_edge_->pvert_->position() - cur_edge_->pprev_->pvert_->position());
-									
-									pos2 = cur_edge_->pvert_->position() - cur_vector_*(cur_edge_->pvert_->position().z() - cur_height_) / cur_vector_.z();
-									cut_edge = cur_edge_;
-								}
-								else if (cur_edge_->pnext_->pvert_->position().z() > cur_height_)
-								{
-									cur_edge_ = cur_edge_->pnext_;
-									cur_vector_ = (cur_edge_->pvert_->position() - cur_edge_->pprev_->pvert_->position());
-									pos2 = cur_edge_->pvert_->position() - cur_vector_*(cur_edge_->pvert_->position().z() - cur_height_) / cur_vector_.z();
-									cut_edge = cur_edge_;
-								}
-								else// cur_edge_->pnext_->pvert_->position().z()== cur_height_
-								{
-									pos2 = cur_edge_->pnext_->pvert_->position();
-									if (cur_edge_->pvert_->position().z() == cur_height_)
-									{
-										cur_edge_ = cur_edge_->pprev_;
-									}
-									else
-									{
-										cur_edge_ = cur_edge_->pnext_;
-									}
-
-									cut_edge = cur_edge_;
-								}
-
-							}
-							cur_edge_ = cut_edge->ppair_;
-						}
-						if (cur_edge_->pface_==NULL)//means reach the boundary 28/11/2016
-						{
-							//qDebug()<<" faces.at(*iter)"<< faces.at(*iter) <<
-							break;
-						}
-						std::vector<int>::iterator p = std::find(slice_faces_.begin(), slice_faces_.end(), cur_edge_->pface_->id());
-						if (p == slice_faces_.end())
-						{
-							break;
-							qDebug() << i << index;
-						}
-						//if (p != slice_faces_.end())
-						{
-							
-							*p = -1;
-						}
-						
-						//qDebug() << "slice" << i;
-						if (pos1==pos2)
-						{
-							continue;
-						}
- 						circle_list_->push_back(CutLine(pos1,pos2));
-					} while (cur_edge_->id() != longest_edge_->id() && cur_edge_ ->pface_!= NULL);
-				}
+				cir.push_back(std::pair<Vec3f, Vec3f>(et_->position_vert[0], et_->position_vert[1]));
+				pieces_list_[i].push_back(cir);
 			}
-
 		}
+		qDebug() << count_;
+		
+#else
+		std::vector<std::pair<Vec3f, Vec3f>> cir;
+		for (int j = 0; j < slice_faces_.size(); j++)
+		{
+			auto t = cutFacet(faces[slice_faces_[j]], cur_height_);
+			polygon_.insertEdge(t.first, t.second);
+		}
+		polygon_.ConnectCutline();
+		//polygon_.FindIntersection();
+		polygon_.storePathToPieces(pieces_list_, i);
+		//qDebug() << i << pieces_list_[i].size();
+#endif
 	}
 }
 
-void SliceCut::clipPolygon()
+static bool sortCutLineByZ(const CutLine* a,const CutLine* b )
 {
-	if (clip_list_!=NULL)
-	{
-		delete[] clip_list_;
-	}
-	clip_list_ = new std::vector<std::vector<Vec3f>>[num_pieces_];
-	for (int i=num_pieces_-1;i>1;i--)
-	{
-		//std::vector < std::vector<cutLine>*>*pieces_list_;
-
-		std::vector<std::vector<CutLine>*>& slice = pieces_list_[i];
-		std::vector<std::vector<CutLine>*>& slice_down_= pieces_list_[i-1];
-		Paths sub(slice.size());
-		Paths clip(slice_down_.size());
-		Paths solution;
-		for (int j=0;j<slice.size();j++)
-		{
-			std::vector<CutLine>* loop = slice[j];
-			for (int k=0;k<loop->size();k++)
-			{
-				int x_ = loop->at(k).position_vert[0].x()*1e6;
-				int y_ = loop->at(k).position_vert[0].y()*1e6;
-				sub[j] << IntPoint(x_, y_);
-			}
-		}
-		for (int j = 0; j < slice_down_.size(); j++)
-		{
-			std::vector<CutLine>* loop = slice_down_[j];
-			for (int k = 0; k < loop->size(); k++)
-			{
-				int x_ = loop->at(k).position_vert[0].x()*1e6;
-				int y_ = loop->at(k).position_vert[0].y()*1e6;
-				clip[j] << IntPoint(x_, y_);
-			}
-		}
-		Clipper c;
-		c.AddPaths(sub, ptSubject, true);
-// 		for (int m=0;m< slice_down_.size();m++)
-// 		{
-// 		
-// 			c.Clear();
-// 			c.AddPaths(solution, ptSubject, true);
-// 		}
-		c.AddPaths(clip, ptClip, true);
-		c.Execute(ctDifference, solution, pftNonZero, pftNonZero);
-
-		for (int j = 0; j < solution.size(); j++)
-		{
-			std::vector<Vec3f> loop;
-			for (int k = 0; k < solution[j].size(); k++)
-			{
-				Vec3f p(solution[j][k].X*1e-6, solution[j][k].Y*1e-6, i*thickness_);
-				loop.push_back(p);
-			}
-			clip_list_[i].push_back(loop);
-		}
-	}
-}
-void SliceCut::storeClipIntoCube()
-{
-	cubes_support_.setUnit(spot_size_, spot_size_, thickness_);
-	for (int i = 2; i < 3; i++)
-	{
-		qDebug()<<clip_list_[i].size();
-		for (int j=0;j<clip_list_[i].size();j++)
-		{
-			std::multiset<Vec3f, comVec3fBlack> grid_points_;
-			int num = clip_list_[i][j].size();
-			Vec3f a, b, vector_;
-			for (int k=0;k<clip_list_[i][j].size();k++)
-			{
-				a=clip_list_[i][j][k];
-				b=clip_list_[i][j][(k + 1) % num];
-				float x_min_ = a.x() <= b.x() ? a.x() : b.x();
-				float x_max_ = a.x() >= b.x() ? a.x() : b.x();
-				int min_wid_id_ = round((x_min_ + spot_size_ * 10000) / spot_size_ - 0.5) - 10000;
-				int max_wid_id_ = round((x_max_ + spot_size_ * 10000) / spot_size_ - 0.5) - 10000;
-				vector_ = b - a;
-				for (int x_id_ = min_wid_id_; x_id_ <= max_wid_id_; x_id_++)
-				{
-					if (vector_.x() == 0) { continue; }
-					if (x_id_*spot_size_ == x_max_) { continue; }
-					else
-					{
-						Vec3f point_p_ = a + (x_id_*spot_size_ - a.x()) / vector_.x()*vector_;
-						grid_points_.insert(point_p_);
-					}
-				}
-			}
-			qDebug() << grid_points_.size();
-			auto iterB = grid_points_.begin();
-			if (iterB == grid_points_.end())continue;;
-			float x_cur_, y_cur_, x_last_, y_last_;
-			x_cur_ = (*iterB).x();//used in small grid
-			x_last_ = (*iterB).x();
-			bool atHeadPoint_ = true;
-			for (; iterB != grid_points_.end(); )
-			{
-				y_last_ = (*iterB).y();
-				y_cur_ = (*iterB).y();
-				x_cur_ = (*iterB).x();
-
-				if (abs(x_cur_ - x_last_) > 1e-3)// means that we are visiting another line;
-				{
-					x_last_ = x_cur_;
-					atHeadPoint_ = true;
-				}
-
-				if (iterB == grid_points_.end()) { break; }// ignore the small grid which has no crosspoint
-
-				else if (atHeadPoint_)
-				{
-					Vec3f boundaryPD_ = *iterB;
-					iterB++;//point to next grid
-					if (iterB == grid_points_.end())continue;
-					atHeadPoint_ = false;
-					y_cur_ = (*iterB).y();
-					float y_max_, y_min_;//modify at 2017/3/2
-					if (y_cur_ - y_last_ > 1e-3)
-					{
-						y_max_ = y_cur_;
-						y_min_ = y_last_;
-					}
-					else
-					{
-						y_max_ = y_last_;
-						y_min_ = y_cur_;
-					}
-					int last_id_ = round((y_min_ + spot_size_ * 10000) / spot_size_ - 0.5) - 10000;
-					int cur_id_ = round((y_max_ + spot_size_ * 10000) / spot_size_ - 0.5) - 10000;
-					int x_id_ = round((x_cur_ + spot_size_ * 10000) / spot_size_ - 0.5) - 10000;
-					if (last_id_*spot_size_ == y_max_)
-					{
-						last_id_--;
-					}
-					if (cur_id_*spot_size_ == y_max_)
-					{
-						cur_id_--;
-					}
-					for (int y_id_ = last_id_; y_id_ <= cur_id_; y_id_++)
-					{
-						Cubes::Box box_(x_id_, y_id_, i);
-						cubes_support_.insertToBox(box_);
-					}
-				}
-				else if (!atHeadPoint_)// ignore the small grid which has no crosspoint
-				{
-					iterB++;
-					if (iterB != grid_points_.end()) { atHeadPoint_ = true; }
-				}
-			}
-			qDebug() << cubes_support_.boxes_.size();
-		}	
-	}
+	return abs((a->position_vert[0] - a->position_vert[1]).z()) <
+		abs((b->position_vert[0] - b->position_vert[1]).z());
 }
 
-
-void SliceCut::cutFaces()
+std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 {
-	const std::vector<HE_face *>& faces = *(mesh_in_->get_faces_list());
+	std::vector<Vec3f>& p = facet->vertices_;
+	std::vector<CutLine*> e_;
+	e_.push_back(new CutLine(p[0],p[1]));
+	e_.push_back(new CutLine(p[1], p[2]));
+	e_.push_back(new CutLine(p[2], p[0]));
+	for (int i = 0; i < 3; i++)
+		e_[i]->pnext_ = e_[(i + 1) % 3];
+	std::sort(e_.begin(), e_.end(), sortCutLineByZ);
+	Vec3f pos1,pos2;
+	Vec3f dir = e_[2]->position_vert[1] - e_[2]->position_vert[0];
+	if (dir.z()<0)
+	{
+		pos1 = e_[2]->position_vert[0] + (cur_height_ - e_[2]->position_vert[0].z())/(dir.z())*dir;
+		if (e_[2]->pnext_->position_vert[1].z()<cur_height_)
+		{
+			pos2 = e_[2]->pnext_->pnext_->position_vert[0] +
+				(e_[2]->pnext_->pnext_->position_vert[1] - e_[2]->pnext_->pnext_->position_vert[0])*
+				(cur_height_ - e_[2]->pnext_->pnext_->position_vert[0].z())/
+				(e_[2]->pnext_->pnext_->position_vert[1]- e_[2]->pnext_->pnext_->position_vert[0]).z();
+		}
+		else if (e_[2]->pnext_->position_vert[1].z()==cur_height_)
+		{
+			pos2 = e_[2]->pnext_->position_vert[1];
+		}
+		else
+		{
+			pos2 = e_[2]->pnext_->position_vert[0] +
+				
+				(e_[2]->pnext_->position_vert[1] - e_[2]->pnext_->position_vert[0])*
+				(cur_height_ - e_[2]->pnext_->position_vert[0].z())/
+				(e_[2]->pnext_->position_vert[1] - e_[2]->pnext_->position_vert[0]).z();
+		}
+	}
+	else
+	{
+		pos2 = e_[2]->position_vert[0] + (cur_height_ - e_[2]->position_vert[0].z())/dir.z()*dir;
+		if (e_[2]->pnext_->position_vert[1].z()<cur_height_)
+		{
+			pos1 = e_[2]->pnext_->position_vert[0] +
+				(e_[2]->pnext_->position_vert[1] - e_[2]->pnext_->position_vert[0])*
+				(cur_height_ - e_[2]->pnext_->position_vert[0].z())/
+				(e_[2]->pnext_->position_vert[1] - e_[2]->pnext_->position_vert[0]).z()	;
+		}
+		else if (e_[2]->pnext_->position_vert[1].z()==cur_height_)
+		{
+			pos1 = e_[2]->pnext_->position_vert[1];
+		}
+		else
+		{
+			pos1 = e_[2]->pnext_->pnext_->position_vert[0] +
+				(e_[2]->pnext_->pnext_->position_vert[1] - e_[2]->pnext_->pnext_->position_vert[0])*
+				(cur_height_ - e_[2]->pnext_->pnext_->position_vert[0].z())/
+				(e_[2]->pnext_->pnext_->position_vert[1] - e_[2]->pnext_->pnext_->position_vert[0]).z();
+		}
+	}
+	for (int i=0;i<3;i++)
+	{
+		delete e_[i];
+	}
+	return std::pair<Vec3f, Vec3f>(pos1, pos2);
+}
+
+std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* SliceCut::GetPieces()
+{
+	
+	 return pieces_list_; 
 }

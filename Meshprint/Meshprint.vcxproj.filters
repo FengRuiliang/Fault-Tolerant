@@ -62,9 +62,6 @@
     <ClCompile Include="clipper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cubes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="globalFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,34 +74,31 @@
     <ClCompile Include="SliceCut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="space2dKDTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Support.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HE_mesh\Mesh3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="triangle\triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MeshInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MeshInfo.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MeshInfo.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Polygon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BinarySearchTree.cpp">
+    <ClCompile Include="maintenance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_maintenance.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_maintenance.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="MSAABB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleglobalFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PSO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -121,11 +115,11 @@
     <CustomBuild Include="renderingwidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="oepndialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MeshInfo.h">
+    <CustomBuild Include="maintenance.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="maintenance.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -136,9 +130,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="clipper.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cubes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="globalFunctions.h">
@@ -156,35 +147,38 @@
     <ClInclude Include="SliceCut.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="space2dKDTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Support.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HE_mesh\Mesh3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HE_mesh\Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="triangle\triangle.h">
+    <ClInclude Include="Cutline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_oepndialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cutline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BinarySearchTree.h">
+    <ClInclude Include="GeneratedFiles\ui_maintenance.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MSAABB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleglobalFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PSO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

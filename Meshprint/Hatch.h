@@ -5,14 +5,10 @@
 #include <math.h>
 #include "globalFunctions.h"
 #include "clipper.hpp"
-#include "Cutline.h"
 using namespace ClipperLib;
 class QLine;
-
+class CutLine;
 // extern float offset_dis_;
-
-//extern enum hatchType;
-//static float getthickness() { return HatchChessboard::getThickness(); }
 enum FieldType
 {
 	WHITE = 0,
@@ -91,34 +87,40 @@ struct compareBField_y_
 };
 
 
-class Hatch
+class Hatch 
 {
-
 public:
-	virtual void clearHatch();
 	void setLaserPower(float power);
 	void setLaserSpeed(float speed);
 	std::vector<Vec3f*>* getHatch() { return hatch_; };
-	int GetNumPieces() { return num_pieces_; }
-	float getThickness() { return thickness_; }
 public:
 	std::vector<Vec3f*>* hatch_;
-	std::vector <std::vector<CutLine>*>*boudary_edge_;
+	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>*boudary_edge_;
 	std::vector < std::vector<Vec3f>>*offset_vert_;
-	int	num_pieces_;
+	//std::vector < std::vector<Vec3f>*>*offset_vert_rotate_;
 public:
-	Hatch(SliceCut*parent);
-	Hatch();
+	Hatch(SliceCut*parent) {
+		boudary_edge_ = parent->GetPieces();
+		num_pieces_ = parent->GetNumPieces();
+		offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
+		hatch_ = new std::vector<Vec3f *>[parent->GetNumPieces()];
+	};
 	virtual ~Hatch();
-
+	Hatch();
+	//void doHatch() {};
+	void setHatch() {};
+	//void rotateOffset();
 	float getLaserPower() { return laser_power_hatch_; };
 	float getLaserSpeed() { return laser_speed_hatch_; };
 	int* getNumhatch() { return num_hatch; }
 	std::vector < std::vector<Vec3f>>* getOffsetVertex() { return offset_vert_; }
 	bool Offset(std::vector<Vec3f>& outer_, std::vector <std::vector<Vec3f>>& inner_, float offset_dist, int num_pieces);
+	//std::vector < std::vector<Vec3f>*>* getOffsetVertexRotate() { return offset_vert_rotate_; }
 	void rotateBack(size_t k);
 	virtual void doHatch();
-
+	virtual void clearHatch() {};
+	public:
+	int num_pieces_;
 };
 class HatchChessboard :public Hatch
 {
@@ -126,38 +128,30 @@ class HatchChessboard :public Hatch
 public:
 	void clearHatch()override;
 	void doHatch()override;
-
 	HatchChessboard(SliceCut*parent);
 	HatchChessboard(SliceCut*slice_model, SliceCut*slice_support);
-	~HatchChessboard();
+	~HatchChessboard() { clearHatch(); }
 protected:
 private:
 	float space_;
+	float angle_;
 	float minimal_field_size_;
 	float white_board_angle_;
 	float black_board_angle;
 	float contour_;
 };
-class HatchOffsetfilling:public Hatch
+class HatchOffsetfilling :public Hatch
 {
 public:
-	void doHatch()override;
-
-	HatchOffsetfilling(SliceCut* inSlice_);
-	void clearHatch()override;
-	~HatchOffsetfilling() { 
-		boudary_edge_ = NULL;
-
-	}
 protected:
 private:
 };
-class HatchMeander :public Hatch
+class HatchStrip :public Hatch
 {
 public:
 	void clearHatch()override;
-	HatchMeander(SliceCut*parent);
-	~HatchMeander();
+	HatchStrip(SliceCut*parent);
+	~HatchStrip() {}
 	void storeCrossPoint();
 	void storeHatchLine();
 	void doHatch() override;
@@ -170,4 +164,10 @@ private:
 	float contour_;
 	std::multiset<Vec3f, comVec3fBlack>* hatch_point_black_;
 	std::multiset<Vec3f, comVec3fWhite>* hatch_point_white_;
+};
+class HatchMeander :public Hatch
+{
+public:
+protected:
+private:
 };

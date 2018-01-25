@@ -5,28 +5,17 @@
 #include "globalFunctions.h"
 #include <QEvent>
 #include "HE_mesh/Vec.h"
+#include "HE_mesh/Mesh3D.h"
+#include "SliceCut.h"
 #include "Hatch.h"
 using trimesh::vec;
 using trimesh::point;
 typedef trimesh::vec3  Vec3f;
-
 class Meshprint;
 class MainWindow;
 class CArcBall;
 class Mesh3D;
-class Support;
 class SliceCut;
-class Hatch;
-class HatchChessboard;
-enum hatchType
-{
-	NONE=0,
-	CHESSBOARD ,
-	OFFSETFILLING,
-	MEANDER,
-	STRIP
-	
-};
 class RenderingWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -55,21 +44,24 @@ public:
 	void keyReleaseEvent(QKeyEvent *e);
 
 signals:
+	void sendMsgtoDialog(QString);
 	//void meshInfo(int, int, int);
 	//void operatorInfo(QString);
 
 private:
 	void Render();
 	void SetLight();
-	bool is_draw_region_;
-	bool is_draw_support_;
-	public slots:
+
+public slots:
+	void ResetView();
+	void RecvMsg(QString);
+	void ApplyMaintenance();
 	void SetBackground();
+	void SetSliceCheckId(int id);
+	void setFildID(int id);
+	void SetLineId(int id);
 	void ReadMesh();
 	void WriteMesh();
-	void Export();
-	void LoadTexture();
-	void SetSliceCheckId(int id);
 	void CheckDrawPoint();
 	void CheckDrawEdge();
 	void CheckDrawFace();
@@ -77,125 +69,51 @@ private:
 	void CheckGrid();
 	void CheckDrawTexture();
 	void CheckDrawAxes();
-	void CheckDrawCutPieces();
-	void Checkmoduletranslate();
-	void CheckSetFace();
-
-	void CheckRegion(bool bv);
-	
-	void CheckSupport(bool bv);
-	void CheckRotateModel(bool bv);
-	// support operators
-	void AddPointSupport();
-	void AddLineSupport();
-	void DeleteSupport();
-	void AutoSupport();
-	
-
-	void setPointD(double diameter);
-	void setPointH(double diameter);
-	void setLineD(double diameter);
-	void setLineH(double diameter);
-	
-	void setThreshold(double threshold) { THRESHOLD = cos(3.1415926 * threshold / 180); };
-	void setGap(double gap) { GAP = gap; };
-	void setSeglength(double length) { SEGLENGTH = length; };
-	void setReso(double reso) { RESO = reso; };
-	void setVerticalgap(double verticalgap) { VERTICALGAP = verticalgap; };
-	void setfieldWidth(double width);
-	void setfieldHeight(double height);
-	void setlineOverlap(int lineoverlap);
-	void setfieldOverlap(double fieldoverlap);
-	void setHatchDis(double value);
-	void setThickness(double thick);
-	void setAngle(int angle);
-	void SetAllHatch(bool bv) { is_show_all = bv; }
-	void FindRegion();
-	void setFildID(int id) {
-		fildID = id; 
-		update();
-	};
-	
-	//hatch operator
-	void setHatchType(int type_) 
-	{ 
-		hatch_type_=(hatchType)type_; 
-	};
-	void setLaserPower(int power) { laser_power_hatch_ = power; };
-	void setLaserSpeed(int speed) { laser_speed_hatch_ = speed; };
-	void setLaserPowerPolygon(int power) { laser_power_polygon_ = power; };
-	void setLaserSpeedPolygon(int speed) { laser_speed_polygon_ = speed; };
-	void setOffset(double dis)
-	{
-		offset_dis_ = dis; 
-	};
-	// SLICE operators
-	void cutinPieces();
-	void cutinPiecesSup();
-	void renderdoHatch();
-
-	void objectTransformation(float * matrix);
-	void Translation();
-	void SetDirection(int id);
-	void setThickness(float thickness){thickness_ = thickness;};
-	public slots:
-	void SelectFace(int x, int y);
-	void SetScaleT(double size) {
-		scaleT = size;
-	}
-	void SclaleModel() {
-		ptr_mesh_->scalemesh(scaleT);
-	};
-
+	void DoSlice();
+	void FillPath();
+	void FindNarrowBand();
+	void LayerOffset(LayerOffDis layer_offdis, int layernum);
+	void PathToCutLine();
+	bool IsNestedIn(Path a, Path b);
+	bool ModelThicken(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* tc, int numlayer);
+	bool DrawPaths(ClipperLib::Paths contours, int numlayer);
+	bool Contour2Layer(ClipperLib::Paths contours, int numlayer);
+	std::pair<int, int> point2grid(std::pair<double, double> p);
+	bool JudgeLoopDir(std::vector<std::pair<double, double>> Loop);
+	pa furthestdir(pa p[3][3]);
+	pa rotate(pa p, double angle);
+	double dot(pa p1, pa p2);
+	pa normailize(pa p);
+	void CancelBugCut(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_, int i, int j);
+	void setHatchType(int type_);
+	void setThickness(double t) { 
+		thickness_ = t; }
 private:
 	void DrawAxes(bool bv);
 	void DrawPoints(bool);
 	void DrawEdge(bool);
 	void DrawFace(bool);
-	void DrawSupport(bool bv);
-	void DrawSupFace(bool bv);
-	void DrawOctree(bool bv);
-	void DrawSegments(bool bv);
-	void DrawInnerLoop(bool bv);
-	void DrawOuterLoop(bool bv);
-	void DrawSupFaceZero(bool bv);
 	void DrawTexture(bool);
 	void DrawGrid(bool bV);
-	void DrawCutPieces(bool bv);
-	void DrawCutPiecesSup(bool bv);
-	void drawCub(bool bv);
+	void DrawSlice(bool bv);
 	void DrawHatch(bool bv);
-	void DrawHatchsup(bool bv);
+	
 public:
 	MainWindow					*ptr_mainwindow_;
 	CArcBall					*ptr_arcball_;
-	CArcBall					*ptr_arcball_module_;
 	Mesh3D						*ptr_mesh_;
-	SliceCut					*mycut;
-	SliceCut					*mycutsup;
-	Hatch						*myhatch;
-	Hatch						*myhatchsup;
-	//hatch operator
+	SliceCut					*ptr_slice_;
+	Hatch						*ptr_hatch_;
 	hatchType					hatch_type_;
-	// my Support-operator
-	//Mesh3D						*ptr_mesh_support_;
-	Support						*ptr_support_;
-	bool						isAddPoint;
-	bool						isAddLine;
-	bool						isDelete;
-	std::vector<int>			delete_points_;
-	std::vector<Vec3f>			line_points_;
-
 	// Texture
 	GLuint						texture_[1];
 	bool						is_load_texture_;
 
 	// eye
-	GLfloat						eye_distance_;
+	GLfloat						eye_distance_{5.0};
 	point						eye_goal_;
 	vec							eye_direction_;
 	QPoint						current_position_;
-
 	// Render information
 	bool						is_draw_point_;
 	bool						is_draw_edge_;
@@ -210,13 +128,24 @@ public:
 	bool						is_draw_hatch_;
 	bool						is_show_all;
 private:
-	int slice_check_id_;
-	int current_face_;
-	std::vector<bool> faceNeedSupport;
-	std::vector<int> BoundaryEdge;
-	void ClearSlice();
-	void ClearHatch();
-	void ClearSupport();
+	int							slice_check_id_;
+	int field_id{0};
+	int line_id_{0};
+public:
+	std::vector<Paths>			res_path;
+	std::vector<std::vector<CutLine>*>* offsetpieces;
+	std::vector<std::vector<std::vector<std::pair<double, double> > > > layers;
+	std::vector<std::vector<Vec3f>>			offset_points;
+	std::vector<New2Origin>     lines_new2origin;
+	std::vector<int>			delete_points_;
+	std::vector<Vec3f>			line_points_;
+	std::vector<std::pair<int, int>>	cutline_points_;
+	std::vector<std::vector<pa>> gridshow;
+	std::vector<LayerOffDis> offdis;
+	std::vector<std::vector<CutLine>>  offsetcircul_;
+	std::vector<std::vector<CutLine>>  offset_cutline;
+
+	std::vector<Vec3f>  points;
 };
 
 #endif // RENDERINGWIDGET_H

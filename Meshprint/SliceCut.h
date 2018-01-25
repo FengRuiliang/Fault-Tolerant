@@ -2,14 +2,13 @@
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
 #include "clipper.hpp"
-#include "Cubes.h"
 #include "Cutline.h"
-using namespace ClipperLib;
 class Mesh3D;
 class vector;
 class Field;
-class CutLine;
+class SweepLine;
 #define DEFAULT_T 0.02f
+
 
 class SliceCut
 {
@@ -34,26 +33,25 @@ public:
 	};
 
 	void clearcut();
+	std::vector<int> sortVertInFace(int faceid);
 	void CutInPieces();
-	void clipPolygon();
-	void storeClipIntoCube();
-	void cutFaces();
+	std::pair<Vec3f, Vec3f> cutFacet(HE_face * facet, float cur_height_);
 	float getThickness() { return thickness_; };
-	std::vector < std::vector<CutLine>* >* GetPieces(){ return pieces_list_; }
-	std::vector < std::vector<Vec3f>>* GetClip() { return clip_list_; }
+	std::vector < std::vector<std::pair<Vec3f, Vec3f>>>* GetPieces();
+	std::map<float, std::vector<std::vector<CutLine>>> getMapPieces() { return cut_list_; }
 	int GetNumPieces() { return num_pieces_; }
-	 std::vector<int> * storeMeshIntoSlice();
-	 std::vector<int>  *storage_Face_list_;
-	Cubes cubes_support_;
+	std::vector<int> * StoreFaceIntoSlice();
+	std::vector<int>  *storage_Face_list_;
+	std::set<float> thickf_;
 	int  num_pieces_;
-	
+
 private:
 	//float thickness_;
 	Mesh3D* mesh_in_;
-	
-	 std::vector < std::vector<CutLine>*>*pieces_list_;
-	 std::vector < std::vector<Vec3f>>* clip_list_{NULL};
+	/* std::vector<cutLine>* circle_list_;*/
+	std::vector < std::vector<std::pair<Vec3f,Vec3f>>>* pieces_list_;
+	std::map<float, std::vector<std::vector<CutLine>>> cut_list_;
 	int isEdgeInFace(HE_vert* pvert1, HE_vert* pvert2, HE_face* pface);
-	std::vector<int> sortVertInFace(int faceid);
+	HE_edge*  getLeftEdge(HE_face* face_, float height_);
 };
 

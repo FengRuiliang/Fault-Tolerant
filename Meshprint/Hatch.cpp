@@ -2,52 +2,29 @@
 #include "QDebug"
 #include <fstream>
 #include <QMatrix4x4>
-#include <omp.h>
 //#include <vld.h>
 Hatch::~Hatch()
 {
-	
-	delete[]offset_vert_;
-	for (int i=0;i<num_pieces_;i++)
-	{
-		for (int j=0;j<hatch_[i].size();j++)
-		{
-			delete hatch_[i][j];
-		}
-		
-	}
-	delete[] hatch_;
-	offset_vert_ = NULL;
-	hatch_ = NULL;
-
 }
-Hatch::Hatch() {
-
-
-};
-
-
-
-Hatch::Hatch(SliceCut*parent)
-{
-	boudary_edge_ = parent->GetPieces();
-	offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
-	hatch_ = new std::vector<Vec3f*>[parent->GetNumPieces()];
-}
-
-//void doHatch() {};
+Hatch::Hatch() {};
 
 HatchChessboard::HatchChessboard(SliceCut*parent)
 {
 	boudary_edge_ = parent->GetPieces();
 	offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
 	hatch_ = new std::vector<Vec3f *>[parent->GetNumPieces()];
+	//hatch_type_ = NONE;
 	num_pieces_ = parent->GetNumPieces();
+	//offset_dis_ = 0;
+	//increment_angle_ = 0.5;
 	minimal_field_size_ = 10;
 	white_board_angle_ = 10;
 	black_board_angle = 10;
 	contour_ = 10;
+
+	//	offset_vert_rotate_ = NULL;
 }
+
 HatchChessboard::HatchChessboard(SliceCut*slice_model,SliceCut*slice_support)
 {
 	boudary_edge_ = slice_model->GetPieces();
@@ -71,26 +48,6 @@ HatchChessboard::HatchChessboard(SliceCut*slice_model,SliceCut*slice_support)
 	//	offset_vert_rotate_ = NULL;
 }
 
-HatchChessboard::~HatchChessboard()
-{
-	boudary_edge_ = NULL;
-}
-
-
-void Hatch::clearHatch()
-{
-	delete[]offset_vert_;
-	for (int i = 0; i < num_pieces_; i++)
-	{
-		for (int j = 0; j < hatch_[i].size(); j++)
-		{
-			delete hatch_[i][j];
-		}
-
-	}
-	delete[] hatch_;
-}
-
 void Hatch::setLaserPower(float power)
 {
 	laser_power_hatch_ = power;
@@ -103,15 +60,15 @@ void Hatch::setLaserSpeed(float speed)
 
 void HatchChessboard::clearHatch()
 {
+
 	boudary_edge_ = NULL;
 	delete[]offset_vert_;
 	delete[]hatch_;
-
-
 }
 
-void HatchMeander::clearHatch()
+void HatchStrip::clearHatch()
 {
+	boudary_edge_->clear();
 	delete[]offset_vert_;
 	delete[] hatch_;
 	delete[]num_hatch;
@@ -121,24 +78,23 @@ void HatchMeander::clearHatch()
 
 void HatchChessboard::doHatch()
 {
+	QMatrix4x4 matrix_;
+	QVector3D rotationAxis(0.0, 0.0, 1.0);
+	int angle_ = 0;
 
-#pragma  omp parallel for
-	for (int k = 0; k < num_pieces_; k++)
+	for (size_t k = 0; k < num_pieces_; k++)
 	{
-		int angle_ = 0;
-		QMatrix4x4 matrix_;
-		QVector3D rotationAxis(0.0, 0.0, 1.0);
 		//offset function
 		//////////////////////////////////////////////////////////////////////////
-		int i = k;
+		size_t i = k;
 		//qDebug() << "k==" << k;
-		for (int j = 0; j < boudary_edge_[i].size(); j++)
+		for (size_t j = 0; j < boudary_edge_[i].size(); j++)
 		{
 			std::vector<Vec3f> Bpoints;
 			std::vector<std::vector<Vec3f>> OFFPoints;
-			for (int k = 0; k < (boudary_edge_[i])[j]->size(); k++)
+			for (size_t k = 0; k < (boudary_edge_[i])[j].size(); k++)
 			{
-				Bpoints.push_back((boudary_edge_[i])[j]->at(k).position_vert[0]);
+				Bpoints.push_back((boudary_edge_[i])[j][k].first);
 			}
 			if (Bpoints.size()<3)
 			{
@@ -362,6 +318,7 @@ void HatchChessboard::doHatch()
 					}
 				}
 				boundaryPD_ = *iterB;
+				
 				if ((FieldType)(abs(x_id_ + cur_id_) % 2) == BLACK)
 				{
 					BField * big_tempUp_ = new BField(x_id_, cur_id_, k*thickness_);//new a big grid only has x and y information
@@ -683,7 +640,7 @@ void HatchChessboard::doHatch()
 			//	qDebug() << (*iterline)[1].x() << (*iterline)[1].y() << (*iterline)[1].z();
 		}
 		//////////////////////////////////////////////////////////////////////////
-		//clear this layer data
+		//cleaer this layer data
 		//////////////////////////////////////////////////////////////////////////
 		for (auto iterF = big_fields_.begin(); iterF != big_fields_.end(); iterF++)
 		{
@@ -695,9 +652,6 @@ void HatchChessboard::doHatch()
 
 bool Hatch::Offset(std::vector<Vec3f>& outer_, std::vector <std::vector<Vec3f>>& inner_, float offset_dist,int thick_id_)
 {
-
-
-
 
 	Path subj;
 	ClipperOffset co;
@@ -862,31 +816,25 @@ void Hatch::doHatch()
 {
 }
 
-HatchMeander::HatchMeander(SliceCut*parent)
+HatchStrip::HatchStrip(SliceCut*parent)
 {
 	boudary_edge_ = parent->GetPieces();
 	offset_vert_ = new std::vector<std::vector<Vec3f>>[parent->GetNumPieces()];
 	hatch_ = new std::vector<Vec3f *>[parent->GetNumPieces()];
+	//hatch_type_ = NONE;
 	thickness_ = parent->getThickness();
 	num_pieces_ = parent->GetNumPieces();
+	//increment_angle_ = 0.5;
 	contour_ = 10;
+	//boudary_edge_ = parent->GetPieces();
 	hatch_point_black_ = new std::multiset<Vec3f, comVec3fBlack>[parent->GetNumPieces()];
 	hatch_point_white_ = new std::multiset<Vec3f, comVec3fWhite>[parent->GetNumPieces()];
+	//offset_vert_rotate_ = NULL;
 }
 
-inline HatchMeander::~HatchMeander() 
-{
-	delete []hatch_point_black_;
-	hatch_point_black_ = NULL;
-	delete[]hatch_point_white_;
-	hatch_point_white_ = NULL;
-	
-}
-
-void HatchMeander::storeCrossPoint()
+void HatchStrip::storeCrossPoint()
 {
 	std::vector < std::vector<Vec3f>>* offset_boundary_ = getOffsetVertex();
-#pragma  omp parallel for
 	for (int i = 0; i < num_pieces_; i++)
 	{
 		for (int j = 0; j < offset_boundary_[i].size(); j++)
@@ -928,9 +876,8 @@ void HatchMeander::storeCrossPoint()
 	}
 }
 
-void HatchMeander::storeHatchLine()
+void HatchStrip::storeHatchLine()
 {
-#pragma  omp parallel for
 	for (int k = 0; k < num_pieces_; k++)
 	{
 		if (hatch_point_black_[k].size() == 0)continue;
@@ -973,108 +920,6 @@ void HatchMeander::storeHatchLine()
 
 }
 
-void HatchMeander::doHatch()
+void HatchStrip::doHatch()
 {
-	std::vector < std::vector<Vec3f>>* offset_boundary_ = getOffsetVertex();
-#pragma  omp parallel for
-	for (int i = 0; i < num_pieces_; i++)
-	{
-		//offset
-		for (int j = 0; j < boudary_edge_[i].size(); j++)
-		{
-			std::vector<Vec3f> Bpoints;
-			std::vector<std::vector<Vec3f>> OFFPoints;
-			for (int k = 0; k < (boudary_edge_[i])[j]->size(); k++)
-			{
-				Bpoints.push_back((boudary_edge_[i])[j]->at(k).position_vert[0]);
-			}
-			if (Bpoints.size() < 3)
-			{
-				continue;
-			}
-			Offset(Bpoints, OFFPoints, offset_dis_, i);
-			offset_vert_[i].insert(offset_vert_[i].end(), OFFPoints.begin(), OFFPoints.end());
-		}
-	}
-	storeCrossPoint();
-	storeHatchLine();
-}
-
-void HatchOffsetfilling::doHatch()
-{
-	//std::vector < std::vector<Vec3f>>* offset_boundary_ = getOffsetVertex();
-#pragma  omp parallel for
-	for (int i = 0; i < num_pieces_; i++)
-	{
-		//offset
-		for (int j = 0; j < boudary_edge_[i].size(); j++)
-		{
-			std::vector<Vec3f> Bpoints;
-			std::vector<std::vector<Vec3f>> OFFPoints;
-			for (int k = 0; k < (boudary_edge_[i])[j]->size(); k++)
-			{
-				Bpoints.push_back((boudary_edge_[i])[j]->at(k).position_vert[0]);
-			}
-			if (Bpoints.size() < 3)
-			{
-				continue;
-			}
-			Offset(Bpoints, OFFPoints, offset_dis_, i);
-			offset_vert_[i].insert(offset_vert_[i].end(), OFFPoints.begin(), OFFPoints.end());
-		}
-	}
-#pragma  omp parallel for
-	for (int i=0;i<num_pieces_;i++)
-	{
-		ClipperOffset co;
-			Paths paths;
-			Paths solution;
-		for (int j = 0; j < offset_vert_[i].size(); j++)
-		{
-				Path subj;
-			std::vector<std::vector<Vec3f>> out_;
-			for (int k = 0; k < (offset_vert_[i])[j].size(); k++)
-			{
-				subj<<IntPoint(offset_vert_[i][j][k].x()*1e6,
-					offset_vert_[i][j][k].y()*1e6);
-			}
-			paths.push_back(subj);
-		}
-		int j = 0;
-		do 
-		{
-			solution.clear();
-			co.Clear();
-			co.AddPaths(paths, jtMiter, etClosedPolygon);
-			co.Execute(solution, line_width_*-1e6);
-			for (int m = 0; m < solution.size(); m++)
-			{
-				for (int n = 0; n < solution[m].size(); n++)
-				{
-					Vec3f* points = new Vec3f[2];
-					points[0] = Vec3f(solution[m][n].X*1e-6, solution[m][n].Y*1e-6, i*thickness_);
-					points[1] = Vec3f(solution[m][(n + 1) % solution[m].size()].X*1e-6,
-						solution[m][(n + 1) % solution[m].size()].Y*1e-6, i*thickness_);
-					hatch_[i].push_back(points);
-				}
-			}	
-			paths = solution;
-		} while (paths.size()!=0);
-	}
-}
-
-HatchOffsetfilling::HatchOffsetfilling(SliceCut * inSlice_)
-{
-
-	boudary_edge_ = inSlice_->GetPieces();
-	offset_vert_ = new std::vector<std::vector<Vec3f>>[inSlice_->GetNumPieces()];
-	hatch_ = new std::vector<Vec3f *>[inSlice_->GetNumPieces()];
-	num_pieces_ = inSlice_->GetNumPieces();
-}
-
-void HatchOffsetfilling::clearHatch()
-{
-	boudary_edge_ = NULL;
-	delete[]offset_vert_;
-	delete[]hatch_;
 }

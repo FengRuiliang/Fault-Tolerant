@@ -83,22 +83,22 @@
     <ClCompile Include="Polygon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="maintenance.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_maintenance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_maintenance.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_maintenance.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="maintenance.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MSAABB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TriangleglobalFunctions.cpp">
+    <ClCompile Include="PSO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PSO.cpp">
+    <ClCompile Include="TriangleglobalFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -153,19 +153,19 @@
     <ClInclude Include="HE_mesh\Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cutline.h">
+    <ClInclude Include="Grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grid.h">
+    <ClInclude Include="Cutline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_maintenance.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MSAABB.h">
+    <ClInclude Include="PSO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Triangle.h">
@@ -174,7 +174,7 @@
     <ClInclude Include="TriangleglobalFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PSO.h">
+    <ClInclude Include="MSAABB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

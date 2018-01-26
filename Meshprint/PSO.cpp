@@ -33,7 +33,7 @@ void  PSO::inform_global(VVECTORINT comm, VVECTORDOUBLE pos_nb,
 // general inform function :: according to the connectivity
 // matrix COMM, it copies the best position (from pos_b) of the
 // informers of each particle to the pos_nb matrix
-void PSO::inform(VVECTORINT *comm, VVECTORDOUBLE pos_nb, VVECTORDOUBLE *pos_b, vector<double> fit_b,
+void PSO::inform(VVECTORINT comm, VVECTORDOUBLE& pos_nb, VVECTORDOUBLE& *pos_b, vector<double> fit_b,
 	int improved)
 {
 	int i, j;
@@ -45,7 +45,7 @@ void PSO::inform(VVECTORINT *comm, VVECTORDOUBLE pos_nb, VVECTORDOUBLE *pos_b, v
 				 // who is the best informer??
 		for (i = 0; i < settings.size; i++)
 			// the i^th particle informs the j^th particle
-			if (comm[i*settings.size + j] && fit_b[i] < fit_b[b_n])
+			if (comm[i][j] && fit_b[i] < fit_b[b_n])
 				// found a better informer for j^th particle
 				b_n = i;
 		// copy pos_b of b_n^th particle to pos_nb[j]

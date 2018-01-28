@@ -9,15 +9,20 @@ double  PSO::calc_inertia_lin_dec(int step) {
 		return settings.w_min;
 }
 
+double PSO::PSOobjfunction(vector<double> pos)
+{
+	//the percent of merge points to all points
 
+
+	return 0;
+
+}
 
 //==============================================================
 //          NEIGHBORHOOD (COMM) MATRIX STRATEGIES
 //==============================================================
 // global neighborhood
-void  PSO::inform_global(VVECTORINT comm, VVECTORDOUBLE pos_nb,
-	VVECTORDOUBLE pos_b, VVECTORDOUBLE& fit_b,
-	vector<double> gbest, int improved)
+void  PSO::inform_global(VVECTORDOUBLE& pos_nb,vector<double> gbest)
 {
 
 	int i;
@@ -27,127 +32,6 @@ void  PSO::inform_global(VVECTORINT comm, VVECTORDOUBLE pos_nb,
 		pos_nb[i] = gbest;
 
 }
-
-
-// ===============================================================
-// general inform function :: according to the connectivity
-// matrix COMM, it copies the best position (from pos_b) of the
-// informers of each particle to the pos_nb matrix
-void PSO::inform(VVECTORINT comm, VVECTORDOUBLE& pos_nb, VVECTORDOUBLE& *pos_b, vector<double> fit_b,
-	int improved)
-{
-	int i, j;
-	int b_n; // best neighbor in terms of fitness
-
-			 // for each particle
-	for (j = 0; j < settings.size; j++) {
-		b_n = j; // self is best
-				 // who is the best informer??
-		for (i = 0; i < settings.size; i++)
-			// the i^th particle informs the j^th particle
-			if (comm[i][j] && fit_b[i] < fit_b[b_n])
-				// found a better informer for j^th particle
-				b_n = i;
-		// copy pos_b of b_n^th particle to pos_nb[j]
-		memmove((void *)&pos_nb[j*settings->dim],
-			(void *)&pos_b[b_n*settings->dim],
-			sizeof(double) * settings->dim);
-	}
-}
-
-
-
-
-// =============
-// ring topology
-// =============
-
-// topology initialization :: this is a static (i.e. fixed) topology
-void  PSO::init_comm_ring(int *comm, pso_settings_t * settings) {
-	int i;
-	// reset array
-	memset((void *)comm, 0, sizeof(int)*settings->size*settings->size);
-
-	// choose informers
-	for (i = 0; i < settings->size; i++) {
-		// set diagonal to 1
-		comm[i*settings->size + i] = 1;
-		if (i == 0) {
-			// look right
-			comm[i*settings->size + i + 1] = 1;
-			// look left
-			comm[(i + 1)*settings->size - 1] = 1;
-		}
-		else if (i == settings->size - 1) {
-			// look right
-			comm[i*settings->size] = 1;
-			// look left
-			comm[i*settings->size + i - 1] = 1;
-		}
-		else {
-			// look right
-			comm[i*settings->size + i + 1] = 1;
-			// look left
-			comm[i*settings->size + i - 1] = 1;
-		}
-
-	}
-
-}
-
-
-
-
-void  PSO::inform_ring(int *comm, double *pos_nb,
-	double *pos_b, double *fit_b,
-	double *gbest, int improved,
-	pso_settings_t * settings)
-{
-
-	// update pos_nb matrix
-	inform(comm, pos_nb, pos_b, fit_b, improved, settings);
-
-}
-
-// ============================
-// random neighborhood topology
-// ============================
-void  PSO::init_comm_random(int *comm, pso_settings_t * settings) {
-
-	int i, j, k;
-	// reset array
-	memset((void *)comm, 0, sizeof(int)*settings->size*settings->size);
-
-	// choose informers
-	for (i = 0; i < settings->size; i++) {
-		// each particle informs itself
-		comm[i*settings->size + i] = 1;
-		// choose kappa (on average) informers for each particle
-		for (k = 0; k < settings->nhood_size; k++) {
-			// generate a random index
-			j = gsl_rng_uniform_int(settings->rng, settings->size);
-			// particle i informs particle j
-			comm[i*settings->size + j] = 1;
-		}
-	}
-}
-
-
-
-void inform_random(int *comm, double *pos_nb,
-	double *pos_b, double *fit_b,
-	double *gbest, int improved,
-	pso_settings_t * settings)
-{
-
-
-	// regenerate connectivity??
-	if (!improved)
-		init_comm_random(comm, settings);
-	inform(comm, pos_nb, pos_b, fit_b, improved, settings);
-
-}
-
 
 int PSO::pso_calc_swarm_size(int dim)
 {
@@ -170,7 +54,7 @@ void PSO::pso_set_default_settings()
 	settings.w_max = PSO_INERTIA;
 	settings.w_min = 0.3;
 
-	settings.clamp_pos = 1;
+	settings.clamp_pos = 0;
 	settings.nhood_strategy = PSO_NHOOD_RING;
 	settings.nhood_size = 5;
 	settings.w_strategy = PSO_W_LIN_DEC;
@@ -206,59 +90,41 @@ void PSO::pso_solve(pso_obj_fun_t obj_fun, void * obj_fun_params)
 	double(*calc_inertia_fun)(); // inertia weight update function
 
 
-								 // CHECK RANDOM NUMBER GENERATOR
-	if (!settings.rng) {
-		// initialize random number generator
-		gsl_rng_env_setup();
-		// allocate the RNG
-		settings.rng = gsl_rng_alloc(gsl_rng_default);
-		// seed the generator
-		gsl_rng_set(settings.rng, settings.seed);
-		// remember to free the RNG
-		free_rng = 1;
-	}
-
 	// SELECT APPROPRIATE NHOOD UPDATE FUNCTION
 	switch (settings.nhood_strategy)
 	{
 	case PSO_NHOOD_GLOBAL:
 		// comm matrix not used
-		inform_fun = inform_global;
 		break;
 	case PSO_NHOOD_RING:
-		init_comm_ring((int *)comm, settings);
-		inform_fun = inform_ring;
 		break;
 	case PSO_NHOOD_RANDOM:
-		init_comm_random((int *)comm, settings);
-		inform_fun = inform_random;
 		break;
 	}
 
 	// SELECT APPROPRIATE INERTIA WEIGHT UPDATE FUNCTION
-	switch (settings->w_strategy)
+	switch (settings.w_strategy)
 	{
 		/* case PSO_W_CONST : */
 		/*     calc_inertia_fun = calc_inertia_const; */
 		/*     break; */
 	case PSO_W_LIN_DEC:
-		calc_inertia_fun = calc_inertia_lin_dec;
 		break;
 	}
 
 	// INITIALIZE SOLUTION
-	solution->error = DBL_MAX;
+	solution.error = DBL_MAX;
 
 	// SWARM INITIALIZATION
 	// for each particle
-	for (i = 0; i < settings->size; i++) {
+	for (i = 0; i < settings.size; i++) {
 		// for each dimension
-		for (d = 0; d < settings->dim; d++) {
+		for (d = 0; d < settings.dim; d++) {
 			// generate two numbers within the specified range
-			a = settings->x_lo + (settings->x_hi - settings->x_lo) * \
-				gsl_rng_uniform(settings->rng);
-			b = settings->x_lo + (settings->x_hi - settings->x_lo) *	\
-				gsl_rng_uniform(settings->rng);
+			a = settings.x_lo + (settings.x_hi - settings.x_lo) * \
+				rand() / double(RAND_MAX);
+			b = settings.x_lo + (settings.x_hi - settings.x_lo) *	\
+				rand() / double(RAND_MAX);
 			// initialize position
 			pos[i][d] = a;
 			// best position is the same
@@ -267,120 +133,80 @@ void PSO::pso_solve(pso_obj_fun_t obj_fun, void * obj_fun_params)
 			vel[i][d] = (a - b) / 2.;
 		}
 		// update particle fitness
-		fit[i] = obj_fun(pos[i], settings->dim, obj_fun_params);
+		fit[i] = obj_fun(pos[i], settings.dim, obj_fun_params);
 		fit_b[i] = fit[i]; // this is also the personal best
 						   // update gbest??
-		if (fit[i] < solution->error) {
+		if (fit[i] < solution.error) {
 			// update best fitness
-			solution->error = fit[i];
+			solution.error = fit[i];
 			// copy particle pos to gbest vector
-			memmove((void *)solution->gbest, (void *)&pos[i],
-				sizeof(double) * settings->dim);
+			solution.gbest = pos[i];
 		}
-
 	}
 
 	// initialize omega using standard value
 	w = PSO_INERTIA;
 	// RUN ALGORITHM
-	for (step = 0; step < settings->steps; step++) {
+	for (step = 0; step < settings.steps; step++) {
 		// update current step
-		settings->step = step;
+		settings.step = step;
 		// update inertia weight
 		// do not bother with calling a calc_w_const function
-		if (settings->w_strategy)
-			w = calc_inertia_fun(step, settings);
+		w = calc_inertia_lin_dec(step);
+	
 		// check optimization goal
-		if (solution->error <= settings->goal) {
+		if (solution.error <= settings.goal) {
 			// SOLVED!!
-			if (settings->print_every)
-				printf("Goal achieved @ step %d (error=%.3e) :-)\n", step, solution->error);
+			if (settings.print_every)
+				printf("Goal achieved @ step %d (error=%.3e) :-)\n", step, solution.error);
 			break;
 		}
 
 		// update pos_nb matrix (find best of neighborhood for all particles)
-		inform_fun(comm, pos_nb, pos_b, fit_b, solution->gbest,
-			improved, settings);
+		inform_global(pos_nb, solution.gbest);
 		// the value of improved was just used; reset it
 		improved = 0;
 
 		// update all particles
-		for (i = 0; i < settings->size; i++) {
+		for (i = 0; i < settings.size; i++) {
 			// for each dimension
-			for (d = 0; d < settings->dim; d++) {
+			for (d = 0; d < settings.dim; d++) {
 				// calculate stochastic coefficients
-				rho1 = settings->c1 * gsl_rng_uniform(settings->rng);
-				rho2 = settings->c2 * gsl_rng_uniform(settings->rng);
+				rho1 = settings.c1 * rand() / double(RAND_MAX);
+				rho2 = settings.c2 *rand() / double(RAND_MAX);
 				// update velocity
 				vel[i][d] = w * vel[i][d] + \
 					rho1 * (pos_b[i][d] - pos[i][d]) + \
 					rho2 * (pos_nb[i][d] - pos[i][d]);
 				// update position
 				pos[i][d] += vel[i][d];
-				// clamp position within bounds?
-				if (settings->clamp_pos) {
-					if (pos[i][d] < settings->x_lo) {
-						pos[i][d] = settings->x_lo;
-						vel[i][d] = 0;
-					}
-					else if (pos[i][d] > settings->x_hi) {
-						pos[i][d] = settings->x_hi;
-						vel[i][d] = 0;
-					}
-				}
-				else {
-					// enforce periodic boundary conditions
-					if (pos[i][d] < settings->x_lo) {
-
-						pos[i][d] = settings->x_hi - fmod(settings->x_lo - pos[i][d],
-							settings->x_hi - settings->x_lo);
-						vel[i][d] = 0;
-
-					}
-					else if (pos[i][d] > settings->x_hi) {
-
-						pos[i][d] = settings->x_lo + fmod(pos[i][d] - settings->x_hi,
-							settings->x_hi - settings->x_lo);
-						vel[i][d] = 0;
-					}
-				}
-
 			}
 
 			// update particle fitness
-			fit[i] = obj_fun(pos[i], settings->dim, obj_fun_params);
+			fit[i] = PSOobjfunction(pos[i]);
 			// update personal best position?
 			if (fit[i] < fit_b[i]) {
 				fit_b[i] = fit[i];
 				// copy contents of pos[i] to pos_b[i]
-				memmove((void *)&pos_b[i], (void *)&pos[i],
-					sizeof(double) * settings->dim);
+				pos_b[i] = pos[i];
 			}
 			// update gbest??
-			if (fit[i] < solution->error) {
+			if (fit[i] < solution.error) {
 				improved = 1;
 				// update best fitness
-				solution->error = fit[i];
+				solution.error = fit[i];
 				// copy particle pos to gbest vector
-				memmove((void *)solution->gbest, (void *)&pos[i],
-					sizeof(double) * settings->dim);
+				solution.gbest = pos[i];
 			}
 		}
-
-		if (settings->print_every && (step % settings->print_every == 0))
-			printf("Step %d (w=%.2f) :: min err=%.5e\n", step, w, solution->error);
-
+		if (settings.print_every && (step % settings.print_every == 0))
+			printf("Step %d (w=%.2f) :: min err=%.5e\n", step, w, solution.error);
 	}
-
-	// free RNG??
-	if (free_rng)
-		gsl_rng_free(settings->rng);
 }
 
 PSO::PSO()
 {
 }
-
 
 PSO::~PSO()
 {

@@ -1,8 +1,7 @@
 #pragma once
-#include<gsl/gsl_rng.h>
 #include <time.h>
+#include <stdlib.h>
 #include <vector>
-extern "C";
 using namespace std;
 #define VVECTORDOUBLE vector<vector<double>>
 #define VVECTORINT	vector<vector<int>>
@@ -32,14 +31,14 @@ using namespace std;
 typedef struct {
 
 	double error;
-	double *gbest; // should contain DIM elements!!
+	vector<double>gbest; // should contain DIM elements!!
 
 } pso_result_t;
 
 
 
 // OBJECTIVE FUNCTION TYPE
-typedef double(*pso_obj_fun_t)(double *, int, void *);
+typedef double(*pso_obj_fun_t)(vector<double>, int, void *);
 
 
 
@@ -66,7 +65,7 @@ typedef struct {
 	int nhood_size; // neighborhood size
 	int w_strategy; // inertia weight strategy (see PSO_W_*)
 
-	gsl_rng *rng; // pointer to random number generator (use NULL to create a new RNG)
+	void *rng; // pointer to random number generator (use NULL to create a new RNG)
 	long seed; // seed for the generator
 
 } pso_settings_t;
@@ -86,8 +85,8 @@ private:
 
 
 
-	void inform_global(VVECTORINT comm, VVECTORDOUBLE pos_nb, VVECTORDOUBLE pos_b, VVECTORDOUBLE& fit_b, vector<double> gbest, int improved);
-	void inform(VVECTORINT * comm, VVECTORDOUBLE pos_nb, VVECTORDOUBLE * pos_b, vector<double> fit_b, int improved);
+	double PSOobjfunction(vector<double> pos);
+	void inform_global(VVECTORDOUBLE& pos_nb, vector<double> gbest);
 	// return the swarm size based on dimensionality
 	int pso_calc_swarm_size(int dim);
 

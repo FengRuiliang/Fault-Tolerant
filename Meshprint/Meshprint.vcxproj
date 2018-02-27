@@ -81,8 +81,6 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>C:\cygwin64\usr\local\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\cygwin64\usr\local\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -201,7 +199,6 @@
     <ClCompile Include="meshprint.cpp" />
     <ClCompile Include="MSAABB.cpp" />
     <ClCompile Include="Polygon.cpp" />
-    <ClCompile Include="PSO.cpp" />
     <ClCompile Include="renderingwidget.cpp" />
     <ClCompile Include="SliceCut.cpp" />
     <ClCompile Include="TriangleglobalFunctions.cpp" />
@@ -257,7 +254,6 @@
     <ClInclude Include="Hatch.h" />
     <ClInclude Include="HE_mesh\Mesh3D.h" />
     <ClInclude Include="HE_mesh\Vec.h" />
-    <ClInclude Include="PSO.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="TriangleglobalFunctions.h" />
     <CustomBuild Include="maintenance.h">

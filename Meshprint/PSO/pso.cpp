@@ -1,12 +1,55 @@
-#include "PSO.h"
-double  PSO::calc_inertia_lin_dec(int step) {
+/* An implementation of the Particle Swarm Optimization algorithm
 
-	int dec_stage = 3 * settings.steps / 4;
+Copyright 2010 Kyriakos Kentzoglanakis
+
+This program is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+3 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see
+<http://www.gnu.org/licenses/>.
+*/
+
+
+#include <time.h> // for time()
+#include <math.h> // for cos(), pow(), sqrt() etc.
+#include <float.h> // for DBL_MAX
+#include <string.h> // for mem*
+#include <vector>
+#include <gsl/gsl_rng.h>
+
+#include "pso.h"
+
+
+
+
+
+//==============================================================
+// calulate swarm size based on dimensionality
+int pso_calc_swarm_size(int dim) {
+	int size = 10. + 2. * sqrt(dim);
+	return (size > PSO_MAX_SIZE ? PSO_MAX_SIZE : size);
+}
+
+
+//==============================================================
+//          INERTIA WEIGHT UPDATE STRATEGIES
+//==============================================================
+// calculate linearly decreasing inertia weight
+double calc_inertia_lin_dec(int step, pso_settings_t *settings) {
+
+	int dec_stage = 3 * settings->steps / 4;
 	if (step <= dec_stage)
-		return settings.w_min + (settings.w_max - settings.w_min) *	\
+		return settings->w_min + (settings->w_max - settings->w_min) *	\
 		(dec_stage - step) / dec_stage;
 	else
-		return settings.w_min;
+		return settings->w_min;
 }
 
 
@@ -15,16 +58,18 @@ double  PSO::calc_inertia_lin_dec(int step) {
 //          NEIGHBORHOOD (COMM) MATRIX STRATEGIES
 //==============================================================
 // global neighborhood
-void  PSO::inform_global(VVECTORINT comm, VVECTORDOUBLE pos_nb,
-	VVECTORDOUBLE pos_b, VVECTORDOUBLE& fit_b,
-	vector<double> gbest, int improved)
+void inform_global(std::vector < std::vector<int>>& comm, std::vector < std::vector<int>>& pos_nb,
+	double *pos_b, double *fit_b,
+	double *gbest, int improved, 
+	pso_settings_t *settings)
 {
 
 	int i;
 	// all particles have the same attractor (gbest)
 	// copy the contents of gbest to pos_nb
-	for (i = 0; i < settings.size; i++)
-		pos_nb[i] = gbest;
+	for (i = 0; i<settings->size; i++)
+		memmove((void *)&pos_nb[i*settings->dim], (void *)gbest,
+			sizeof(double) * settings->dim);
 
 }
 
@@ -33,19 +78,19 @@ void  PSO::inform_global(VVECTORINT comm, VVECTORDOUBLE pos_nb,
 // general inform function :: according to the connectivity
 // matrix COMM, it copies the best position (from pos_b) of the
 // informers of each particle to the pos_nb matrix
-void PSO::inform(VVECTORINT *comm, VVECTORDOUBLE pos_nb, VVECTORDOUBLE *pos_b, vector<double> fit_b,
-	int improved)
+void inform(std::vector < std::vector<int>>& comm, double *pos_nb, double *pos_b, double *fit_b,
+	int improved, pso_settings_t * settings)
 {
 	int i, j;
 	int b_n; // best neighbor in terms of fitness
 
 			 // for each particle
-	for (j = 0; j < settings.size; j++) {
+	for (j = 0; j<settings->size; j++) {
 		b_n = j; // self is best
 				 // who is the best informer??
-		for (i = 0; i < settings.size; i++)
+		for (i = 0; i<settings->size; i++)
 			// the i^th particle informs the j^th particle
-			if (comm[i*settings.size + j] && fit_b[i] < fit_b[b_n])
+			if (comm[i*settings->size + j] && fit_b[i] < fit_b[b_n])
 				// found a better informer for j^th particle
 				b_n = i;
 		// copy pos_b of b_n^th particle to pos_nb[j]
@@ -63,32 +108,38 @@ void PSO::inform(VVECTORINT *comm, VVECTORDOUBLE pos_nb, VVECTORDOUBLE *pos_b, v
 // =============
 
 // topology initialization :: this is a static (i.e. fixed) topology
-void  PSO::init_comm_ring(int *comm, pso_settings_t * settings) {
+void init_comm_ring(std::vector < std::vector<int>>& comm, pso_settings_t * settings) {
 	int i;
 	// reset array
-	memset((void *)comm, 0, sizeof(int)*settings->size*settings->size);
+	for (int i = 0; i < comm.size(); i++)
+	{
+		for (int j = 0; j < comm[i].size(); j++)
+		{
+			comm[i][j] = 0;
+		}
+	}
 
 	// choose informers
-	for (i = 0; i < settings->size; i++) {
+	for (i = 0; i<settings->size; i++) {
 		// set diagonal to 1
-		comm[i*settings->size + i] = 1;
+		comm[i][i] = 1;
 		if (i == 0) {
 			// look right
-			comm[i*settings->size + i + 1] = 1;
+			comm[i][i + 1] = 1;
 			// look left
-			comm[(i + 1)*settings->size - 1] = 1;
+			comm[i][settings->size - 1] = 1;
 		}
 		else if (i == settings->size - 1) {
 			// look right
-			comm[i*settings->size] = 1;
+			comm[i][0] = 1;
 			// look left
-			comm[i*settings->size + i - 1] = 1;
+			comm[i][i - 1] = 1;
 		}
 		else {
 			// look right
-			comm[i*settings->size + i + 1] = 1;
+			comm[i][i + 1] = 1;
 			// look left
-			comm[i*settings->size + i - 1] = 1;
+			comm[i][i - 1] = 1;
 		}
 
 	}
@@ -98,7 +149,7 @@ void  PSO::init_comm_ring(int *comm, pso_settings_t * settings) {
 
 
 
-void  PSO::inform_ring(int *comm, double *pos_nb,
+void inform_ring(std::vector < std::vector<int>>& comm, double *pos_nb,
 	double *pos_b, double *fit_b,
 	double *gbest, int improved,
 	pso_settings_t * settings)
@@ -112,29 +163,35 @@ void  PSO::inform_ring(int *comm, double *pos_nb,
 // ============================
 // random neighborhood topology
 // ============================
-void  PSO::init_comm_random(int *comm, pso_settings_t * settings) {
+void init_comm_random(std::vector < std::vector<int>>& comm, pso_settings_t * settings) {
 
 	int i, j, k;
 	// reset array
-	memset((void *)comm, 0, sizeof(int)*settings->size*settings->size);
+	for ( i = 0; i < comm.size(); i++)
+	{
+		for ( j = 0; j < comm[i].size(); j++)
+		{
+			comm[i][j] = 0;
+		}
+	}
 
 	// choose informers
-	for (i = 0; i < settings->size; i++) {
+	for (i = 0; i<settings->size; i++) {
 		// each particle informs itself
-		comm[i*settings->size + i] = 1;
+		comm[i][i] = 1;
 		// choose kappa (on average) informers for each particle
-		for (k = 0; k < settings->nhood_size; k++) {
+		for (k = 0; k<settings->nhood_size; k++) {
 			// generate a random index
 			j = gsl_rng_uniform_int(settings->rng, settings->size);
 			// particle i informs particle j
-			comm[i*settings->size + j] = 1;
+			comm[i][j] = 1;
 		}
 	}
 }
 
 
 
-void inform_random(int *comm, double *pos_nb,
+void inform_random(std::vector < std::vector<int>>&comm, double *pos_nb,
 	double *pos_b, double *fit_b,
 	double *gbest, int improved,
 	pso_settings_t * settings)
@@ -149,51 +206,60 @@ void inform_random(int *comm, double *pos_nb,
 }
 
 
-int PSO::pso_calc_swarm_size(int dim)
-{
-	int size = 10. + 2. * sqrt(dim);
-	return (size > PSO_MAX_SIZE ? PSO_MAX_SIZE : size);
+
+
+//==============================================================
+// return default pso settings
+void pso_set_default_settings(pso_settings_t *settings) {
+
+	// set some default values
+	settings->dim = 30;
+	settings->x_lo = -20;
+	settings->x_hi = 20;
+	settings->goal = 1e-5;
+
+	settings->size = pso_calc_swarm_size(settings->dim);
+	settings->print_every = 1000;
+	settings->steps = 100000;
+	settings->c1 = 1.496;
+	settings->c2 = 1.496;
+	settings->w_max = PSO_INERTIA;
+	settings->w_min = 0.3;
+
+	settings->clamp_pos = 1;
+	settings->nhood_strategy = PSO_NHOOD_RING;
+	settings->nhood_size = 5;
+	settings->w_strategy = PSO_W_LIN_DEC;
+
+	settings->rng = NULL;
+	settings->seed = time(0);
+
 }
 
-void PSO::pso_set_default_settings()
-{  // set some default values
-	settings.dim = 30;
-	settings.x_lo = -20;
-	settings.x_hi = 20;
-	settings.goal = 1e-5;
 
-	settings.size = pso_calc_swarm_size(settings.dim);
-	settings.print_every = 1000;
-	settings.steps = 100000;
-	settings.c1 = 1.496;
-	settings.c2 = 1.496;
-	settings.w_max = PSO_INERTIA;
-	settings.w_min = 0.3;
 
-	settings.clamp_pos = 1;
-	settings.nhood_strategy = PSO_NHOOD_RING;
-	settings.nhood_size = 5;
-	settings.w_strategy = PSO_W_LIN_DEC;
 
-	settings.rng = NULL;
-	settings.seed = time(0);
-}
+//==============================================================
+//                     PSO ALGORITHM
+//==============================================================
 
-void PSO::pso_solve(pso_obj_fun_t obj_fun, void * obj_fun_params)
+void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params,
+	pso_result_t *solution, pso_settings_t *settings)
 {
 
-	int free_rng = 0; // whether to free settings.rng when finished
+	int free_rng = 0; // whether to free settings->rng when finished
 					  // Particles
-	vector<vector<double>> pos(settings.size, vector<double>(settings.dim));// position matrix
-	vector<vector<double>> vel(settings.size, vector<double>(settings.dim));// velocity matrix
-	vector<vector<double>> pos_b(settings.size, vector<double>(settings.dim));// best position matrix
-	vector<double> fit(settings.size); // particle fitness vector
-	vector<double> fit_b(settings.size);// best fitness vector
-	  // Swarm
-	vector<vector<double>> pos_nb(settings.size, vector<double>(settings.dim)); // what is the best informed
+	std::vector<std::vector<double> >pos(settings->size,std::vector<double>(settings->dim)); // position matrix
+	std::vector<std::vector<double> >vel(settings->size, std::vector<double>(settings->dim));// velocity matrix
+	std::vector<std::vector<double> >pso_b(settings->size, std::vector<double>(settings->dim));// best position matrix
+	std::vector<double> fit(settings->size);// particle fitness vector
+	std::vector<double> fit_b(settings->size);// best fitness vector
+
+								  // Swarm
+	std::vector<std::vector<double> >pos_nb(settings->size, std::vector<double>(settings->dim));// what is the best informed
 												  // position for each particle
-	vector<vector<int>> comm(settings.size, vector<int>(settings.size));// communications:who informs who
-											  // rows : those who inform
+	std::vector<std::vector<int> >comm(settings->size, std::vector<int>(settings->size));// communications:who informs who
+										  // rows : those who inform
 											  // cols : those who are informed
 	int improved; // whether solution->error was improved during
 				  // the last iteration
@@ -202,35 +268,38 @@ void PSO::pso_solve(pso_obj_fun_t obj_fun, void * obj_fun_params)
 	double a, b; // for matrix initialization
 	double rho1, rho2; // random numbers (coefficients)
 	double w; // current omega
-	void(*inform_fun)(); // neighborhood update function
+	void(*inform_fun)(std::vector < std::vector<int>>& comm, double *pos_nb,
+		double *pos_b, double *fit_b,
+		double *gbest, int improved,
+		pso_settings_t *settings); // neighborhood update function
 	double(*calc_inertia_fun)(); // inertia weight update function
 
 
 								 // CHECK RANDOM NUMBER GENERATOR
-	if (!settings.rng) {
+	if (!settings->rng) {
 		// initialize random number generator
 		gsl_rng_env_setup();
 		// allocate the RNG
-		settings.rng = gsl_rng_alloc(gsl_rng_default);
+		settings->rng = gsl_rng_alloc(gsl_rng_default);
 		// seed the generator
-		gsl_rng_set(settings.rng, settings.seed);
+		gsl_rng_set(settings->rng, settings->seed);
 		// remember to free the RNG
 		free_rng = 1;
 	}
 
 	// SELECT APPROPRIATE NHOOD UPDATE FUNCTION
-	switch (settings.nhood_strategy)
+	switch (settings->nhood_strategy)
 	{
 	case PSO_NHOOD_GLOBAL:
 		// comm matrix not used
-		inform_fun = inform_global;
+		inform_fun = inform_global(pos_nb,settings);
 		break;
 	case PSO_NHOOD_RING:
-		init_comm_ring((int *)comm, settings);
+		init_comm_ring(comm, settings);
 		inform_fun = inform_ring;
 		break;
 	case PSO_NHOOD_RANDOM:
-		init_comm_random((int *)comm, settings);
+		init_comm_random(comm, settings);
 		inform_fun = inform_random;
 		break;
 	}
@@ -375,13 +444,4 @@ void PSO::pso_solve(pso_obj_fun_t obj_fun, void * obj_fun_params)
 	// free RNG??
 	if (free_rng)
 		gsl_rng_free(settings->rng);
-}
-
-PSO::PSO()
-{
-}
-
-
-PSO::~PSO()
-{
 }

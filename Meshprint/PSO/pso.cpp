@@ -211,15 +211,15 @@ void PSO::pso_solve()
 	{
 	case PSO_NHOOD_GLOBAL:
 		// comm matrix not used
-		inform_fun = inform_global;
+		inform_fun = &PSO::inform_global;
 		break;
 	case PSO_NHOOD_RING:
 		init_comm_ring();
-		inform_fun = inform_ring;
+		inform_fun = &PSO::inform_ring;
 		break;
 	case PSO_NHOOD_RANDOM:
 		init_comm_random();
-		inform_fun = inform_random;
+		inform_fun = &PSO::inform_random;
 		break;
 	}
 
@@ -230,7 +230,7 @@ void PSO::pso_solve()
 		/*     calc_inertia_fun = calc_inertia_const; */
 		/*     break; */
 	case PSO_W_LIN_DEC:
-		calc_inertia_fun = calc_inertia_lin_dec;
+		calc_inertia_fun =&PSO::calc_inertia_lin_dec;
 		break;
 	}
 

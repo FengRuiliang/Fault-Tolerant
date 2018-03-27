@@ -29,6 +29,7 @@ public:
 
 	PSO();
 	~PSO();
+	void solver_init();
 public:
 	// PSO SETTINGS
 	struct pso_settings_t{
@@ -85,7 +86,6 @@ public:
 		std::vector<double> gbest;
 	}population;
 
-	void init();
 	int improved; // whether solution->error was improved during
 				 // the last iteration
 	void pso_swarm_init();

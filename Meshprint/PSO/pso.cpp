@@ -6,7 +6,7 @@
 PSO::PSO()
 {
 	pso_set_default_settings();
-	init();
+	pso_swarm_init();
 }
 
 
@@ -14,7 +14,7 @@ PSO::~PSO()
 {
 }
 
-void PSO::init()
+void PSO::solver_init()
 {
 
 	// CHECK RANDOM NUMBER GENERATOR
@@ -22,16 +22,17 @@ void PSO::init()
 	improved = false;
 	// INITIALIZE SOLUTION
 	solution.error = DBL_MAX;
-
-	pso_swarm_init();
-
 }
 
 void PSO::pso_swarm_init()
 {
 	// SWARM INITIALIZATION
 	// for each particle
+	population.birds.resize(settings.size);
+for (int i=0;i<population.birds.size();i++)
+{
 
+}
 }
 
 //==============================================================

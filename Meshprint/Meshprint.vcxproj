@@ -201,6 +201,7 @@
     <ClCompile Include="meshprint.cpp" />
     <ClCompile Include="MSAABB.cpp" />
     <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSO\pso.cpp" />
     <ClCompile Include="renderingwidget.cpp" />
     <ClCompile Include="SliceCut.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="Hatch.h" />
     <ClInclude Include="HE_mesh\Mesh3D.h" />
     <ClInclude Include="HE_mesh\Vec.h" />
+    <ClInclude Include="PSO.h" />
     <ClInclude Include="PSO\pso.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="TriangleglobalFunctions.h" />

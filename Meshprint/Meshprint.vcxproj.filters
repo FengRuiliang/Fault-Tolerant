@@ -101,6 +101,9 @@
     <ClCompile Include="PSO\pso.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PSO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="meshprint.h">
@@ -175,6 +178,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PSO\pso.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PSO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

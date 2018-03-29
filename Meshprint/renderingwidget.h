@@ -16,6 +16,7 @@ class MainWindow;
 class CArcBall;
 class Mesh3D;
 class SliceCut;
+class Support;
 class RenderingWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -52,7 +53,8 @@ private:
 	void Render();
 	void SetLight();
 
-public slots:
+	bool is_draw_support_;
+	public slots:
 	void ResetView();
 	void RecvMsg(QString);
 	void ApplyMaintenance();
@@ -69,8 +71,10 @@ public slots:
 	void CheckGrid();
 	void CheckDrawTexture();
 	void CheckDrawAxes();
+	void check_support(bool bv);
 	void DoSlice();
 	void FillPath();
+	void add_support();
 	void FindNarrowBand();
 	void LayerOffset(LayerOffDis layer_offdis, int layernum);
 	void PathToCutLine();
@@ -97,6 +101,8 @@ private:
 	void DrawGrid(bool bV);
 	void DrawSlice(bool bv);
 	void DrawHatch(bool bv);
+
+	void draw_support_aera(bool bv);
 	
 public:
 	MainWindow					*ptr_mainwindow_;
@@ -105,6 +111,7 @@ public:
 	SliceCut					*ptr_slice_;
 	Hatch						*ptr_hatch_;
 	hatchType					hatch_type_;
+	Support						*ptr_support_;
 	// Texture
 	GLuint						texture_[1];
 	bool						is_load_texture_;

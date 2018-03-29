@@ -10,5 +10,7 @@ public:
 	void project_on_ground();
 private:
 	Mesh3D* target_mesh;
+public:
+	std::map<int,Mesh3D> supp_aeras;
 };
 

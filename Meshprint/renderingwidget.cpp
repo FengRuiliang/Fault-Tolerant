@@ -21,9 +21,9 @@
 #include <fstream>
 #include <QTime>
 #include "maintenance.h"
+#include "Support.h"
 
 
-class Support;
 static GLfloat win,hei;
 RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	: QOpenGLWidget(parent), ptr_mainwindow_(mainwindow), eye_distance_(200),
@@ -33,6 +33,7 @@ RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	ptr_mesh_ =new Mesh3D;
 	ptr_slice_ = NULL;
 	ptr_hatch_ = NULL;
+	ptr_support_ = NULL;
 	is_select_face = false;
 	is_draw_hatch_ = false;
 	is_load_texture_ = false;
@@ -42,6 +43,7 @@ RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	is_draw_cutpieces_ = (false);
 	is_move_module_ = (false);
 	is_show_all = false;
+	is_draw_support_ = false;
 	eye_goal_[0] = eye_goal_[1] = eye_goal_[2] = 0.0;
 	eye_direction_[0] = eye_direction_[1] = 0.0;
 	eye_direction_[2] = 1.0;
@@ -284,6 +286,7 @@ void RenderingWidget::Render()
 	DrawTexture(is_draw_texture_);
 	DrawSlice(true);
 	DrawHatch(true);
+	draw_support_aera(is_draw_support_);
 }
 
 void RenderingWidget::SetLight()
@@ -518,7 +521,7 @@ void RenderingWidget::ReadMesh()
 	}
 	else if (fileinfo.suffix() == "stl" || fileinfo.suffix() == "STL")
 	{
-		ptr_mesh_->LoadFromSTLFileOnly3Point(byfilename.data());
+		ptr_mesh_->LoadFromSTLFile(byfilename.data());
 	}
 	float max_ = ptr_mesh_->getBoundingBox().at(0).at(0);
 	max_ = max_ > ptr_mesh_->getBoundingBox().at(0).at(1) ? max_ : ptr_mesh_->getBoundingBox().at(0).at(1);
@@ -599,7 +602,13 @@ void RenderingWidget::CheckDrawAxes()
 	update();
 
 }
+void RenderingWidget::check_support(bool bv)
+{
+	is_draw_support_ = bv;
+	//updateGL();
+	update();
 
+}
 void RenderingWidget::DrawAxes(bool bv)
 {
 	if (!bv)
@@ -672,21 +681,17 @@ void RenderingWidget::DrawEdge(bool bv)
 		return;
 	}
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
-	if (ptr_slice_ == NULL)
-	{
-		return;
-	}
-	const std::vector<int> layerface = ptr_slice_->storage_Face_list_[slice_check_id_];
+	
 	//////////////////////////////////////////////////////////////////////////
 	glBegin(GL_LINES);
 	glColor4ub(0, 0, 0, 255);
-	for (int i=0;i<layerface.size();i++)
+	for (int i=0;i<faces.size();i++)
 	{
 		
 			for (int j = 0; j < 3; j++)
 			{
-				glVertex3fv(faces[layerface[i]]->vertices_[j]);
-				glVertex3fv(faces[layerface[i]]->vertices_[(j + 1) % 3]);
+				glVertex3fv(faces[i]->vertices_[j]);
+				glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
 			}
 	}
 	glEnd();
@@ -701,36 +706,20 @@ void RenderingWidget::DrawFace(bool bv)
 	{
 		return;
 	}
-// 	const std::vector<HE_edge *>& edges = *(ptr_mesh_->get_edges_list());
-// 	glLineWidth(2.0f);
-// 	glColor4ub(0, 0, 0, 255);
-// 	glBegin(GL_LINES);
-// 	for (int i=0;i<edges.size();i++)
-// 	{
-// 		if (edges[i]->boundary_flag()==BOUNDARY)
-// 		{
-// 			glVertex3fv(edges.at(i)->start_->position());
-// 			glVertex3fv(edges.at(i)->pvert_->position());
-// 		}
-// 	}
-// 	glEnd();
+;
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
-	if (ptr_slice_==NULL)
-	{
-		return;
-	}
-	const std::vector<int> layerface = ptr_slice_->storage_Face_list_[slice_check_id_];
+
 	glBegin(GL_TRIANGLES);
 	glColor4ub(0, 170, 0, 255);
-	for (size_t i = 0; i < layerface.size(); ++i)
+	for (size_t i = 0; i < faces.size(); ++i)
 	{
 		/*if (faces[i]->selected())*/
 		{
 		
-			glNormal3fv(faces[layerface[i]]->normal());
-			glVertex3fv(faces[layerface[i]]->vertices_[0]);
-			glVertex3fv(faces[layerface[i]]->vertices_[1]);
-			glVertex3fv(faces[layerface[i]]->vertices_[2]);}
+			glNormal3fv(faces[i]->normal());
+			glVertex3fv(faces[i]->vertices_[0]);
+			glVertex3fv(faces[i]->vertices_[1]);
+			glVertex3fv(faces[i]->vertices_[2]);}
 	}
 	glEnd();
 }
@@ -927,6 +916,26 @@ void RenderingWidget::DrawHatch(bool bv)
 		}
 	}
 }
+void RenderingWidget::draw_support_aera(bool bv)
+{
+	if (bv&&ptr_support_ != NULL)
+	{
+		glBegin(GL_TRIANGLES);
+		for (int i=0;i<90;i++)
+		{
+			glColor3f(sin(i*10), cos(i*10), tan(i*10));
+			auto f_list_= ptr_support_->supp_aeras[i].get_faces_list();
+			for (int j=0;j<f_list_->size();j++)
+			{
+				glVertex3fv(f_list_->at(j)->vertices_[0]);
+				glVertex3fv(f_list_->at(j)->vertices_[1]);
+				glVertex3fv(f_list_->at(j)->vertices_[2]);
+
+			}
+		}
+		glEnd();
+	}
+}
 void RenderingWidget::DoSlice()
 {
 	if (ptr_slice_!=NULL)
@@ -969,6 +978,15 @@ void RenderingWidget::FillPath()
 	}
 	update();
 }
+void RenderingWidget::add_support()
+{
+	SafeDelete(ptr_support_);
+	if (ptr_mesh_!=NULL)
+	{
+		ptr_support_ = new Support(ptr_mesh_);
+	}
+	ptr_support_->project_on_ground();
+}
 
 
 void RenderingWidget::FindNarrowBand()
@@ -978,8 +996,7 @@ void RenderingWidget::FindNarrowBand()
 	
 	qDebug() << "preprocessing" << endl;
 	for (int i = 0; i < ptr_slice_->GetNumPieces(); i++) {
-		std::vector<std::vector<std::pair<double, double> > > contours; contours.clear();
-		New2Origin layerlinenew2origin;
+		std::vector<std::vector<std::pair<double, double> > > contours; contours.clear(); New2Origin layerlinenew2origin;
 		for (int j = 0; j < pieces_[i].size(); j++) {
 			std::vector<std::pair<double, double> > contour; contour.clear();
 			//CancelBugCut(pieces_,i,j);

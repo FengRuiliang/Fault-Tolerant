@@ -920,20 +920,49 @@ void RenderingWidget::draw_support_aera(bool bv)
 {
 	if (bv&&ptr_support_ != NULL)
 	{
-		glBegin(GL_TRIANGLES);
-		for (int i=0;i<90;i++)
+		int i=0;
+	
+		for (auto iterA=ptr_support_->supp_aeras.begin();iterA!=ptr_support_->supp_aeras.end();iterA++)
 		{
-			glColor3f(sin(i*10), cos(i*10), tan(i*10));
-			auto f_list_= ptr_support_->supp_aeras[i].get_faces_list();
-			for (int j=0;j<f_list_->size();j++)
-			{
-				glVertex3fv(f_list_->at(j)->vertices_[0]);
-				glVertex3fv(f_list_->at(j)->vertices_[1]);
-				glVertex3fv(f_list_->at(j)->vertices_[2]);
 
+			if (i!=field_id)
+			{
+				i++; continue;
+			}	glBegin(GL_TRIANGLES);
+		//	glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
+			glColor3f(0.0, 0.0, 1.0);
+			auto f_list_= iterA->second.get_faces_list();
+			for (int j=0;j<f_list_->size();j++)
+				{
+				HE_edge* sta = f_list_->at(j)->pedge_;
+				HE_edge* cur = sta;
+				do 
+				{
+					glVertex3fv(cur->pvert_->position());
+					cur = cur->pnext_;
+				} while (cur!=sta);
+				//glVertex3fv(f_list_->at(j)->vertices_[0]);
+				//glVertex3fv(f_list_->at(j)->vertices_[1]);
+				//glVertex3fv(f_list_->at(j)->vertices_[2]);
+
+			}	glEnd();
+			auto boundary_loop_ = iterA->second.GetBLoop();
+			auto blist_ = iterA->second.get_bedges_list();
+			glColor3f(1.0, 0.0, 0.0);
+			for (int j=0; j < boundary_loop_.size(); j++)
+			{
+			//	glColor3f(sin(j * 10+1), cos(j * 10+1), tan(j * 10+1));
+				glBegin(GL_LINE_LOOP);
+				for (int k = 0; k < boundary_loop_[j].size(); k++)
+				{
+					glVertex3fv(boundary_loop_[j][k]->pvert_->position());
+				}
+				glEnd();
 			}
+			i++;
 		}
-		glEnd();
+	
+
 	}
 }
 void RenderingWidget::DoSlice()

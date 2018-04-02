@@ -268,7 +268,8 @@ private:
 	//! values for the bounding box
 	float xmax_, xmin_, ymax_, ymin_, zmax_, zmin_;
 	std::vector<int> wro_Nor_facets_;
-
+public:
+	bool is_support = { false };
 public:
 	std::vector<Triangle> Tria; //用来判断三角面的位置关系
 	std::vector<Triangle> Tri; //用来判断三角面的位置关系

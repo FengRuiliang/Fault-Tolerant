@@ -157,8 +157,16 @@ HE_vert* Mesh3D::InsertVertex(const Vec3f& v)
 	{
 		pvertices_list_ = new std::vector<HE_vert*>;
 	}
-	pvert->id_ = static_cast<int>(pvertices_list_->size());
-	pvertices_list_->push_back(pvert);
+	auto re = input_vertex_list_.insert(pvert);
+	if (re.second)
+	{
+		InsertVertex(pvert);
+	}
+	else
+	{
+		delete pvert;
+		pvert = *re.first;
+	}
 	return pvert;
 }
 
@@ -1253,7 +1261,7 @@ void Mesh3D::UpdateMesh(void)
 	ComputeAvarageEdgeLength();
 	if (input_vertex_list_.size() == 0)
 		SetNeighbors();
-	Unify(1);
+
 }
 
 void Mesh3D::SetBoundaryFlag(void)
@@ -1307,7 +1315,7 @@ void Mesh3D::countBoundaryComponat()
 	}
 	else
 	{
-		bLoop.resize(no_loop + 1);//initial the vectro bloop
+		bLoop.resize(no_loop + 1);//initial the vector bloop
 	}
 	//count the number of boundary loops
 	size_t i;
@@ -1333,7 +1341,6 @@ void Mesh3D::countBoundaryComponat()
 		bheList->at(i)->start_->set_seleted(UNSELECTED);
 	}
 	bLoop.resize(no_loop);
-	bLoop;
 }
 
 void Mesh3D::UpdateNormal(void)
@@ -2109,18 +2116,8 @@ void Mesh3D::computeComponent()
 	{
 		bheList->at(i)->start_->set_seleted(UNSELECTED);
 	}
-	return;
-	for (int i = 0; i < num_components_; i++)
-	{
-		HE_face* facet = bLoop[i].at(1)->ppair_->pface_;
-
-		FaceDFS(facet, i);
-	}
-	for (int i = 0; i < num_of_face_list(); i++)
-	{
-		pfaces_list_->at(i)->set_selected(UNSELECTED);
-	}
 }
+
 
 void Mesh3D::FaceDFS(HE_face* facet, int no)
 {
@@ -2131,6 +2128,7 @@ void Mesh3D::FaceDFS(HE_face* facet, int no)
 	do
 	{
 		facet = cur->ppair_->pface_;
+	
 		if (facet != NULL&&facet->selected() == UNSELECTED)
 		{
 			FaceDFS(cur->ppair_->pface_, no);

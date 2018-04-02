@@ -21,25 +21,31 @@ void Support::project_on_ground()
 	for (auto iter=target_mesh->get_faces_list()->begin();iter!=target_mesh->get_faces_list()->end();iter++)
 	{
 		int supp_angle = acos((*iter)->normal() * perpendicular) * 180 / PI;
-		if (supp_angle>155)
+		if (supp_angle>120)
 		{
 
-			std::vector<HE_vert*> verts;
+			std::vector<HE_vert*> verts,input;
 			(*iter)->face_verts(verts);
-			supp_aeras[(180 - supp_angle)/2].InsertFace(verts);
+			for (auto iterV=verts.begin();iterV!=verts.end();iterV++)
+			{
+			input.push_back(supp_aeras[(180 - supp_angle)/10].InsertVertex((*iterV)->position()));
+
+			}
+			supp_aeras[(180 - supp_angle)/10].InsertFaceSup(input);
 		}		
 	}
-	return;
 	for (auto iterM=supp_aeras.begin();iterM!=supp_aeras.end();iterM++)
 	{
-		iterM->second.UpdateMesh();
-		std::vector<HE_face*> flist=*(iterM->second.get_faces_list());
-		for (int k=0;k<flist.size();k++)
-		{
-			flist[k]->vertices_[0] -= Vec3f(0.0, 0.0, flist[k]->vertices_[0].z());
-			flist[k]->vertices_[1] -= Vec3f(0.0, 0.0, flist[k]->vertices_[1].z());
-			flist[k]->vertices_[2] -= Vec3f(0.0, 0.0, flist[k]->vertices_[2].z());
-		}
+		iterM->second.UpdateMeshSup();
+
+
+// 		continue;
+// 		for (int k=0;k<flist.size();k++)
+// 		{
+// 			flist[k]->vertices_[0] -= Vec3f(0.0, 0.0, flist[k]->vertices_[0].z());
+// 			flist[k]->vertices_[1] -= Vec3f(0.0, 0.0, flist[k]->vertices_[1].z());
+// 			flist[k]->vertices_[2] -= Vec3f(0.0, 0.0, flist[k]->vertices_[2].z());
+// 		}
 	}
 
 }

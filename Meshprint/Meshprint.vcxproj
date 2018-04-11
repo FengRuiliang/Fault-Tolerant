@@ -200,6 +200,7 @@
     <ClCompile Include="maintenance.cpp" />
     <ClCompile Include="meshprint.cpp" />
     <ClCompile Include="MSAABB.cpp" />
+    <ClCompile Include="Octree.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="PSO\pso.cpp" />
     <ClCompile Include="renderingwidget.cpp" />
@@ -258,6 +259,7 @@
     <ClInclude Include="Hatch.h" />
     <ClInclude Include="HE_mesh\Mesh3D.h" />
     <ClInclude Include="HE_mesh\Vec.h" />
+    <ClInclude Include="Octree.h" />
     <ClInclude Include="PSO\pso.h" />
     <ClInclude Include="Support.h" />
     <ClInclude Include="Triangle.h" />

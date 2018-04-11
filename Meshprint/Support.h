@@ -8,6 +8,7 @@ public:
 	Support(Mesh3D * mesh);
 	~Support();
 	void project_on_ground();
+	void support_point_sampling();
 private:
 	Mesh3D* target_mesh;
 public:

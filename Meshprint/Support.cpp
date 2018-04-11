@@ -51,8 +51,9 @@ void Support::project_on_ground()
 }
 void Support::support_point_sampling()
 {
-for (auto miter=supp_aeras.begin();miter!=supp_aeras.end();miter++)
-{
-	
-}
+	for (auto miter = supp_aeras.begin(); miter != supp_aeras.end(); miter++)
+	{
+
+
+	}
 }

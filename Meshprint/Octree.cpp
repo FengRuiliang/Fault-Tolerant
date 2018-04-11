@@ -53,11 +53,11 @@ void Octree::create_octree(MeshOcNode*& node_in, std::vector<int>* face_list_idx
 
 		// compute the bounding box
 		AABB cur_aabb;
-		oc_face_list_->at(face_list_idx->at(0))->getBoundingBox(cur_aabb.max_point, cur_aabb.min_point);
+		oc_face_list_->at(face_list_idx->at(0))->getBoundingBox(cur_aabb._max, cur_aabb._min);
 		for (std::vector<int>::iterator i = face_list_idx->begin(); i != face_list_idx->end(); i++)
 		{
 			AABB tmp_aabb;
-			oc_face_list_->at(*i)->getBoundingBox(tmp_aabb.max_point, tmp_aabb.min_point);
+			oc_face_list_->at(*i)->getBoundingBox(tmp_aabb._max, tmp_aabb._min);
 			MergeBoundingBox(cur_aabb, cur_aabb, tmp_aabb);
 		}
 		node_in->ocn_aabb_ = cur_aabb;
@@ -69,7 +69,7 @@ void Octree::create_octree(MeshOcNode*& node_in, std::vector<int>* face_list_idx
 	for (int i = 0; i < 8; i++)
 		tmp_face_list_idx[i] = new std::vector < int >;
 
-	Vec3f split_center = (aabb.max_point + aabb.min_point) / 2.0f;
+	Vec3f split_center = (aabb._max + aabb._min) / 2.0f;
 	for (std::vector<int>::iterator i = face_list_idx->begin(); i != face_list_idx->end(); i++)
 	{
 		float bcx = bary_center[*i].x();
@@ -108,20 +108,23 @@ void Octree::create_octree(MeshOcNode*& node_in, std::vector<int>* face_list_idx
 		}
 	}
 
-	Vec3f hab = (aabb.max_point - aabb.min_point) / 2.0f;
+	Vec3f hab = (aabb._max - aabb._min) / 2.0f;
 
-	create_octree(node_in->child_node_[0], tmp_face_list_idx[0], AABB(split_center, aabb.min_point), stopFlag);
-	create_octree(node_in->child_node_[1], tmp_face_list_idx[1], AABB(split_center + Vec3f(hab.x(), 0, 0), aabb.min_point + Vec3f(hab.x(), 0, 0)), stopFlag);
-	create_octree(node_in->child_node_[2], tmp_face_list_idx[2], AABB(aabb.max_point - Vec3f(0, hab.y(), 0), split_center - Vec3f(0, hab.y(), 0)), stopFlag);
-	create_octree(node_in->child_node_[3], tmp_face_list_idx[3], AABB(split_center - Vec3f(0, 0, hab.z()), aabb.min_point - Vec3f(0, 0, hab.z())), stopFlag);
+	create_octree(node_in->child_node_[0], tmp_face_list_idx[0], AABB(split_center, aabb._min), stopFlag);
+	create_octree(node_in->child_node_[1], tmp_face_list_idx[1], AABB(split_center + Vec3f(hab.x(), 0, 0), aabb._min + Vec3f(hab.x(), 0, 0)), stopFlag);
+	create_octree(node_in->child_node_[2], tmp_face_list_idx[2], AABB(aabb._max - Vec3f(0, hab.y(), 0), split_center - Vec3f(0, hab.y(), 0)), stopFlag);
+	create_octree(node_in->child_node_[3], tmp_face_list_idx[3], AABB(split_center - Vec3f(0, 0, hab.z()), aabb._min - Vec3f(0, 0, hab.z())), stopFlag);
 
-	create_octree(node_in->child_node_[4], tmp_face_list_idx[4], AABB(split_center + Vec3f(0, hab.y(), 0), aabb.min_point + Vec3f(0, hab.y(), 0)), stopFlag);
-	create_octree(node_in->child_node_[5], tmp_face_list_idx[5], AABB(aabb.max_point + Vec3f(0, 0, hab.z()), split_center + Vec3f(0, 0, hab.z())), stopFlag);
-	create_octree(node_in->child_node_[6], tmp_face_list_idx[6], AABB(aabb.max_point, split_center), stopFlag);
-	create_octree(node_in->child_node_[7], tmp_face_list_idx[7], AABB(aabb.max_point - Vec3f(hab.x(), 0, 0), split_center - Vec3f(hab.x(), 0, 0)), stopFlag);
+	create_octree(node_in->child_node_[4], tmp_face_list_idx[4], AABB(split_center + Vec3f(0, hab.y(), 0), aabb._min + Vec3f(0, hab.y(), 0)), stopFlag);
+	create_octree(node_in->child_node_[5], tmp_face_list_idx[5], AABB(aabb._max + Vec3f(0, 0, hab.z()), split_center + Vec3f(0, 0, hab.z())), stopFlag);
+	create_octree(node_in->child_node_[6], tmp_face_list_idx[6], AABB(aabb._max, split_center), stopFlag);
+	create_octree(node_in->child_node_[7], tmp_face_list_idx[7], AABB(aabb._max - Vec3f(hab.x(), 0, 0), split_center - Vec3f(hab.x(), 0, 0)), stopFlag);
 
 	for (int i = 0; i < 8; i++)
-		SafeDelete(tmp_face_list_idx[i]);
+	{
+		delete tmp_face_list_idx[i];
+		tmp_face_list_idx[i] = NULL;
+	}
 
 	int i = 0;
 	for (; i < 8; i++) {

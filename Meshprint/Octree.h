@@ -1,18 +1,8 @@
 #pragma once
 #include "HE_mesh/Mesh3D.h"
-typedef struct AlignAxisBoundingBox
-{
-public:
-	Vec3f	max_point;
-	Vec3f	min_point;
-	AlignAxisBoundingBox(Vec3f max_p, Vec3f min_p)
-	{
-		max_point = max_p;
-		min_point = min_p;
-	}
-	AlignAxisBoundingBox(void) {}
-}AABB;
-
+#include "MSAABB.h"
+#include <algorithm>
+class AABB;
 class MeshOcNode
 {
 public:
@@ -65,13 +55,13 @@ private:
 
 	void MergeBoundingBox(AABB &A, AABB A1, AABB A2)
 	{
-		A.max_point.x() = std::max(A1.max_point.x(), A2.max_point.x());
-		A.max_point.y() = std::max(A1.max_point.y(), A2.max_point.y());
-		A.max_point.z() = std::max(A1.max_point.z(), A2.max_point.z());
+		A._max.x() = std::max(A1._max.x(), A2._max.x());
+		A._max.y() = std::max(A1._max.y(), A2._max.y());
+		A._max.z() = std::max(A1._max.z(), A2._max.z());
 
-		A.min_point.x() = std::min(A1.min_point.x(), A2.min_point.x());
-		A.min_point.y() = std::min(A1.min_point.y(), A2.min_point.y());
-		A.min_point.z() = std::min(A1.min_point.z(), A2.min_point.z());
+		A._min.x() = std::min(A1._min.x(), A2._min.x());
+		A._min.y() = std::min(A1._min.y(), A2._min.y());
+		A._min.z() = std::min(A1._min.z(), A2._min.z());
 	}
 
 	bool RayHitAABB(Vec3f raySPoint, Vec3f rayDirection, Vec3f A, Vec3f B);
@@ -81,8 +71,8 @@ private:
 	bool isCollidAABB(AABB ab_1, AABB ab_2)
 	{
 		bool iscoll = true;
-		Vec3f coll_p1 = ab_2.max_point - ab_1.min_point;
-		Vec3f coll_p2 = ab_2.min_point - ab_1.max_point;
+		Vec3f coll_p1 = ab_2._max - ab_1._min;
+		Vec3f coll_p2 = ab_2._min - ab_1._max;
 		if (coll_p1.x() < 0 || coll_p1.y() < 0 || coll_p1.z() < 0)
 			iscoll = false;
 		else if (coll_p2.x() > 0 || coll_p2.y() > 0 || coll_p2.z() > 0)

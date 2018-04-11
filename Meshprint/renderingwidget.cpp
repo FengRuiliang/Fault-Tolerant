@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <queue>
 #include <utility>
-#include "ArcBall.h"
+#include "Library/ArcBall.h"
 #include "globalFunctions.h"
 #include "HE_mesh/Mesh3D.h"
 #include "openGLProjector.h"

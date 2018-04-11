@@ -4,7 +4,7 @@
 #include<QDebug>
 #include <math.h>
 #include "globalFunctions.h"
-#include "clipper.hpp"
+#include "Library/clipper.hpp"
 using namespace ClipperLib;
 class QLine;
 class CutLine;

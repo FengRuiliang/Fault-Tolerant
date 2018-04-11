@@ -1,7 +1,7 @@
 #pragma once
 #include "HE_mesh\Mesh3D.h"
 #include "globalFunctions.h"
-#include "clipper.hpp"
+#include "Library/clipper.hpp"
 #include "Cutline.h"
 class Mesh3D;
 class vector;

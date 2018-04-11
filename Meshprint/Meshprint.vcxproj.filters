@@ -56,12 +56,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_renderingwidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="ArcBall.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clipper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="globalFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,12 +71,6 @@
     <ClCompile Include="HE_mesh\Mesh3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Grid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Polygon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="maintenance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -91,9 +79,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_maintenance.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="MSAABB.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TriangleglobalFunctions.cpp">
       <Filter>Source Files</Filter>
@@ -104,7 +89,19 @@
     <ClCompile Include="Support.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Octree.cpp">
+    <ClCompile Include="Library\clipper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\ArcBall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\MSAABB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Polygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Octree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -132,12 +129,6 @@
     <ClInclude Include="GeneratedFiles\ui_meshprint.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ArcBall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clipper.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="globalFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -162,17 +153,8 @@
     <ClInclude Include="Cutline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Polygon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_maintenance.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MSAABB.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Triangle.h">
       <Filter>Header Files</Filter>
@@ -186,7 +168,19 @@
     <ClInclude Include="Support.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Octree.h">
+    <ClInclude Include="Library\clipper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\ArcBall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\MSAABB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Octree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

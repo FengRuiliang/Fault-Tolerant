@@ -1,7 +1,7 @@
 #pragma once
 #include "SliceCut.h"
 #include "QDebug"
-#include "Polygon.h"
+#include "Library/Polygon.h"
 #define MAX_FLOAT_VALUE (static_cast<float>(10e10))
 #define MIN_FLOAT_VALUE	(static_cast<float>(-10e10))
 //CHANGE

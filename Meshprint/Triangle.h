@@ -2,7 +2,7 @@
 #define TRIANGLE_HAN
 #include "TriangleglobalFunctions.h"
 #include <QDebug>
-#include "MSAABB.h"
+#include "Library/MSAABB.h"
 
 /*
 检测两个三角面的相交时思路如下：

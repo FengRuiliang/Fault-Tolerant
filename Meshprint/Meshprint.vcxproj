@@ -156,8 +156,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ArcBall.cpp" />
-    <ClCompile Include="clipper.cpp" />
+    <ClCompile Include="Library\ArcBall.cpp" />
+    <ClCompile Include="Library\clipper.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_maintenance.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -193,15 +193,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="globalFunctions.cpp" />
-    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Hatch.cpp" />
     <ClCompile Include="HE_mesh\Mesh3D.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maintenance.cpp" />
     <ClCompile Include="meshprint.cpp" />
-    <ClCompile Include="MSAABB.cpp" />
-    <ClCompile Include="Octree.cpp" />
-    <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="Library\MSAABB.cpp" />
+    <ClCompile Include="Library\Octree.cpp" />
+    <ClCompile Include="Library\Polygon.cpp" />
     <ClCompile Include="PSO\pso.cpp" />
     <ClCompile Include="renderingwidget.cpp" />
     <ClCompile Include="SliceCut.cpp" />
@@ -249,17 +248,16 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ArcBall.h" />
-    <ClInclude Include="clipper.hpp" />
+    <ClInclude Include="Library\ArcBall.h" />
+    <ClInclude Include="Library\clipper.hpp" />
     <ClInclude Include="Cutline.h" />
     <ClInclude Include="GeneratedFiles\ui_maintenance.h" />
     <ClInclude Include="GeneratedFiles\ui_meshprint.h" />
     <ClInclude Include="globalFunctions.h" />
-    <ClInclude Include="Grid.h" />
     <ClInclude Include="Hatch.h" />
     <ClInclude Include="HE_mesh\Mesh3D.h" />
     <ClInclude Include="HE_mesh\Vec.h" />
-    <ClInclude Include="Octree.h" />
+    <ClInclude Include="Library\Octree.h" />
     <ClInclude Include="PSO\pso.h" />
     <ClInclude Include="Support.h" />
     <ClInclude Include="Triangle.h" />
@@ -283,9 +281,9 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
     </CustomBuild>
     <ClInclude Include="matrix.h" />
-    <ClInclude Include="MSAABB.h" />
+    <ClInclude Include="Library\MSAABB.h" />
     <ClInclude Include="openGLProjector.h" />
-    <ClInclude Include="Polygon.h" />
+    <ClInclude Include="Library\Polygon.h" />
     <ClInclude Include="SliceCut.h" />
     <CustomBuild Include="renderingwidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

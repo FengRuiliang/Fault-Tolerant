@@ -1,7 +1,6 @@
 #include "Support.h"
 #include <algorithm>
-
-
+#include "Sweep.h"
 #define PI 3.1415926
 Support::Support()
 {
@@ -38,15 +37,6 @@ void Support::project_on_ground()
 	for (auto iterM=supp_aeras.begin();iterM!=supp_aeras.end();iterM++)
 	{
 		iterM->second.UpdateMeshSup();
-
-
-// 		continue;
-// 		for (int k=0;k<flist.size();k++)
-// 		{
-// 			flist[k]->vertices_[0] -= Vec3f(0.0, 0.0, flist[k]->vertices_[0].z());
-// 			flist[k]->vertices_[1] -= Vec3f(0.0, 0.0, flist[k]->vertices_[1].z());
-// 			flist[k]->vertices_[2] -= Vec3f(0.0, 0.0, flist[k]->vertices_[2].z());
-// 		}
 	}
 
 }
@@ -58,38 +48,45 @@ void Support::support_point_sampling()
 	for (int i=0;i<face_list_.size();i++)
 	{
 		int supp_angle =180- acos(face_list_[i]->normal() *perpendicular) * 180 / PI;
-		if (supp_angle<20)
+		if (supp_angle<60)
 		{
 			std::pair<float, float> dense(2.0, 2.0);
-			std::vector<Vec3f>& v=face_list_[i]->vertices_;
-			
+			std::vector<Vec3f> verts = face_list_[i]->vertices_;
 
-
-			float x_min_ =std::min(std::min(v[0].x(), v[1].x()),v[2].x());
-			float x_cor_ = x_min_ / dense.first;
-
-		}
-	}
-
-
-
-
-	for (auto miter = supp_aeras.begin(); miter != supp_aeras.end(); miter++)
-	{
-		auto boundary_loop_ = miter->second.GetBLoop();
-		std::pair<float, float> dense(2.0, 2.0);
-		std::vector<HE_vert*> sweep_point_;
-		std::vector<HE_edge*> sweep_segment_;
-		for (int i = 0; i < boundary_loop_.size(); i++)
-		{
-			for (int j=0;j<boundary_loop_[i].size();j++)
+			sort(verts.begin(), verts.end());
+			float sta_x_ = ((int)(verts[0].x() / dense.first))*dense.first;
+			if (sta_x_ < verts[0].x())
+				sta_x_ += dense.first;
+			for (; sta_x_ < verts[1].x(); sta_x_ += dense.first)
 			{
-				sweep_point_.push_back(boundary_loop_[i][j]->start_);
-				sweep_point_.push_back(boundary_loop_[i][j]->pvert_);
+				Vec3f p1, p2;
+				p1 = ((sta_x_ - verts[0].x()) / (verts[1].x() - verts[0].x()))*(verts[1] - verts[0]) + verts[0];
+				p2 = ((sta_x_ - verts[0].x()) / (verts[2].x() - verts[0].x()))*(verts[2] - verts[0]) + verts[0];
+				float sta_y_ = ((int)(std::min(p1.y(), p2.y()) / dense.second))*dense.second;
+				if (sta_y_ < std::min(p1.y(), p2.y()))
+					sta_y_ += dense.second;
+
+				for (;sta_y_<std::max(p1.y(),p2.y());sta_y_+=dense.second)
+				{
+					Vec3f p = ((sta_y_ - p1.y()) / (p2.y() - p1.y()))*(p2 - p1)+p1;
+					sample_points_.push_back(p);
+				}
+			}
+			for (;sta_x_<verts[2].x();sta_x_+=dense.first)
+			{																
+				Vec3f p1, p2;
+				p1 = ((sta_x_ - verts[1].x()) / (verts[2].x() - verts[1].x()))*(verts[2] - verts[1]) + verts[1];
+				p2 = ((sta_x_ - verts[0].x()) / (verts[2].x() - verts[0].x()))*(verts[2] - verts[0]) + verts[0];
+				float sta_y_ = ((int)(std::min(p1.y(), p2.y()) / dense.second))*dense.second;	
+				if (sta_y_ < std::min(p1.y(), p2.y()))
+					sta_y_ += dense.second;
+				for (; sta_y_ < std::max(p1.y(), p2.y()); sta_y_ += dense.second)
+				{
+					Vec3f p = ((sta_y_ - p1.y()) / (p2.y() - p1.y()))*(p2 - p1) + p1;
+					sample_points_.push_back(p);
+				}
+
 			}
 		}
-
-		std::sort(sweep_point_,)
-		
 	}
 }

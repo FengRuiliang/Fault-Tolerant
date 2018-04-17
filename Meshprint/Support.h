@@ -13,5 +13,6 @@ private:
 	Mesh3D* target_mesh;
 public:
 	std::map<int,Mesh3D> supp_aeras;
+	std::vector<Vec3f> sample_points_;
 };
 

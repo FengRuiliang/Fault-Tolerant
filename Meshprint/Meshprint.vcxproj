@@ -205,6 +205,7 @@
     <ClCompile Include="renderingwidget.cpp" />
     <ClCompile Include="SliceCut.cpp" />
     <ClCompile Include="Support.cpp" />
+    <ClCompile Include="Sweep.cpp" />
     <ClCompile Include="TriangleglobalFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -260,6 +261,7 @@
     <ClInclude Include="Library\Octree.h" />
     <ClInclude Include="PSO\pso.h" />
     <ClInclude Include="Support.h" />
+    <ClInclude Include="Sweep.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="TriangleglobalFunctions.h" />
     <CustomBuild Include="maintenance.h">

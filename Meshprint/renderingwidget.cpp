@@ -925,10 +925,11 @@ void RenderingWidget::draw_support_aera(bool bv)
 		for (auto iterA=ptr_support_->supp_aeras.begin();iterA!=ptr_support_->supp_aeras.end();iterA++)
 		{
 
-			if (i!=field_id)
-			{
-				i++; continue;
-			}	glBegin(GL_TRIANGLES);
+			//if (i!=field_id)
+			//{
+			//	i++; continue;
+			//}	
+			glBegin(GL_TRIANGLES);
 		//	glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
 			glColor3f(0.0, 0.0, 1.0);
 			auto f_list_= iterA->second.get_faces_list();
@@ -961,7 +962,18 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 			i++;
 		}
-	
+		glBegin(GL_LINES);
+		glColor3f(1.0, 1.0, 1.0);
+		auto t = ptr_support_->sample_points_;
+		for (;i<t.size();i++)
+		{
+			glVertex3fv(t[i]);
+
+			glVertex3f(t[i].x(), t[i].y(), 0.0);
+
+
+		}
+		glEnd();
 
 	}
 }
@@ -1015,6 +1027,7 @@ void RenderingWidget::add_support()
 		ptr_support_ = new Support(ptr_mesh_);
 	}
 	ptr_support_->project_on_ground();
+	ptr_support_->support_point_sampling();
 }
 
 

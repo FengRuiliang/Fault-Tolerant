@@ -51,6 +51,7 @@ void Support::support_point_sampling()
 		if (supp_angle<60)
 		{
 			std::pair<float, float> dense=get_dense(supp_angle);
+			//std::pair<float, float> dense(2.0, 2.0);
 			std::vector<Vec3f> verts = face_list_[i]->vertices_;
 
 			sort(verts.begin(), verts.end());
@@ -118,6 +119,13 @@ std::pair<float, float> Support::get_dense(int angle)
 	else
 	{
 		d_.first = 2.5;
+
+		if (angle < 18)
+		{
+			d_.second = 10.0;
+		}
+		else
+			d_.second = 15.0;
 	}
 	return d_;
 }

@@ -9,6 +9,7 @@ public:
 	~Support();
 	void project_on_ground();
 	void support_point_sampling();
+	std::pair<float, float> get_dense(int angle);
 private:
 	Mesh3D* target_mesh;
 public:

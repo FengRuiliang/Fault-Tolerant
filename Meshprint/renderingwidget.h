@@ -54,6 +54,7 @@ private:
 	void SetLight();
 
 	bool is_draw_support_;
+	int counter_;
 	public slots:
 	void ResetView();
 	void RecvMsg(QString);

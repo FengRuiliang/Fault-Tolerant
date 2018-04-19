@@ -20,8 +20,8 @@ void Support::project_on_ground()
 	Vec3f perpendicular(0.0, 0.0, 1.0);
 	for (auto iter=target_mesh->get_faces_list()->begin();iter!=target_mesh->get_faces_list()->end();iter++)
 	{
-		int supp_angle = acos((*iter)->normal() * perpendicular) * 180 / PI;
-		if (supp_angle>120)
+		int supp_angle =180- acos((*iter)->normal() * perpendicular) * 180 / PI;
+		if (supp_angle<60)
 		{
 
 			std::vector<HE_vert*> verts,input;
@@ -40,9 +40,10 @@ void Support::project_on_ground()
 	}
 
 }
-void Support::support_point_sampling()
+void Support::support_point_sampling(int counter_)
 {
-	// 对每个三角面片的支撑点采样
+	sample_points_.clear();qDebug() << counter_;
+//do sampling for every triangle
 	auto face_list_ = *(target_mesh->get_faces_list());
 	Vec3f perpendicular(0.0, 0.0, 1.0);
 	for (int i=0;i<face_list_.size();i++)
@@ -50,8 +51,23 @@ void Support::support_point_sampling()
 		int supp_angle =180- acos(face_list_[i]->normal() *perpendicular) * 180 / PI;
 		if (supp_angle<60)
 		{
-			std::pair<float, float> dense=get_dense(supp_angle);
-			//std::pair<float, float> dense(2.0, 2.0);
+			
+			std::pair<float, float> dense;
+			if (counter_%3==1)
+			{// uniform sampling
+				dense.first = 2.0;
+				dense.second = 2.0;
+			}
+			else if (counter_%3==2)
+			{
+				dense = get_dense(supp_angle);
+			}
+			else
+			{
+				//best sampling
+
+
+			}
 			std::vector<Vec3f> verts = face_list_[i]->vertices_;
 
 			sort(verts.begin(), verts.end());
@@ -90,6 +106,7 @@ void Support::support_point_sampling()
 			}
 		}
 	}
+	qDebug() << " the size of support is:" << sample_points_.size();
 }
 std::pair<float, float> Support::get_dense(int angle)
 {

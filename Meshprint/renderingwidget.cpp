@@ -554,6 +554,7 @@ void RenderingWidget::WriteMesh()
 	QByteArray byfilename = filename.toLocal8Bit();
 }
 
+
 void RenderingWidget::CheckDrawPoint()
 {
 	is_draw_point_ = !is_draw_point_;
@@ -1026,8 +1027,9 @@ void RenderingWidget::add_support()
 	{
 		ptr_support_ = new Support(ptr_mesh_);
 	}
-	ptr_support_->project_on_ground();
-	ptr_support_->support_point_sampling();
+	counter_++;
+ptr_support_->project_on_ground();
+	ptr_support_->support_point_sampling(counter_);
 }
 
 

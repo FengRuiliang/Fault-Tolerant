@@ -1261,7 +1261,6 @@ void Mesh3D::UpdateMesh(void)
 	ComputeAvarageEdgeLength();
 	if (input_vertex_list_.size() == 0)
 		SetNeighbors();
-
 }
 
 void Mesh3D::SetBoundaryFlag(void)
@@ -2055,7 +2054,6 @@ void Mesh3D::UpdateMeshSup(void)
 
 	UpdateBList();
 	ComputeBoundingBox();
-	//Unify(1.0);
 	SetNeighbors();
 	SetBoundaryFlag();
 	computeComponent();

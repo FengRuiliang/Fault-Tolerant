@@ -8,7 +8,8 @@ Support::Support()
 Support::Support(Mesh3D* mesh)
 {
 	target_mesh = mesh;
-
+	sp_mesh.LoadFromOBJFile(".\\Resources\\models\\sp_sim.obj");
+	sp_mesh.scalemesh(0.6);
 }
 
 Support::~Support()
@@ -21,9 +22,15 @@ void Support::project_on_ground()
 	for (auto iter=target_mesh->get_faces_list()->begin();iter!=target_mesh->get_faces_list()->end();iter++)
 	{
 		int supp_angle =180- acos((*iter)->normal() * perpendicular) * 180 / PI;
-		if (supp_angle<60)
+		if (supp_angle<limit_angle_)
 		{
-
+			float t = 0.0;
+			for (int j = 0; j < 3; j++)
+			{
+				t=std::max(t,(*iter)->vertices_[j].z());
+			}
+			if (t < 15e-1)
+				continue;
 			std::vector<HE_vert*> verts,input;
 			(*iter)->face_verts(verts);
 			for (auto iterV=verts.begin();iterV!=verts.end();iterV++)
@@ -49,16 +56,22 @@ void Support::support_point_sampling(int counter_)
 	for (int i=0;i<face_list_.size();i++)
 	{
 		int supp_angle =180- acos(face_list_[i]->normal() *perpendicular) * 180 / PI;
-		if (supp_angle<60)
+		if (supp_angle<limit_angle_)
 		{
-			
+			float t = 0.0;
+			for (int j=0;j<3;j++)
+			{
+				t = std::max(t, face_list_[i]->vertices_[j].z());
+			}
+			if (t<15e-1)
+				continue;
 			std::pair<float, float> dense;
-			if (counter_%3==1)
+			if (counter_%2==1)
 			{// uniform sampling
 				dense.first = 2.0;
 				dense.second = 2.0;
 			}
-			else if (counter_%3==2)
+			else if (counter_%2==0)
 			{
 				dense = get_dense(supp_angle);
 			}
@@ -68,6 +81,8 @@ void Support::support_point_sampling(int counter_)
 
 
 			}
+			/*	dense.first/=2;
+				dense.second/= 2;*/
 			std::vector<Vec3f> verts = face_list_[i]->vertices_;
 
 			sort(verts.begin(), verts.end());
@@ -126,12 +141,6 @@ std::pair<float, float> Support::get_dense(int angle)
 		{
 			d_.second = 8.0;
 		}
-		else if (angle < 18)
-		{
-			d_.second = 10.0;
-		}
-		else
-			d_.second = 15.0;
 	}
 	else
 	{

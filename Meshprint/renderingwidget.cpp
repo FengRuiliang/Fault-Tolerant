@@ -59,7 +59,7 @@ RenderingWidget::~RenderingWidget()
 
 void RenderingWidget::initializeGL()
 {
-	glClearColor(0.68, 0.68, 0.68, 0.0);
+	glClearColor(0.78, 0.78, 0.78, 0.0);
 	glShadeModel(GL_SMOOTH);
 	//glShadeModel(GL_FLAT);
 
@@ -692,6 +692,7 @@ void RenderingWidget::DrawEdge(bool bv)
 			for (int j = 0; j < 3; j++)
 			{
 				glVertex3fv(faces[i]->vertices_[j]);
+
 				glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
 			}
 	}
@@ -921,8 +922,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 {
 	if (bv&&ptr_support_ != NULL)
 	{
-		int i=0;
-	
+
+		int i = 0;
 		for (auto iterA=ptr_support_->supp_aeras.begin();iterA!=ptr_support_->supp_aeras.end();iterA++)
 		{
 
@@ -931,8 +932,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 			//	i++; continue;
 			//}	
 			glBegin(GL_TRIANGLES);
-		//	glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
-			glColor3f(0.0, 0.0, 1.0);
+			//glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
+			glColor4f(1.0, 1.0, 1.0,1.0);
 			auto f_list_= iterA->second.get_faces_list();
 			for (int j=0;j<f_list_->size();j++)
 				{
@@ -943,14 +944,11 @@ void RenderingWidget::draw_support_aera(bool bv)
 					glVertex3fv(cur->pvert_->position());
 					cur = cur->pnext_;
 				} while (cur!=sta);
-				//glVertex3fv(f_list_->at(j)->vertices_[0]);
-				//glVertex3fv(f_list_->at(j)->vertices_[1]);
-				//glVertex3fv(f_list_->at(j)->vertices_[2]);
+			
 
 			}	glEnd();
 			auto boundary_loop_ = iterA->second.GetBLoop();
 			auto blist_ = iterA->second.get_bedges_list();
-			glColor3f(1.0, 0.0, 0.0);
 			for (int j=0; j < boundary_loop_.size(); j++)
 			{
 			//	glColor3f(sin(j * 10+1), cos(j * 10+1), tan(j * 10+1));
@@ -963,16 +961,22 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 			i++;
 		}
-		glBegin(GL_LINES);
-		glColor3f(1.0, 1.0, 1.0);
+		auto fl = *ptr_support_->sp_mesh.get_faces_list();
 		auto t = ptr_support_->sample_points_;
+		glColor3f(1.0, 0.0, 0.0);
+		glBegin(GL_TRIANGLES);
 		for (;i<t.size();i++)
 		{
-			glVertex3fv(t[i]);
-
-			glVertex3f(t[i].x(), t[i].y(), 0.0);
-
-
+			for (int j = 0; j < fl.size(); j++)
+			{
+				HE_edge* sta = fl[j]->pedge_;
+				HE_edge* cur = sta;
+				do
+				{
+					glVertex3fv(cur->pvert_->position()+t[i]);
+					cur = cur->pnext_;
+				} while (cur != sta);
+			}
 		}
 		glEnd();
 

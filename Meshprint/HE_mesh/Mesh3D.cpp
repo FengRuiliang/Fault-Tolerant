@@ -465,7 +465,7 @@ bool Mesh3D::LoadFromOBJFile(const char* fins)//读取obj文件
 			}
 		}
 		UpdateMesh();
-		Unify(2.f);
+		//Unify(2.f);
 	}
 	catch (...)
 	{
@@ -662,6 +662,7 @@ bool Mesh3D::LoadFromSTLFile(const char* fins)
 
 	file.close();
 	UpdateMesh();
+	Unify();
 	return isValid();
 }
 
@@ -1884,7 +1885,30 @@ void Mesh3D::meshTranslate(float param1, float param2)
 
 void Mesh3D::scalemesh(float size)
 {
-	Unify(size);
+	//qDebug() << "z position" << zmax_;
+	float scaleX = xmax_ - xmin_;
+	float scaleY = ymax_ - ymin_;
+	float scaleZ = zmax_ - zmin_;
+	float scaleMax;
+
+	if (scaleX < scaleY)
+	{
+		scaleMax = scaleY;
+	}
+	else
+	{
+		scaleMax = scaleX;
+	}
+	if (scaleMax < scaleZ)
+	{
+		scaleMax = scaleZ;
+	}
+	Vec3f centerPos((xmin_ + xmax_) / 2.0, (ymin_ + ymax_) / 2.0, (zmin_+zmax_)/2.0);
+	//Vec3f centerPos(xmin_ , ymin_, zmin_);
+	for (size_t i = 0; i != pvertices_list_->size(); i++)
+	{
+		pvertices_list_->at(i)->position_ = (pvertices_list_->at(i)->position_ - centerPos)*size;
+	}
 }
 
 Mesh3D::~Mesh3D(void)

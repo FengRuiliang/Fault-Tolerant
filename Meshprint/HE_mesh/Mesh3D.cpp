@@ -225,11 +225,8 @@ HE_face* Mesh3D::InsertFace(std::vector<HE_vert* >& vec_hv)
 
 	HE_face *pface = new HE_face;
 	pface->valence_ = vsize;
-	pface->vertices_.clear();
-	for (int i=0;i<3;i++)
-	{
-		pface->vertices_.push_back(vec_hv[i]->position());
-	}
+	pface->vec_ptr_vert_ = vec_hv;
+
 	HE_edge *he1 = NULL, *he2 = NULL, *he3 = NULL, *he1_pair_ = NULL, *he2_pair_ = NULL, *he3_pair_ = NULL;
 	//std::vector<HE_edge*> vec_edges;
 	he1 = InsertEdge(vec_hv[0], vec_hv[1]);
@@ -310,25 +307,22 @@ HE_face* Mesh3D::InsertFace(std::vector<Vec3f> vec_hv,Vec3f normal_read_)
 	{
 		pfaces_list_ = new std::vector<HE_face *>;
 	}
-	HE_face *pface = new HE_face;
-	pface->id_ = static_cast<int>(pfaces_list_->size());
-
-	pfaces_list_->push_back(pface);
-	pface->normal() = normal_read_;
-	//if the normal is wrong ,exchange the order of vec_hv
-	Vec3f vector1 = vec_hv[1] - vec_hv[0];
-	Vec3f vector2 = vec_hv[2]- vec_hv[0];
-	Vec3f n_ = vector1^vector2;
-	n_.normalize();
-	if (n_.dot(normal_read_) < -0.98)
+	if (pvertices_list_==NULL)
 	{
-		for (int j = 0; j < 3; j++)
-		{
-			pface->vertices_[j] = vec_hv[2 - j];
-		}
+		pvertices_list_ = new std::vector<HE_vert *>;
 	}
-	else
-		pface->vertices_ = vec_hv;
+	HE_face *pface = new HE_face;
+	pface->normal() = normal_read_;
+	pface->id_ = static_cast<int>(pfaces_list_->size());
+	pfaces_list_->push_back(pface);
+
+	for (int i=0;i<3;i++)
+	{
+		HE_vert	*pvert = new HE_vert(vec_hv[i]);
+		pvert->id_ = static_cast<int>(pvertices_list_->size());
+		pvertices_list_->push_back(pvert);
+		pface->vec_ptr_vert_.push_back(pvert);
+	}
 	return pface;
 }
 
@@ -890,13 +884,13 @@ void Mesh3D::transcriptionFaces(void)
 
 		tri._aabb.reset();
 
-		tri.Vertex_1 = pfaces_list_->at(i)->vertices_[0];
+		tri.Vertex_1 = pfaces_list_->at(i)->vec_ptr_vert_[0];
 		tri._aabb.updateMinMax(tri.Vertex_1);
 
-		tri.Vertex_2 = pfaces_list_->at(i)->vertices_[1];
+		tri.Vertex_2 = pfaces_list_->at(i)->vec_ptr_vert_[1];
 		tri._aabb.updateMinMax(tri.Vertex_2);
 
-		tri.Vertex_3 = pfaces_list_->at(i)->vertices_[2];
+		tri.Vertex_3 = pfaces_list_->at(i)->vec_ptr_vert_[2];
 		tri._aabb.updateMinMax(tri.Vertex_3);
 
 		//tri._aabb.expandBoundary();
@@ -1475,59 +1469,16 @@ void Mesh3D::ComputeBoundingBox(void)
 	}
 }
 
-void Mesh3D::Unify(float size)
-{
-	//qDebug() << "z position" << zmax_;
-	float scaleX = xmax_ - xmin_;
-	float scaleY = ymax_ - ymin_;
-	float scaleZ = zmax_ - zmin_;
-	float scaleMax;
-
-	if (scaleX < scaleY)
-	{
-		scaleMax = scaleY;
-	}
-	else
-	{
-		scaleMax = scaleX;
-	}
-	if (scaleMax < scaleZ)
-	{
-		scaleMax = scaleZ;
-	}
-	Vec3f centerPos((xmin_ +xmax_)/2.0, (ymin_+ymax_)/2.0, (zmin_));
-	//Vec3f centerPos(xmin_ , ymin_, zmin_);
-	for (size_t i = 0; i != pvertices_list_->size(); i++)
-	{
-		pvertices_list_->at(i)->position_ = (pvertices_list_->at(i)->position_ - centerPos)*size;
-	}
-}
-
 void Mesh3D::Unify()
 {
-#define MAX_FLOAT_VALUE (static_cast<float>(10e10))
-#define MIN_FLOAT_VALUE	(static_cast<float>(-10e10))
-
-	xmax_ = ymax_ = zmax_ = MIN_FLOAT_VALUE;
-	xmin_ = ymin_ = zmin_ = MAX_FLOAT_VALUE;
-	for (int i=0;i<pfaces_list_->size();i++)
+	if (xmin_==xmax_&&ymin_==ymax_&&zmin_==zmax_)
 	{
-		for (int j=0;j<3;j++)
-		{
-			xmin_ = min(xmin_, pfaces_list_->at(i)->vertices_[j].x());
-			ymin_ = min(ymin_, pfaces_list_->at(i)->vertices_[j].y());
-			zmin_ = min(zmin_, pfaces_list_->at(i)->vertices_[j].z());
-			xmax_ = max(xmax_, pfaces_list_->at(i)->vertices_[j].x());
-			ymax_ = max(ymax_, pfaces_list_->at(i)->vertices_[j].y());
-			zmax_ = max(zmax_, pfaces_list_->at(i)->vertices_[j].z());
-		}
+		ComputeBoundingBox();
 	}
-
 	Vec3f centerPos((xmin_ + xmax_) / 2.0, (ymin_ + ymax_) / 2.0, (zmin_));
-	for (size_t i = 0; i != pfaces_list_->size(); i++)
+	for (size_t i=0;i!=pvertices_list_->size();i++)
 	{
-		for (int j = 0; j < 3; j++)
-			pfaces_list_->at(i)->vertices_[j] -= centerPos;
+		pvertices_list_->at(i)->position() -= centerPos;
 	}
 	xmin_ -= centerPos.x();
 	xmax_ -= centerPos.x();
@@ -1535,6 +1486,7 @@ void Mesh3D::Unify()
 	ymax_ -= centerPos.y();
 	zmin_ -= centerPos.z();
 	zmax_ -= centerPos.z();
+
 }
 
 void Mesh3D::ComputeAvarageEdgeLength(void)

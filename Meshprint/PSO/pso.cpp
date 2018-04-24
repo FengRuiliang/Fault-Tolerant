@@ -6,7 +6,15 @@
 PSO::PSO()
 {
 	pso_set_default_settings();
-	pso_swarm_init();
+	
+}
+
+PSO::PSO(std::vector<std::vector<float>> original_bird_, int size)
+{
+	pso_set_default_settings();
+	settings.dim = original_bird_.size();
+	settings.size = size;
+	pso_swarm_init(original_bird_);
 }
 
 
@@ -24,15 +32,23 @@ void PSO::solver_init()
 	solution.error = DBL_MAX;
 }
 
-void PSO::pso_swarm_init()
+
+void PSO::pso_swarm_init(std::vector<std::vector<float>> first_particle_)
 {
 	// SWARM INITIALIZATION
-	// for each particle
-	population.birds.resize(settings.size);
-for (int i=0;i<population.birds.size();i++)
-{
+	srand((unsigned)time(NULL));
+	population.resize(settings.size);
+	for (int i = 0; i < settings.size; i++)
+	{
+		for (int j = 0; j < settings.dim; j++)
+		{
+			for (int k = 0; k < first_particle_[j].size(); k++)
+			{
+				population[i].pos[j][k] = first_particle_[j][k] + ((-1)^rand())*rand() / double(RAND_MAX);
+			}
+		}
+	}
 
-}
 }
 
 //==============================================================
@@ -330,9 +346,11 @@ void PSO::pso_solve()
 
 double PSO::pso_obj_fun_t(std::vector<double> pos)
 {
+
+
+
 	return 0.0;
 }
-
 
 //==============================================================
 // calculate swarm size based on dimensionality

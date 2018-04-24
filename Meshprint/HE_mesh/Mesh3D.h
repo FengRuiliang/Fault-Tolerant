@@ -137,7 +137,7 @@ public:
 	Vec4f		color_;			//!< the color of this face
 	BoundaryTag boundary_flag_;	//!< this flag is used to split the mesh
 	int com_flag;
-	std::vector<Vec3f> vertices_;
+	std::vector<HE_vert*> vec_ptr_vert_;
 public:
 	HE_face()
 		: id_(-1), pedge_(NULL), valence_(0), selected_(UNSELECTED), boundary_flag_(INNER), normal_(0,0,0),com_flag(-1)
@@ -501,7 +501,6 @@ private:
 
 	void countBoundaryComponat();
 	//! unify mesh
-	void Unify(float size);
 
 	void Unify();
 

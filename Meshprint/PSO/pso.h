@@ -28,6 +28,7 @@ class PSO
 public:
 
 	PSO();
+	PSO(std::vector<std::vector<float>> original_bird_, int size);
 	~PSO();
 	void solver_init();
 public:
@@ -65,7 +66,7 @@ public:
 	}solution;
 	// Particles
 	struct particle {
-		std::vector<double> pos, vel, pos_b,pos_nb;
+		std::vector<std::vector<float>> pos, vel, pos_b,pos_nb;
 								// position matrix
 								// velocity matrix
 								// best position matrix
@@ -74,21 +75,18 @@ public:
 		double fit, fit_b;		// particle fitness 
 								// best fitness 
 
-	}bird;
+	};
 	//Swarm
-	struct swarm
-	{
-	
 		std::vector<std::vector<int>> comm;	// communications:who informs who
 											// rows : those who inform
 											// cols : those who are informed
-		std::vector<particle> birds;
+		std::vector<particle> population;
 		std::vector<double> gbest;
-	}population;
+
 
 	int improved; // whether solution->error was improved during
 				 // the last iteration
-	void pso_swarm_init();
+	void pso_swarm_init(std::vector<std::vector<float>> firs_particle_);
 
 
 

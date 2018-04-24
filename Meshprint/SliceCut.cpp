@@ -40,8 +40,8 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 	
 		for (int i=0;i<3;i++)
 		{
-			min_height = min(min_height, (*iter_Face)->vertices_[i].z());
-			max_height = max(max_height, (*iter_Face)->vertices_[i].z());
+			min_height = min(min_height, (*iter_Face)->vec_ptr_vert_[i]->position().z());
+			max_height = max(max_height, (*iter_Face)->vec_ptr_vert_[i]->position().z());
 		}
 		if (max_height-min_height<1e-3)// 22/01/2017
 		{
@@ -193,7 +193,10 @@ static bool sortCutLineByZ(const CutLine* a,const CutLine* b )
 
 std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 {
-	std::vector<Vec3f>& p = facet->vertices_;
+	std::vector<Vec3f> p;
+	p.push_back(facet->vec_ptr_vert_[0]->position());
+	p.push_back(facet->vec_ptr_vert_[1]->position());
+	p.push_back(facet->vec_ptr_vert_[2]->position());
 	std::vector<CutLine*> e_;
 	e_.push_back(new CutLine(p[0],p[1]));
 	e_.push_back(new CutLine(p[1], p[2]));

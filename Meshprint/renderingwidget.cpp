@@ -170,12 +170,12 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 		for (int i=0;i<faces.size();i++)
 		{
 			Vec3f point_;
-			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vertices_[0],
+			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vec_ptr_vert_[0]->position(),
 				direc, add_pointN, point_);
 			std::vector<Vec3f> te;
 			for (int i=0;i<3;i++)
 			{
-				te.push_back(faces[i]->vertices_[i]);
+				te.push_back(faces[i]->vec_ptr_vert_[i]->position());
 			}
 			if (PointinTriangle(te,point_))
 			{
@@ -691,9 +691,9 @@ void RenderingWidget::DrawEdge(bool bv)
 		
 			for (int j = 0; j < 3; j++)
 			{
-				glVertex3fv(faces[i]->vertices_[j]);
+				glVertex3fv(faces[i]->vec_ptr_vert_[j]->position());
 
-				glVertex3fv(faces[i]->vertices_[(j + 1) % 3]);
+				glVertex3fv(faces[i]->vec_ptr_vert_[(j + 1) % 3]->position());
 			}
 	}
 	glEnd();
@@ -715,13 +715,10 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		/*if (faces[i]->selected())*/
-		{
-		
-			glNormal3fv(faces[i]->normal());
-			glVertex3fv(faces[i]->vertices_[0]);
-			glVertex3fv(faces[i]->vertices_[1]);
-			glVertex3fv(faces[i]->vertices_[2]);}
+		glNormal3fv(faces[i]->normal());
+		glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
+		glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
+		glVertex3fv(faces[i]->vec_ptr_vert_[2]->position());
 	}
 	glEnd();
 }
@@ -922,36 +919,26 @@ void RenderingWidget::draw_support_aera(bool bv)
 {
 	if (bv&&ptr_support_ != NULL)
 	{
-
-		int i = 0;
-		for (auto iterA=ptr_support_->supp_aeras.begin();iterA!=ptr_support_->supp_aeras.end();iterA++)
-		{
-
-			//if (i!=field_id)
-			//{
-			//	i++; continue;
-			//}	
-			glBegin(GL_TRIANGLES);
-			//glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
-			glColor4f(1.0, 1.0, 1.0,1.0);
-			auto f_list_= iterA->second.get_faces_list();
-			for (int j=0;j<f_list_->size();j++)
+		auto mesh_list_ = ptr_support_->sup_ptr_aera_list_;
+		for (int i=0;i<mesh_list_.size();i++)
+		{	glBegin(GL_TRIANGLES);
+			auto face_list_ = mesh_list_[i]->get_faces_list();
+			glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
+			//glColor4f(1.0, 1.0, 1.0,1.0);
+			for (int j=0;j<face_list_->size();j++)
 				{
-				HE_edge* sta = f_list_->at(j)->pedge_;
+				HE_edge* sta = face_list_->at(j)->pedge_;
 				HE_edge* cur = sta;
 				do 
 				{
 					glVertex3fv(cur->pvert_->position());
 					cur = cur->pnext_;
 				} while (cur!=sta);
-			
 
 			}	glEnd();
-			auto boundary_loop_ = iterA->second.GetBLoop();
-			auto blist_ = iterA->second.get_bedges_list();
+			auto boundary_loop_ = mesh_list_[i]->GetBLoop();
 			for (int j=0; j < boundary_loop_.size(); j++)
 			{
-			//	glColor3f(sin(j * 10+1), cos(j * 10+1), tan(j * 10+1));
 				glBegin(GL_LINE_LOOP);
 				for (int k = 0; k < boundary_loop_[j].size(); k++)
 				{
@@ -959,13 +946,12 @@ void RenderingWidget::draw_support_aera(bool bv)
 				}
 				glEnd();
 			}
-			i++;
 		}
 		auto fl = *ptr_support_->sp_mesh.get_faces_list();
 		auto t = ptr_support_->sample_points_;
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_TRIANGLES);
-		for (;i<t.size();i++)
+		for (int i=0;i<t.size();i++)
 		{
 			for (int j = 0; j < fl.size(); j++)
 			{
@@ -1027,12 +1013,12 @@ void RenderingWidget::FillPath()
 void RenderingWidget::add_support()
 {
 	SafeDelete(ptr_support_);
-	if (ptr_mesh_!=NULL)
+	if (ptr_mesh_ != NULL)
 	{
 		ptr_support_ = new Support(ptr_mesh_);
 	}
 	counter_++;
-ptr_support_->project_on_ground();
+	ptr_support_->find_support_area();
 	ptr_support_->support_point_sampling(counter_);
 }
 

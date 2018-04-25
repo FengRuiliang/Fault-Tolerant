@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "Library/clipper.hpp"
 using namespace std;
 	// CONSTANTS
 #define PSO_MAX_SIZE 100 // max swarm size
@@ -28,7 +29,7 @@ class PSO
 public:
 
 	PSO();
-	PSO(std::vector<std::vector<float>> original_bird_, int size);
+	PSO(std::vector<std::pair<int, int>> original_bird_, ClipperLib::Paths polygon, std::pair<int, int> dense, int size);
 	~PSO();
 	void solver_init();
 public:
@@ -66,7 +67,7 @@ public:
 	}solution;
 	// Particles
 	struct particle {
-		std::vector<std::vector<float>> pos, vel, pos_b,pos_nb;
+		std::vector<std::pair<int,int>> pos, vel, pos_b,pos_nb;
 								// position matrix
 								// velocity matrix
 								// best position matrix
@@ -77,20 +78,19 @@ public:
 
 	};
 	//Swarm
+
 		std::vector<std::vector<int>> comm;	// communications:who informs who
 											// rows : those who inform
 											// cols : those who are informed
-		std::vector<particle> population;
-		std::vector<double> gbest;
-
+		std::vector<particle> swarm;
+		std::vector<std::pair<int, int>> gbest;
+	
 
 	int improved; // whether solution->error was improved during
 				 // the last iteration
-	void pso_swarm_init(std::vector<std::vector<float>> firs_particle_);
 
-
-
-public:	
+	void pso_swarm_init(std::vector<std::pair<int, int>> first_particle_);
+public:
 	void inform_global();
 	void init_comm_ring();
 	void inform_ring();
@@ -100,8 +100,10 @@ public:
 	void pso_set_default_settings();
 	double calc_inertia_lin_dec(int step);
 	int pso_calc_swarm_size(int dim);
-	void pso_solve();
+	std::vector<std::pair<int, int>> pso_solve();
 private:
-	double pso_obj_fun_t(std::vector<double> pos);
+	double pso_obj_fun_t(particle bird);
+	ClipperLib::Paths remain_paths_;
+	std::pair<int, int>dense_;
 };
 

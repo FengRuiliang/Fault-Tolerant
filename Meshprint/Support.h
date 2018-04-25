@@ -20,7 +20,7 @@ private:
 
 public:
 	std::vector<Mesh3D*> sup_ptr_aera_list_;
-	std::vector<Vec3f> sample_points_;
+	std::map<int,std::vector<Vec3f>> sample_points_;
 	Mesh3D sp_mesh;
 };
 

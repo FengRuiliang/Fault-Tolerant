@@ -920,8 +920,11 @@ void RenderingWidget::draw_support_aera(bool bv)
 	if (bv&&ptr_support_ != NULL)
 	{
 		auto mesh_list_ = ptr_support_->sup_ptr_aera_list_;
+		auto fl = *ptr_support_->sp_mesh.get_faces_list();
+		auto t = ptr_support_->sample_points_;
 		for (int i=0;i<mesh_list_.size();i++)
-		{	glBegin(GL_TRIANGLES);
+		{
+			glBegin(GL_TRIANGLES);
 			auto face_list_ = mesh_list_[i]->get_faces_list();
 			glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
 			//glColor4f(1.0, 1.0, 1.0,1.0);
@@ -935,7 +938,29 @@ void RenderingWidget::draw_support_aera(bool bv)
 					cur = cur->pnext_;
 				} while (cur!=sta);
 
-			}	glEnd();
+			}	
+			glEnd();
+			
+			glColor3f(1.0, 0.0, 0.0);
+			glBegin(GL_TRIANGLES);
+			for (int j = 0;j < t[i].size(); j++)
+			{
+				for (int k = 0; k < fl.size(); k++)
+				{
+					HE_edge* sta = fl[k]->pedge_;
+					HE_edge* cur = sta;
+					do
+					{
+						glVertex3fv(cur->pvert_->position() + t[i][j]);
+						cur = cur->pnext_;
+					} while (cur != sta);
+				}
+			}
+			glEnd();
+			
+			
+			
+			
 			auto boundary_loop_ = mesh_list_[i]->GetBLoop();
 			for (int j=0; j < boundary_loop_.size(); j++)
 			{
@@ -947,24 +972,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 				glEnd();
 			}
 		}
-		auto fl = *ptr_support_->sp_mesh.get_faces_list();
-		auto t = ptr_support_->sample_points_;
-		glColor3f(1.0, 0.0, 0.0);
-		glBegin(GL_TRIANGLES);
-		for (int i=0;i<t.size();i++)
-		{
-			for (int j = 0; j < fl.size(); j++)
-			{
-				HE_edge* sta = fl[j]->pedge_;
-				HE_edge* cur = sta;
-				do
-				{
-					glVertex3fv(cur->pvert_->position()+t[i]);
-					cur = cur->pnext_;
-				} while (cur != sta);
-			}
-		}
-		glEnd();
+	
+		
 
 	}
 }

@@ -2,6 +2,7 @@
 #include <math.h>
 #include <ctime>
 #include <stdlib.h>
+#include <qdebug.h>
 
 PSO::PSO()
 {
@@ -41,8 +42,11 @@ void PSO::pso_swarm_init(std::vector<std::pair<int, int>> first_particle_)
 	// SWARM INITIALIZATION
 	srand((unsigned)time(NULL));
 	swarm.resize(settings.size);
+	inform_.resize(settings.dim);
+	gbest.resize(settings.dim);
 	for (int i=0;i<settings.size;i++)
 	{
+	
 		swarm[i].pos.resize(settings.dim);
 		swarm[i].pos_b.resize(settings.dim);
 		swarm[i].pos_nb.reserve(settings.dim);
@@ -52,14 +56,14 @@ void PSO::pso_swarm_init(std::vector<std::pair<int, int>> first_particle_)
 	{
 		for (int j = 0; j < settings.dim; j++)
 		{
-			swarm[i].pos[j].first = first_particle_[j].first + rand() % 2001-1000;
-			swarm[i].pos[j].second = first_particle_[j].second +rand() % 2001-1000;
+			swarm[i].pos[j].first = first_particle_[j].first + rand() % 1001-500;
+			swarm[i].pos[j].second = first_particle_[j].second +rand() % 1001-500;
 		}
 		double area = pso_obj_fun_t(swarm[i]);
 		if (area<useless_area)
 		{
 			useless_area = area;
-			gbest = swarm[i].pos;
+			
 		}
 	}
 }
@@ -122,6 +126,7 @@ double PSO::calc_inertia_lin_dec(int step)
 
 std::vector<std::pair<int, int>> PSO::pso_solve()
 {
+
 	return gbest;
 
 }
@@ -130,10 +135,12 @@ double PSO::pso_obj_fun_t(particle bird)
 {
 	//calculate the non-overlap area
 	using namespace ClipperLib; 
+	Paths target = remain_paths_;
 	Path rectangle_;
 	Clipper solver;
 	Paths useless_paths_;
 	double useless_area_value_ = {0.0};
+	double area_rec_ = dense_.first*dense_.second;
 	for (int i=0;i<settings.dim;i++)
 	{
 		solver.Clear();
@@ -143,19 +150,29 @@ double PSO::pso_obj_fun_t(particle bird)
 		rectangle_ << IntPoint(bird.pos[i].first + dense_.first / 2, bird.pos[i].second + dense_.second / 2);
 		rectangle_ << IntPoint(bird.pos[i].first - dense_.first / 2, bird.pos[i].second + dense_.second / 2);
 		solver.AddPath(rectangle_,ptSubject,true);
-		solver.AddPaths(remain_paths_, ptClip, true);
+		solver.AddPaths(target, ptClip, true);
 		solver.Execute(ctDifference, useless_paths_, pftNonZero, pftNonZero);
+		
 		solver.Clear();
-		solver.AddPaths(remain_paths_, ptSubject, true);
+		solver.AddPaths(target, ptSubject, true);
 		solver.AddPath(rectangle_, ptClip, true);
-		solver.Execute(ctDifference, remain_paths_, pftNonZero, pftNonZero);
+		solver.Execute(ctDifference, target, pftNonZero, pftNonZero);
 		solver.Clear();
-		for (int j=0;j<useless_paths_.size();j++)
-			useless_area_value_ = +Area(useless_paths_[j]);	
+		double t_area_ = 0.0;
+		for (int j = 0; j < useless_paths_.size(); j++)
+		{
+			useless_area_value_ +=powf(Area(useless_paths_[j]),2.0);
+			t_area_ += Area(useless_paths_[j]);
+		}
+		if (t_area_-area_rec_==0)
+		{
+			inform_[i] = 0;
+		}
+		else
+		{
+			inform_[i] = 1;
+		}
 	}
-	if (remain_paths_.size())
-		return 1e20;
-
 	return useless_area_value_;
 }
 

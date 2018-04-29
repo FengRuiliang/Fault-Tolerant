@@ -84,6 +84,7 @@ public:
 											// cols : those who are informed
 		std::vector<particle> swarm;
 		std::vector<std::pair<int, int>> gbest;
+		std::vector < int> inform_;
 	
 
 	int improved; // whether solution->error was improved during

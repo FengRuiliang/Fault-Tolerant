@@ -90,101 +90,98 @@ void Support::support_point_sampling(int counter_)
 #define OPTIMAL (int)0
 
 	sample_points_.clear();
-	std::pair<float, float> dense(1.0, 1.0);
-	Vec3f perpendicular(0.0, 0.0, 1.0);
+	IntPoint dense(1000, 1000);
 	for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
 	{
-		std::vector<HE_face*> face_list_ = *(sup_ptr_aera_list_[i]->get_faces_list());
-
-		for (int j = 0; j < face_list_.size(); j++)
+		auto loop_list_ = sup_ptr_aera_list_[i]->GetBLoop();
+		using namespace ClipperLib;
+		ClipperLib::Paths polygon;
+		polygon.resize(loop_list_.size());
+		IntPoint p;
+		for (int j = 0; j < loop_list_.size(); j++)
 		{
-			if (counter_ % 3 == SPARSE)
+			for (int k = 0; k < loop_list_[j].size(); k++)
 			{
-				dense = get_dense(180 - acos(face_list_[i]->normal() * perpendicular) * 180 / PI);
-				dense = make_pair(2.0, 2.0);
-			}
-			std::vector<Vec3f> verts;
-			HE_edge* sta = face_list_[j]->pedge_;
-			HE_edge* cur = sta;
-			do
-			{
-				verts.push_back(cur->pvert_->position());
-				cur = cur->pnext_;
-			} while (cur != sta);
-
-			sort(verts.begin(), verts.end());
-			float sta_x_ = ((int)(verts[0].x() / dense.first))*dense.first;
-			if (sta_x_ < verts[0].x())
-				sta_x_ += dense.first;
-			for (; sta_x_ < verts[1].x(); sta_x_ += dense.first)
-			{
-				Vec3f p1, p2;
-				p1 = ((sta_x_ - verts[0].x()) / (verts[1].x() - verts[0].x()))*(verts[1] - verts[0]) + verts[0];
-				p2 = ((sta_x_ - verts[0].x()) / (verts[2].x() - verts[0].x()))*(verts[2] - verts[0]) + verts[0];
-				float sta_y_ = ((int)(std::min(p1.y(), p2.y()) / dense.second))*dense.second;
-				if (sta_y_ < std::min(p1.y(), p2.y()))
-					sta_y_ += dense.second;
-
-				for (; sta_y_ < std::max(p1.y(), p2.y()); sta_y_ += dense.second)
-				{
-					Vec3f p = ((sta_y_ - p1.y()) / (p2.y() - p1.y()))*(p2 - p1) + p1;
-					sample_points_[i].push_back(p);
-				}
-			}
-			for (; sta_x_ < verts[2].x(); sta_x_ += dense.first)
-			{
-				Vec3f p1, p2;
-				p1 = ((sta_x_ - verts[1].x()) / (verts[2].x() - verts[1].x()))*(verts[2] - verts[1]) + verts[1];
-				p2 = ((sta_x_ - verts[0].x()) / (verts[2].x() - verts[0].x()))*(verts[2] - verts[0]) + verts[0];
-				float sta_y_ = ((int)(std::min(p1.y(), p2.y()) / dense.second))*dense.second;
-				if (sta_y_ < std::min(p1.y(), p2.y()))
-					sta_y_ += dense.second;
-				for (; sta_y_ < std::max(p1.y(), p2.y()); sta_y_ += dense.second)
-				{
-					Vec3f p = ((sta_y_ - p1.y()) / (p2.y() - p1.y()))*(p2 - p1) + p1;
-					sample_points_[i].push_back(p);
-				}
+				p.X = (int)(loop_list_[j][k]->pvert_->position().x()*1e3);
+				p.Y = (int)(loop_list_[j][k]->pvert_->position().y()*1e3);
+				polygon[j] << p;
 			}
 		}
-	}
 
+		std::vector<Vec3f> box = sup_ptr_aera_list_[i]->getBoundingBox();
+		int min_x_, min_y_, max_x_, max_y_;
+		min_x_ = ((int)box[1].x() - 2) * 1000;
+		min_y_ = ((int)box[1].y() - 2) * 1000;
+		max_x_ = ((int)box[0].x() + 2) * 1000;
+		max_y_ = ((int)box[0].x() + 2) * 1000;
+		std::vector<IntPoint> points;
+		Path rec(4);
+		Clipper solver;
 
-	if (counter_ % 3 == OPTIMAL)
-	{
-		for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
+		Paths solution;
+		for (p.X = min_x_; p.X < max_x_; p.X += dense.X)
 		{
-			auto loop_list_ = sup_ptr_aera_list_[i]->GetBLoop();
-			ClipperLib::Paths polygon;
-			std::vector<std::pair<int, int>> points;
-			polygon.resize(loop_list_.size());
-			for (int j = 0; j < loop_list_.size(); j++)
+			for (p.Y = min_y_; p.Y < max_y_; p.Y += dense.Y)
 			{
-				for (int k = 0; k < loop_list_[j].size(); k++)
+
+				if (PointInPolygon(p, polygon[0]) == 0)
 				{
-					polygon[j] << ClipperLib::IntPoint((int)(loop_list_[j][k]->pvert_->position().x()*1e3),
-						(int)(loop_list_[j][k]->pvert_->position().y()*1e3));
+					rec[0].X = p.X - dense.X / 2;
+					rec[0].Y = p.Y - dense.Y / 2;
+					rec[1].X = p.X + dense.X / 2;
+					rec[1].Y = p.Y - dense.Y / 2;
+					rec[2].X = p.X + dense.X / 2;
+					rec[2].Y = p.Y + dense.Y / 2;
+					rec[3].X = p.X - dense.X / 2;
+					rec[3].Y = p.Y + dense.Y / 2;
+					solver.Clear();
+					solver.AddPaths(polygon, ptClip, true);
+					solver.AddPath(rec, ptSubject, true);
+					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
+					if (solution.size())
+					{
+						points << p;
+						Vec3f v(p.X / 1e3, p.Y / 1e3, 0.0);
+						sample_points_[i].push_back(v);
+					}
 				}
+				else
+				{
+					points << p;
+					Vec3f v(p.X / 1e3, p.Y / 1e3, 0.0);
+					sample_points_[i].push_back(v);
+				}
+
+
 			}
-			for (int j = 0; j < sample_points_[i].size(); j++)
-			{
-				points.push_back(make_pair((int)(sample_points_[i][j].x()*1e3),
-					(int)(sample_points_[i][j].y()*1e3)));
-			}
-			PSO pso_solver_(points, polygon, make_pair((int)1000, (int)1000), 100);
-			pso_solver_.settings.goal = sample_points_[i].size()-1;
+
+		}
+		if (counter_ % 2 == OPTIMAL)
+		{
+			PSO pso_solver_;
+			pso_solver_.remain_paths_ = polygon;
+			pso_solver_.settings.clamp_pos[0] = IntPoint(max_x_, max_y_);
+			pso_solver_.settings.clamp_pos[1] = IntPoint(min_x_, min_y_);
+			pso_solver_.settings.size = 100;
+			pso_solver_.settings.steps = 10;
+			pso_solver_.dense_ = dense;
+			pso_solver_.pso_swarm_init();	
 			auto pos_ = pso_solver_.pso_solve();
+		
+
 			sample_points_[i].clear();
 			for (int j = 0; j < pos_.size(); j++)
 			{
-				Vec3f p(pos_[j].first / 1e3, pos_[j].second / 1e3, 0.0);
+				Vec3f p(pos_[j].first / 1e3, pos_[j].second / 1e3, 10);
 				sample_points_[i].push_back(p);
 			}
 		}
+	}
 	
-	}	
-	sam_project_to_mesh(sample_points_);
-	
-	qDebug() << counter_ << sample_points_[0].size();
+sam_project_to_mesh(sample_points_);
+
+
+qDebug() << counter_ << sample_points_[0].size();
 }
 std::pair<float, float> Support::get_dense(int angle)
 {
@@ -225,7 +222,7 @@ void Support::sam_project_to_mesh(std::map<int, std::vector<Vec3f>> points_)
 	for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
 	{
 		MeshOctree octree;
-		octree.BuildOctree(sup_ptr_aera_list_[i]);
+		octree.BuildOctree(target_mesh);
 		std::vector<Vec3f> re_sample_p;
 		for (int j = 0; j < points_[i].size(); j++)
 		{

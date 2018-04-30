@@ -19,8 +19,8 @@ class SliceCut;
 class Support;
 class RenderingWidget : public QOpenGLWidget
 {
+	
 	Q_OBJECT
-
 public:
 	Meshprint* parent;
 
@@ -56,9 +56,6 @@ private:
 	bool is_draw_support_;
 	int counter_ = { 0 };
 	public slots:
-	void ResetView();
-	void RecvMsg(QString);
-	void ApplyMaintenance();
 	void SetBackground();
 	void SetSliceCheckId(int id);
 	void setFildID(int id);

@@ -20,7 +20,6 @@
 #include "meshprint.h"
 #include <fstream>
 #include <QTime>
-#include "maintenance.h"
 #include "Support.h"
 
 
@@ -367,114 +366,6 @@ void RenderingWidget::setHatchType(int type_)
 {
 	hatch_type_ = (hatchType)type_;
 }
-
-//by Triangle Maintenancer
-//Reset Model View
-
-void RenderingWidget::ResetView() {
-
-	ptr_arcball_->InitBall();
-
-	update();
-}
-
-//pass information for SendMsg 
-void RenderingWidget::RecvMsg(QString str) {
-	if (str == "intersectDetection")
-	{
-		//执行检测方法
-		ptr_mesh_->TriangleIntersect();
-		//ptr_mesh_->ClearMark();
-		emit sendMsgtoDialog("Dialog");
-	}
-	else if (str == "reverseDetection")
-	{
-		//2017/10/23还未做reverse处理
-		emit sendMsgtoDialog("Dialog");
-	}
-	else if (str == "badsideDetection")
-	{
-		//坏边数量即bhelist
-		badside_num = ptr_mesh_->GetBhelist()->size();
-		emit sendMsgtoDialog("Dialog");
-	}
-	else if (str == "holeDetection")
-	{
-		//孔洞数量即bloop
-		hole_num = ptr_mesh_->GetBLoop().size();
-		emit sendMsgtoDialog("Dialog");
-	}
-	else if (str == "shellDetection")
-	{
-		//壳体的检测在Mesh.cpp中updateMesh中的setBloopFromBhelist已经做了处理
-		emit sendMsgtoDialog("Dialog");
-	}
-	else if (str == "update")
-	{
-		//做一些重置更新工作，在点击更新后，可能做了一些修复，未来的及更新Tria
-
-	}
-	else if (str == "maintenance")
-	{
-		ptr_mesh_->Maintenance();
-	}
-
-	else if (str == "clearmark")
-	{
-		ptr_mesh_->ClearMark();
-	}
-
-	else if (str == "intersectmark")
-	{
-		ptr_mesh_->TriaToTri();
-	}
-
-	else if (str == "createtriangle")
-	{
-		//开放openGLWidget的选取，
-		ptr_mesh_->CreateTriangle();
-	}
-
-	else if (str == "repairhole")
-	{	//孔洞的修复
-		ptr_mesh_->RepairHole();
-	}
-
-	else if (str == "markbadside")
-	{
-		badsideMark = !badsideMark;
-	}
-	//else
-	//{
-	//	updateFlag = true;
-	//}
-
-	//设置dialog上界面变化
-
-	update();
-}
-
-
-void RenderingWidget::ApplyMaintenance() {
-	qDebug() << "Maintenance!!!" << "\n";
-	if (actionMaintenanceFlag)
-	{
-		actionMaintenanceFlag = false;
-
-		MyDialog *dialog = new MyDialog(this);//当用WA_DeleteOnClose时，会不会存在二次析构的问题呢，不会，对象析构时，会在父对象的children table delete.父对象销毁时children也销毁，否则nodestory
-		dialog->setAttribute(Qt::WA_DeleteOnClose);//在Dialog关闭时，进行析构，防止内存泄漏
-		dialog->setWindowTitle(tr("Maintenance Dialog"));
-		//关联信号和槽函数
-		connect(dialog, SIGNAL(SendMsg(QString)), this, SLOT(RecvMsg(QString)));
-		connect(this, SIGNAL(sendMsgtoDialog(QString)), dialog, SLOT(receiveData(QString)));
-
-		dialog->show();
-		qDebug() << "over!!!" << dialog->result();
-	}
-
-
-}
-
 
 
 void RenderingWidget::ReadMesh()
@@ -957,9 +848,6 @@ void RenderingWidget::draw_support_aera(bool bv)
 				}
 			}
 			glEnd();
-			
-			
-			
 			
 			auto boundary_loop_ = mesh_list_[i]->GetBLoop();
 			for (int j=0; j < boundary_loop_.size(); j++)

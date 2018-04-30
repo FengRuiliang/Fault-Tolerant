@@ -1,8 +1,49 @@
 #pragma once
 #include "HE_mesh/Mesh3D.h"
-#include "MSAABB.h"
 #include <algorithm>
-class AABB;
+
+
+template<class object>
+void SafeDelete(object *ptr)
+{
+	if (ptr != NULL)
+	{
+		delete ptr;
+		ptr = NULL;
+	}
+}
+
+template<class object>
+void SafeDeletes(object *ptr)
+{
+	if (ptr != NULL)
+	{
+		delete[] ptr;
+		ptr = NULL;
+	}
+}
+template <typename T>
+void inline MySwap(T &t1, T &t2)
+{
+	T tmp = t1;
+	t1 = t2;
+	t2 = tmp;
+};
+
+#define ABS_FLOAT_0 1e-3
+typedef struct AlignAxisBoundingBox
+{
+public:
+	Vec3f	max_point;
+	Vec3f	min_point;
+	AlignAxisBoundingBox(Vec3f max_p, Vec3f min_p)
+	{
+		max_point = max_p;
+		min_point = min_p;
+	}
+	AlignAxisBoundingBox(void) {}
+}AABB;
+
 class MeshOcNode
 {
 public:
@@ -16,12 +57,8 @@ public:
 	~MeshOcNode()
 	{
 		for (int i = 0; i < 8; i++)
-		{
-			delete child_node_[i];
-			child_node_[i] = NULL;
-		}
-		delete ocn_face_list_;
-		ocn_face_list_ = NULL;
+			SafeDelete(child_node_[i]);
+		SafeDelete(ocn_face_list_);
 	};
 
 	//private:
@@ -31,15 +68,19 @@ public:
 	bool					is_leaf_;
 };
 
-class Octree
+class MeshOctree
 {
 public:
 	MeshOcNode*				oc_root_;
 	std::vector<HE_face*>*	oc_face_list_;
 	std::vector<Vec3f>		bary_center;
 
-	Octree(Mesh3D* mesh);
-	~Octree() ;
+	MeshOctree()
+		: oc_root_(NULL)
+		, oc_face_list_(NULL)
+	{
+	}
+	~MeshOctree() { DeleteMeshOcTree(); };
 
 	void DeleteMeshOcTree();
 
@@ -51,17 +92,17 @@ public:
 
 private:
 	// if child faces num are equal to it parent's, stop recursion
-	void create_octree(MeshOcNode*& node_in, std::vector<int>* face_list_idx, AABB aabb, bool stopFlag);
+	void createOctree(MeshOcNode*& node_in, std::vector<int>* face_list_idx, AABB aabb, bool stopFlag);
 
 	void MergeBoundingBox(AABB &A, AABB A1, AABB A2)
 	{
-		A._max.x() = std::max(A1._max.x(), A2._max.x());
-		A._max.y() = std::max(A1._max.y(), A2._max.y());
-		A._max.z() = std::max(A1._max.z(), A2._max.z());
+		A.max_point.x() = std::max(A1.max_point.x(), A2.max_point.x());
+		A.max_point.y() = std::max(A1.max_point.y(), A2.max_point.y());
+		A.max_point.z() = std::max(A1.max_point.z(), A2.max_point.z());
 
-		A._min.x() = std::min(A1._min.x(), A2._min.x());
-		A._min.y() = std::min(A1._min.y(), A2._min.y());
-		A._min.z() = std::min(A1._min.z(), A2._min.z());
+		A.min_point.x() = std::min(A1.min_point.x(), A2.min_point.x());
+		A.min_point.y() = std::min(A1.min_point.y(), A2.min_point.y());
+		A.min_point.z() = std::min(A1.min_point.z(), A2.min_point.z());
 	}
 
 	bool RayHitAABB(Vec3f raySPoint, Vec3f rayDirection, Vec3f A, Vec3f B);
@@ -71,8 +112,8 @@ private:
 	bool isCollidAABB(AABB ab_1, AABB ab_2)
 	{
 		bool iscoll = true;
-		Vec3f coll_p1 = ab_2._max - ab_1._min;
-		Vec3f coll_p2 = ab_2._min - ab_1._max;
+		Vec3f coll_p1 = ab_2.max_point - ab_1.min_point;
+		Vec3f coll_p2 = ab_2.min_point - ab_1.max_point;
 		if (coll_p1.x() < 0 || coll_p1.y() < 0 || coll_p1.z() < 0)
 			iscoll = false;
 		else if (coll_p2.x() > 0 || coll_p2.y() > 0 || coll_p2.z() > 0)
@@ -80,3 +121,4 @@ private:
 		return iscoll;
 	}
 };
+

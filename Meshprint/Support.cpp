@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <PSO/pso.h>
 #include "Library/clipper.hpp"
+#include "Library/Octree.h"
+#include <qdebug.h>
 #define PI 3.1415926
 Support::Support()
 {
@@ -87,10 +89,8 @@ void Support::support_point_sampling(int counter_)
 #define SPARSE (int)1
 #define OPTIMAL (int)0
 
-
 	sample_points_.clear();
 	std::pair<float, float> dense(1.0, 1.0);
-
 	Vec3f perpendicular(0.0, 0.0, 1.0);
 	for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
 	{
@@ -101,6 +101,7 @@ void Support::support_point_sampling(int counter_)
 			if (counter_ % 3 == SPARSE)
 			{
 				dense = get_dense(180 - acos(face_list_[i]->normal() * perpendicular) * 180 / PI);
+				dense = make_pair(2.0, 2.0);
 			}
 			std::vector<Vec3f> verts;
 			HE_edge* sta = face_list_[j]->pedge_;
@@ -169,7 +170,8 @@ void Support::support_point_sampling(int counter_)
 				points.push_back(make_pair((int)(sample_points_[i][j].x()*1e3),
 					(int)(sample_points_[i][j].y()*1e3)));
 			}
-			PSO pso_solver_(points, polygon, make_pair((int)2000, (int)2000), 100);
+			PSO pso_solver_(points, polygon, make_pair((int)1000, (int)1000), 100);
+			pso_solver_.settings.goal = sample_points_[i].size()-1;
 			auto pos_ = pso_solver_.pso_solve();
 			sample_points_[i].clear();
 			for (int j = 0; j < pos_.size(); j++)
@@ -178,7 +180,11 @@ void Support::support_point_sampling(int counter_)
 				sample_points_[i].push_back(p);
 			}
 		}
-	}
+	
+	}	
+	sam_project_to_mesh(sample_points_);
+	
+	qDebug() << counter_ << sample_points_[0].size();
 }
 std::pair<float, float> Support::get_dense(int angle)
 {
@@ -211,4 +217,21 @@ std::pair<float, float> Support::get_dense(int angle)
 			d_.second = 15.0;
 	}
 	return d_;
+}
+
+void Support::sam_project_to_mesh(std::map<int, std::vector<Vec3f>> points_)
+{
+	int num_of_sam = 0;
+	for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
+	{
+		MeshOctree octree;
+		octree.BuildOctree(sup_ptr_aera_list_[i]);
+		std::vector<Vec3f> re_sample_p;
+		for (int j = 0; j < points_[i].size(); j++)
+		{
+			re_sample_p.push_back(octree.InteractPoint(points_[i][j], Vec3f(0, 0, 1)));
+		}
+		num_of_sam += re_sample_p.size();
+		sample_points_[i] = re_sample_p;
+	}
 }

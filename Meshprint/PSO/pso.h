@@ -6,7 +6,7 @@ using namespace std;
 #define PSO_MAX_SIZE 100 // max swarm size
 #define PSO_INERTIA 0.7298 // default value of w (see clerc02)
 
-
+#define MIN_FITNESS 0
 	// === NEIGHBORHOOD SCHEMES ===
 
 	// global best topology
@@ -62,16 +62,17 @@ public:
 	}settings;
 	// PSO SOLUTION -- Initialized by the user
 	struct pso_result_t {
-		double error;
-		std::vector<double> gbest; // should contain DIM elements!!
+		int error, error_last;
+		double fit_b;
+		std::vector<std::pair<int, int>> gbest; // should contain DIM elements!!
+		std::vector<int> isavailable;
 	}solution;
 	// Particles
 	struct particle {
-		std::vector<std::pair<int,int>> pos, vel, pos_b,pos_nb;
-								// position matrix
-								// velocity matrix
-								// best position matrix
-								// what is the best informed position for each particle
+		std::vector<std::pair<int, int>> pos;// position matrix
+		std::vector<std::pair<int, int>> 	vel;// velocity matrix
+		std::vector<std::pair<int, int>>pos_b;// best position matrix
+		std::vector<std::pair<int, int>>pos_nb;	// what is the best informed position for each particle
 
 		double fit, fit_b;		// particle fitness 
 								// best fitness 
@@ -83,7 +84,6 @@ public:
 											// rows : those who inform
 											// cols : those who are informed
 		std::vector<particle> swarm;
-		std::vector<std::pair<int, int>> gbest;
 		std::vector < int> inform_;
 	
 

@@ -4,7 +4,6 @@
 #include <map>
 #include "Vec.h"
 #include <set>
-#include "Triangle.h"
 
 #define PARTTABLENUM 32
 // forward declarations of mesh classes
@@ -270,11 +269,6 @@ private:
 	std::vector<int> wro_Nor_facets_;
 public:
 	bool is_support = { false };
-public:
-	std::vector<Triangle> Tria; //用来判断三角面的位置关系
-	std::vector<Triangle> Tri; //用来判断三角面的位置关系
-
-	std::vector<Triangle *> partitionTable_Z[PARTTABLENUM]; //分区检测Z轴
 
 public:
 	//! associate two end vertex with its edge: only useful in creating mesh

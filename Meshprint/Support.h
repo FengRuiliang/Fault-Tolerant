@@ -22,5 +22,8 @@ public:
 	std::vector<Mesh3D*> sup_ptr_aera_list_;
 	std::map<int,std::vector<Vec3f>> sample_points_;
 	Mesh3D sp_mesh;
+private:
+	void sam_project_to_mesh(std::map<int, std::vector<Vec3f>> sample_points_);
+	int pso_target_ = { 0 };
 };
 

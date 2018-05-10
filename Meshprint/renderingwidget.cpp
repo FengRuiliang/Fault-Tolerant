@@ -23,13 +23,13 @@
 #include "Support.h"
 
 
-static GLfloat win,hei;
+static GLfloat win, hei;
 RenderingWidget::RenderingWidget(QWidget *parent, MainWindow* mainwindow)
 	: QOpenGLWidget(parent), ptr_mainwindow_(mainwindow), eye_distance_(200),
 	has_lighting_(true), is_draw_point_(false), is_draw_edge_(false), is_draw_face_(true)
 {
 	ptr_arcball_ = new CArcBall(width(), height());
-	ptr_mesh_ =new Mesh3D;
+	ptr_mesh_ = new Mesh3D;
 	ptr_slice_ = NULL;
 	ptr_hatch_ = NULL;
 	ptr_support_ = NULL;
@@ -117,7 +117,7 @@ void RenderingWidget::paintGL()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	if (win <= hei)
-		glOrtho(-eye_distance_+eye_goal_[0], eye_distance_ + eye_goal_[0],
+		glOrtho(-eye_distance_ + eye_goal_[0], eye_distance_ + eye_goal_[0],
 			-eye_distance_ * (GLfloat)hei / (GLfloat)win + eye_goal_[1], eye_distance_ * (GLfloat)hei / (GLfloat)win + eye_goal_[1],
 			-200.0, 200.0);
 	else
@@ -149,7 +149,7 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 		ptr_arcball_->MouseDown(e->pos());
 		update();
 	}
-		break;
+	break;
 	case Qt::MidButton:
 		current_position_ = e->pos();
 		break;
@@ -166,17 +166,17 @@ void RenderingWidget::mousePressEvent(QMouseEvent *e)
 		add_pointN -= direc * 0.10f;
 		direc.normalize();
 		const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
-		for (int i=0;i<faces.size();i++)
+		for (int i = 0; i < faces.size(); i++)
 		{
 			Vec3f point_;
 			CalPlaneLineIntersectPoint(faces.at(i)->normal(), faces.at(i)->vec_ptr_vert_[0]->position(),
 				direc, add_pointN, point_);
 			std::vector<Vec3f> te;
-			for (int i=0;i<3;i++)
+			for (int i = 0; i < 3; i++)
 			{
 				te.push_back(faces[i]->vec_ptr_vert_[i]->position());
 			}
-			if (PointinTriangle(te,point_))
+			if (PointinTriangle(te, point_))
 			{
 				ptr_mesh_->SetDirection(i);
 				ptr_mesh_->scalemesh(1.0);
@@ -220,7 +220,7 @@ void RenderingWidget::mouseReleaseEvent(QMouseEvent *e)
 	{
 	case Qt::LeftButton:
 
-ptr_arcball_->MouseUp(e->pos());
+		ptr_arcball_->MouseUp(e->pos());
 		setCursor(Qt::ArrowCursor);
 
 		ptr_arcball_->MouseUp(e->pos());
@@ -247,7 +247,7 @@ void RenderingWidget::wheelEvent(QWheelEvent *e)
 {
 	if (ptr_mesh_ != NULL)
 	{
-		eye_distance_ -= e->delta()/100;
+		eye_distance_ -= e->delta() / 100;
 	}
 	eye_distance_ = eye_distance_ < 0 ? 0 : eye_distance_;
 	update();
@@ -339,6 +339,7 @@ void RenderingWidget::SetBackground()
 
 void RenderingWidget::SetSliceCheckId(int id)
 {
+	slice_check_id_ = id;
 	if (ptr_slice_ == NULL)
 	{
 		return;
@@ -353,7 +354,7 @@ void RenderingWidget::SetSliceCheckId(int id)
 	}
 	update();
 }
-void RenderingWidget::setFildID(int id) { 
+void RenderingWidget::setFildID(int id) {
 	field_id = id;
 	update();
 }
@@ -439,7 +440,7 @@ void RenderingWidget::WriteMesh()
 	}
 	QString filename = QFileDialog::
 		getSaveFileName(this, tr("Write Mesh"),
-		"..", tr("Meshes (*.txt)"));
+			"..", tr("Meshes (*.txt)"));
 	if (filename.isEmpty())
 		return;
 	QByteArray byfilename = filename.toLocal8Bit();
@@ -573,19 +574,19 @@ void RenderingWidget::DrawEdge(bool bv)
 		return;
 	}
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	glBegin(GL_LINES);
 	glColor4ub(0, 0, 0, 255);
-	for (int i=0;i<faces.size();i++)
+	for (int i = 0; i < faces.size(); i++)
 	{
-		
-			for (int j = 0; j < 3; j++)
-			{
-				glVertex3fv(faces[i]->vec_ptr_vert_[j]->position());
 
-				glVertex3fv(faces[i]->vec_ptr_vert_[(j + 1) % 3]->position());
-			}
+		for (int j = 0; j < 3; j++)
+		{
+			glVertex3fv(faces[i]->vec_ptr_vert_[j]->position());
+
+			glVertex3fv(faces[i]->vec_ptr_vert_[(j + 1) % 3]->position());
+		}
 	}
 	glEnd();
 	//////////////////////////////////////////////////////////////////////////
@@ -599,7 +600,7 @@ void RenderingWidget::DrawFace(bool bv)
 	{
 		return;
 	}
-;
+	;
 	const std::vector<HE_face *>& faces = *(ptr_mesh_->get_faces_list());
 
 	glBegin(GL_TRIANGLES);
@@ -671,7 +672,7 @@ void RenderingWidget::DrawGrid(bool bv)
 }
 void RenderingWidget::DrawSlice(bool bv)
 {
-	if (!bv||ptr_slice_==NULL)
+	if (!bv || ptr_slice_ == NULL)
 		return;
 	/*glColor3f(0.0, 1.0, 0.0);
 	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
@@ -708,7 +709,7 @@ void RenderingWidget::DrawSlice(bool bv)
 		{
 			for (int k = 0; k < (tc[i])[j].size(); k++)
 			{
-			
+
 				glVertex3fv(tc[i][j][k].first);
 				glVertex3fv(tc[i][j][k].second );
 			}
@@ -716,10 +717,10 @@ void RenderingWidget::DrawSlice(bool bv)
 		glEnd();
 	}
 */
-	//slicing before offset
+//slicing before offset
 	for (int i = 0; i < layers[slice_check_id_].size(); i++) {
 		glBegin(GL_LINE_LOOP); glColor4f(0.0, 0.0, 1.0, 1.0); glLineWidth(2);
-		for (int j = 0; j<layers[slice_check_id_][i].size(); j++) {
+		for (int j = 0; j < layers[slice_check_id_][i].size(); j++) {
 			glVertex3f(layers[slice_check_id_][i][j].first, layers[slice_check_id_][i][j].second, slice_check_id_*thickness_);
 		}
 		glEnd();
@@ -763,8 +764,8 @@ void RenderingWidget::DrawHatch(bool bv)
 			{
 				glColor3f(0.0, 1.0, 0.0);
 				glBegin(GL_LINES);
-				glVertex3fv((*iterline)[0] );
-				glVertex3fv((*iterline)[1] );
+				glVertex3fv((*iterline)[0]);
+				glVertex3fv((*iterline)[1]);
 				glEnd();
 			}
 
@@ -810,64 +811,67 @@ void RenderingWidget::draw_support_aera(bool bv)
 {
 	if (bv&&ptr_support_ != NULL)
 	{
-		auto mesh_list_ = ptr_support_->sup_ptr_aera_list_;
-		auto fl = *ptr_support_->sp_mesh.get_faces_list();
-		auto t = ptr_support_->sample_points_;
-		for (int i=0;i<mesh_list_.size();i++)
+		auto sp_flist_ = *ptr_support_->sp_mesh.get_faces_list();
+		auto sup_point_ = ptr_support_->sample_points_;
+		for (auto iter = ptr_support_->sup_ptr_aera_list_.begin(); iter != ptr_support_->sup_ptr_aera_list_.end(); iter++)
 		{
-			glBegin(GL_TRIANGLES);
-			auto face_list_ = mesh_list_[i]->get_faces_list();
-			glColor3f(sin(i*10+1), cos(i*10+1), tan(i*10+1));
-			//glColor4f(1.0, 1.0, 1.0,1.0);
-			for (int j=0;j<face_list_->size();j++)
-				{
-				HE_edge* sta = face_list_->at(j)->pedge_;
-				HE_edge* cur = sta;
-				do 
-				{
-					glVertex3fv(cur->pvert_->position());
-					cur = cur->pnext_;
-				} while (cur!=sta);
-
-			}	
-			glEnd();
-			
-			glColor3f(1.0, 0.0, 0.0);
-			glBegin(GL_TRIANGLES);
-			for (int j = 0;j < t[i].size(); j++)
+			if (field_id!=iter->first&&slice_check_id_==0)
 			{
-				for (int k = 0; k < fl.size(); k++)
+				continue;
+			}
+			for (int i=0;i<iter->second.size();i++)
+			{
+			
+				auto face_list_ = iter->second[i]->get_faces_list();
+				glBegin(GL_TRIANGLES);
+				glColor3f(sin(iter->first * 10 + 1), cos(iter->first * 10 + 1), tan(iter->first * 10 + 1));
+				for (int j = 0; j < face_list_->size(); j++)
 				{
-					HE_edge* sta = fl[k]->pedge_;
+					HE_edge* sta = face_list_->at(j)->pedge_;
 					HE_edge* cur = sta;
 					do
 					{
-						glVertex3fv(cur->pvert_->position() + t[i][j]);
+						glVertex3fv(cur->pvert_->position());
+						cur = cur->pnext_;
+					} while (cur != sta);
+
+				}
+				glEnd();
+				auto boundary_loop_ = iter->second[i]->GetBLoop();
+				for (int j = 0; j < boundary_loop_.size(); j++)
+				{
+					glBegin(GL_LINE_LOOP);
+					for (int k = 0; k < boundary_loop_[j].size(); k++)
+					{
+						glVertex3fv(boundary_loop_[j][k]->pvert_->position());
+					}
+					glEnd();
+				}
+			}
+			// draw support point
+			glColor3f(1.0, 0.0, 0.0);
+			glBegin(GL_TRIANGLES);
+			for (int j = 0; j < sup_point_[iter->first].size(); j++)
+			{
+				for (int k = 0; k < sp_flist_.size(); k++)
+				{
+					HE_edge* sta = sp_flist_[k]->pedge_;
+					HE_edge* cur = sta;
+					do
+					{
+						glVertex3fv(cur->pvert_->position() + sup_point_[iter->first][j]);
 						cur = cur->pnext_;
 					} while (cur != sta);
 				}
 			}
 			glEnd();
-			
-			auto boundary_loop_ = mesh_list_[i]->GetBLoop();
-			for (int j=0; j < boundary_loop_.size(); j++)
-			{
-				glBegin(GL_LINE_LOOP);
-				for (int k = 0; k < boundary_loop_[j].size(); k++)
-				{
-					glVertex3fv(boundary_loop_[j][k]->pvert_->position());
-				}
-				glEnd();
-			}
 		}
-	
-		
 
 	}
 }
 void RenderingWidget::DoSlice()
 {
-	if (ptr_slice_!=NULL)
+	if (ptr_slice_ != NULL)
 	{
 		SafeDelete(ptr_slice_);
 	}
@@ -924,7 +928,7 @@ void RenderingWidget::FindNarrowBand()
 {
 	std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_ = ptr_slice_->GetPieces();
 	layers.clear(); res_path.clear();
-	
+
 	qDebug() << "preprocessing" << endl;
 	for (int i = 0; i < ptr_slice_->GetNumPieces(); i++) {
 		std::vector<std::vector<std::pair<double, double> > > contours; contours.clear(); New2Origin layerlinenew2origin;
@@ -936,18 +940,18 @@ void RenderingWidget::FindNarrowBand()
 				double x2 = pieces_[i][j][k].second[0]; double y2 = pieces_[i][j][k].second[1];
 				std::set<double> godis; godis.clear();
 				godis.insert(0); godis.insert(1);
-				for (int ii = int( min(x1, x2)/MIN_DIS); ii < int(max(x1, x2) / MIN_DIS); ii++) {
-					if (!(x1 < ii*MIN_DIS&&ii*MIN_DIS<x2))continue;
+				for (int ii = int(min(x1, x2) / MIN_DIS); ii < int(max(x1, x2) / MIN_DIS); ii++) {
+					if (!(x1 < ii*MIN_DIS&&ii*MIN_DIS < x2))continue;
 					godis.insert((ii*MIN_DIS - x1) / (x2 - x1));
 				}
-				for (int jj = int( min(y1, y2)/MIN_DIS); jj < int(max(y1, y2) / MIN_DIS); jj++) {
-					if (!(y1<jj*MIN_DIS&&jj*MIN_DIS<y2))continue;
+				for (int jj = int(min(y1, y2) / MIN_DIS); jj < int(max(y1, y2) / MIN_DIS); jj++) {
+					if (!(y1 < jj*MIN_DIS&&jj*MIN_DIS < y2))continue;
 					godis.insert((jj*MIN_DIS - y1) / (y2 - y1));
 				}
 				std::set<double>::iterator it;
 				double last_it;
 				for (it = godis.begin(); it != godis.end(); ++it) {
-					if (it != godis.begin() && abs(*it - last_it)<eps)continue;
+					if (it != godis.begin() && abs(*it - last_it) < eps)continue;
 					last_it = *it;
 					layerlinenew2origin.layermap[j][contour.size()] = k;
 					contour.push_back(std::make_pair(x1 + *it*(x2 - x1), y1 + *it*(y2 - y1)));
@@ -1098,9 +1102,9 @@ void RenderingWidget::LayerOffset(LayerOffDis layer_offdis, int layernum) {
 			ClipperLib::cInt y = ScaleNumber*layers[layernum][i][j].second;
 			max_d = max(max_d, d);
 			sub << IntPoint(x, y);
-			if (max_d>eps)clipper << IntPoint(x, y);
+			if (max_d > eps)clipper << IntPoint(x, y);
 
-			if (fabs(d) < eps&&max_d>eps) {
+			if (fabs(d) < eps&&max_d > eps) {
 				offset.AddPath(clipper, jtMiter, etOpenButt);
 				offset.Execute(clippers, max_d*ScaleNumber); ClipperLib::CleanPolygons(clippers);
 				difference.AddPaths(clippers, ptClip, TRUE);
@@ -1297,8 +1301,8 @@ pa RenderingWidget::normailize(pa p) {
 }
 void RenderingWidget::CancelBugCut(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_, int i, int j) {
 	if (!pieces_[i][j].size())return;
-	if (pieces_[i][j].at(0).first != pieces_[i][j].at(pieces_[i][j].size() - 1).second){
-		std::pair<Vec3f,Vec3f> new_CutLine(pieces_[i][j].at(pieces_[i][j].size() - 1).second, pieces_[i][j].at(0).first);
+	if (pieces_[i][j].at(0).first != pieces_[i][j].at(pieces_[i][j].size() - 1).second) {
+		std::pair<Vec3f, Vec3f> new_CutLine(pieces_[i][j].at(pieces_[i][j].size() - 1).second, pieces_[i][j].at(0).first);
 		pieces_[i][j].push_back(new_CutLine);
 	}
 }

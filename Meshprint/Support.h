@@ -7,7 +7,8 @@ public:
 	Support();
 	Support(Mesh3D * mesh);
 	~Support();
-	void sup_face_dfs(HE_face * facet, Mesh3D* mesh_);
+	void sup_face_dfs(HE_face * facet, std::vector<HE_face*>* faces, int angle_id_);
+	void sup_mesh_dfs(HE_face * facet, Mesh3D * mesh);
 	void find_support_area();
 	void support_point_sampling(int counter_);
 	std::pair<float, float> get_dense(int angle);
@@ -19,7 +20,8 @@ private:
 
 
 public:
-	std::vector<Mesh3D*> sup_ptr_aera_list_;
+	std::map<int, std::vector<Mesh3D*>> sup_ptr_aera_list_;
+	std::vector<Mesh3D*> sup_areas_;
 	std::map<int,std::vector<Vec3f>> sample_points_;
 	Mesh3D sp_mesh;
 private:

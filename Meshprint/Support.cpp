@@ -65,7 +65,12 @@ void Support::find_support_area()
 	Vec3f perpendicular(0.0, 0.0, 1.0);
 	auto face_list_ = target_mesh->get_faces_list();
 	face_selected_.resize(face_list_->size());
-	Mesh3D wholemesh;// find big support area
+	if (wholemesh==NULL)
+	{
+		delete wholemesh;
+	}
+	wholemesh = new Mesh3D;
+
 	for (int i = 0; i < face_list_->size(); i++)
 	{
 		int angle_ = 180 - acos(face_list_->at(i)->normal()*perpendicular) * 180 / PI;
@@ -75,14 +80,14 @@ void Support::find_support_area()
 			face_list_->at(i)->face_verts(verts);
 			for (auto iterV = verts.begin(); iterV != verts.end(); iterV++)
 			{
-				input.push_back(wholemesh.InsertVertex((*iterV)->position()));
+				input.push_back(wholemesh->InsertVertex((*iterV)->position()));
 			}
-			wholemesh.InsertFaceSup(input);
+			wholemesh->InsertFaceSup(input);
 		}
 	}
-	wholemesh.UpdateMeshSup();
+	wholemesh->UpdateMeshSup();
 	// find connected component
-	face_list_ = wholemesh.get_faces_list();
+	face_list_ = wholemesh->get_faces_list();
 	for (int i = 0; i < face_list_->size(); i++)
 	{
 		if (!face_list_->at(i)->selected_)
@@ -211,6 +216,7 @@ void Support::support_point_sampling(int counter_)
 	for (auto iter = sup_ptr_aera_list_.begin(); iter != sup_ptr_aera_list_.end(); iter++)
 	{
 		//for every component
+		Paths rectangles;
 		for (int i = 0; i < iter->second.size(); i++)
 		{
 
@@ -235,7 +241,7 @@ void Support::support_point_sampling(int counter_)
 			min_x_ = ((int)box[1].x() - 2) * 1000;
 			min_y_ = ((int)box[1].y() - 2) * 1000;
 			max_x_ = ((int)box[0].x() + 2) * 1000;
-			max_y_ = ((int)box[0].x() + 2) * 1000;
+			max_y_ = ((int)box[0].y() + 2) * 1000;
 			std::vector<IntPoint> points;
 			Path rec(4);
 			Clipper solver;
@@ -299,7 +305,7 @@ void Support::support_point_sampling(int counter_)
 				}
 			}
 		}
-
+	
 	}
 
 
@@ -348,7 +354,7 @@ void Support::sam_project_to_mesh(std::map<int, std::vector<Vec3f>> points_)
 	for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
 	{
 		MeshOctree octree;
-		octree.BuildOctree(target_mesh);
+		octree.BuildOctree(wholemesh);
 		std::vector<Vec3f> re_sample_p;
 		for (int j = 0; j < points_[i].size(); j++)
 		{

@@ -110,5 +110,7 @@ public:
 	ClipperLib::Paths remain_paths_,grid_paths_;
 	IntPoint dense_;
 	std::vector<IntPoint> original;
+	std::map<int, std::vector<Mesh3D*>> meshs_;
+
 };
 

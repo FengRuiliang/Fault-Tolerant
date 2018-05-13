@@ -831,7 +831,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 					HE_edge* cur = sta;
 					do
 					{
-						glVertex3fv(cur->pvert_->position());
+						glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
 						cur = cur->pnext_;
 					} while (cur != sta);
 

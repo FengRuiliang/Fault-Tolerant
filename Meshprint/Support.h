@@ -9,6 +9,7 @@ public:
 	Support(Mesh3D * mesh);
 	~Support();
 	void sup_face_dfs(HE_face * facet, std::vector<HE_face*>* faces, int angle_id_);
+	void angle_dfs(HE_face * facet, Mesh3D * mesh, int angle_id_);
 	void sup_mesh_dfs(HE_face * facet, Mesh3D * mesh);
 	void find_support_area();
 	void support_point_sampling(int counter_);

@@ -219,8 +219,6 @@ void Support::support_point_sampling(int counter_)
 		Paths rectangles;
 		for (int i = 0; i < iter->second.size(); i++)
 		{
-
-
 			auto loop_list_ = iter->second[i]->GetBLoop();
 			using namespace ClipperLib;
 			ClipperLib::Paths polygon;
@@ -245,44 +243,31 @@ void Support::support_point_sampling(int counter_)
 			std::vector<IntPoint> points;
 			Path rec(4);
 			Clipper solver;
-
+			dense = get_dense(iter->first*5);
 			Paths solution;
 			for (p.X = min_x_; p.X < max_x_; p.X += dense.X)
 			{
 				for (p.Y = min_y_; p.Y < max_y_; p.Y += dense.Y)
 				{
-
-					if (PointInPolygon(p, polygon[0]) == 0)
-					{
-						rec[0].X = p.X - dense.X / 2;
-						rec[0].Y = p.Y - dense.Y / 2;
-						rec[1].X = p.X + dense.X / 2;
-						rec[1].Y = p.Y - dense.Y / 2;
-						rec[2].X = p.X + dense.X / 2;
-						rec[2].Y = p.Y + dense.Y / 2;
-						rec[3].X = p.X - dense.X / 2;
-						rec[3].Y = p.Y + dense.Y / 2;
-						solver.Clear();
-						solver.AddPaths(polygon, ptClip, true);
-						solver.AddPath(rec, ptSubject, true);
-						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-						if (solution.size())
-						{
-							points << p;
-							Vec3f v(p.X / 1e3, p.Y / 1e3, 0.0);
-							sample_points_[iter->first].push_back(v);
-						}
-					}
-					else
+					rec[0].X = p.X - dense.X / 2;
+					rec[0].Y = p.Y - dense.Y / 2;
+					rec[1].X = p.X + dense.X / 2;
+					rec[1].Y = p.Y - dense.Y / 2;
+					rec[2].X = p.X + dense.X / 2;
+					rec[2].Y = p.Y + dense.Y / 2;
+					rec[3].X = p.X - dense.X / 2;
+					rec[3].Y = p.Y + dense.Y / 2;
+					solver.Clear();
+					solver.AddPaths(polygon, ptClip, true);
+					solver.AddPath(rec, ptSubject, true);
+					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
+					if (solution.size())
 					{
 						points << p;
 						Vec3f v(p.X / 1e3, p.Y / 1e3, 0.0);
 						sample_points_[iter->first].push_back(v);
 					}
-
-
 				}
-
 			}
 			if (counter_ % 2 == OPTIMAL)
 			{
@@ -295,8 +280,6 @@ void Support::support_point_sampling(int counter_)
 				pso_solver_.dense_ = dense;
 				pso_solver_.pso_swarm_init();
 				auto pos_ = pso_solver_.pso_solve();
-
-
 				sample_points_[i].clear();
 				for (int j = 0; j < pos_.size(); j++)
 				{
@@ -315,35 +298,36 @@ void Support::support_point_sampling(int counter_)
 
 
 
-std::pair<float, float> Support::get_dense(int angle)
+IntPoint Support::get_dense(int angle)
 {
-	std::pair<float, float>d_;
+	IntPoint d_;
 	if (angle < 15)
 	{
-		d_.first = 2.0;
+		d_.X = 2.0;
+
 		if (angle < 5)
 		{
-			d_.second = 2.0;
+			d_.Y = 2.0;
 		}
 		else if (angle < 10)
 		{
-			d_.second = 2.5;
+			d_.Y = 2.5;
 		}
 		else if (angle < 15)
 		{
-			d_.second = 8.0;
+			d_.Y = 8.0;
 		}
 	}
 	else
 	{
-		d_.first = 2.5;
+		d_.X = 2.5;
 
 		if (angle < 18)
 		{
-			d_.second = 10.0;
+			d_.Y = 10.0;
 		}
 		else
-			d_.second = 15.0;
+			d_.Y = 15.0;
 	}
 	return d_;
 }
@@ -363,4 +347,5 @@ void Support::sam_project_to_mesh(std::map<int, std::vector<Vec3f>> points_)
 		num_of_sam += re_sample_p.size();
 		sample_points_[i] = re_sample_p;
 	}
+	qDebug() <<"zong dianshu:"<< num_of_sam;
 }

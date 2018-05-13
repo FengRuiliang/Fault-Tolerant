@@ -1,6 +1,7 @@
 #pragma once
 #include "HE_mesh/Mesh3D.h"
 #include "HE_mesh/Vec.h"
+#include "Library/clipper.hpp"
 class Support
 {
 public:
@@ -11,7 +12,7 @@ public:
 	void sup_mesh_dfs(HE_face * facet, Mesh3D * mesh);
 	void find_support_area();
 	void support_point_sampling(int counter_);
-	std::pair<float, float> get_dense(int angle);
+	ClipperLib::IntPoint get_dense(int angle);
 private:
 	Mesh3D* target_mesh;
 	int limit_angle_ = { 30 };

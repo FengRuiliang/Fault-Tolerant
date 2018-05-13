@@ -19,7 +19,7 @@ PSO::PSO(std::vector<IntPoint> original_bird_, ClipperLib::Paths polygon, IntPoi
 	settings.dim = 2;
 	settings.size = size;
 	remain_paths_ = polygon;
-	dense_ = dense;
+	dense = dense;
 	original = original_bird_;
 	solution.error = MAX_FITNESS;
 	solution.fit_b = MAX_FITNESS;
@@ -49,10 +49,17 @@ void PSO::pso_swarm_init()
 	qDebug() << "start initialize swarm";
 	for (int i = 0; i < settings.size; i++)
 	{
+		for (int m=0;m<meshs_.size();m++)
+		{
+			std::vector < std:: pair<int, int> > m_degree_center;
+			for (int n=0;n<meshs_[m].size();n++)
+			{
+				m_degree_center.push_back(make_pair(rand() % 101 - 50, rand() % 101 - 50));
+			}
+			swarm[i].pos.insert(swarm[i].pos.end(), m_degree_center.begin(), m_degree_center.end());
+		}
 
-
-		swarm[i].pos.first = rand() % 101 - 50;
-		swarm[i].pos.second = rand() % 101 - 50;
+		
 		swarm[i].fit = pso_obj_fun_t(swarm[i]);
 
 		if (swarm[i].fit < solution.fit_b)
@@ -60,15 +67,15 @@ void PSO::pso_swarm_init()
 			solution.fit_b = swarm[i].fit;
 			solution.gbest = swarm[i].pos;
 		}
-		swarm[i].vel.first = swarm[i].pos.first;
-		swarm[i].vel.second = swarm[i].pos.second;
+		swarm[i].vel = swarm[i].pos;
+		swarm[i].vel = swarm[i].pos;
 
 		swarm[i].fit_b = swarm[i].fit;
 		swarm[i].pos_b = swarm[i].pos;
 		swarm[i].pos_nb = solution.gbest;
 		qDebug() << i << swarm[i].fit;
 	}
-	qDebug() << "end initialize swarm";
+	qDebug() << "end initialize swarm"<<"best fitness is "<<solution.fit_b;
 
 }
 
@@ -135,7 +142,7 @@ double PSO::calc_inertia_lin_dec(int step)
 
 
 
-std::vector<std::pair<int, int>> PSO::pso_solve()
+std::vector<Vec3f> PSO::pso_solve()
 {
 	qDebug() << "star pso solution";
 	// initialize omega using standard value
@@ -165,16 +172,23 @@ std::vector<std::pair<int, int>> PSO::pso_solve()
 			// calculate stochastic coefficients
 			rho1 = settings.c1 * rand() / RAND_MAX;
 			rho2 = settings.c2 * rand() / RAND_MAX;
-			// update velocity
-			swarm[i].vel.first = w*swarm[i].vel.first
-				+ rho1*(swarm[i].pos_b.first - swarm[i].pos.first)
-				+ rho2*(swarm[i].pos_nb.first - swarm[i].pos.first);
-			swarm[i].vel.second = w*swarm[i].vel.second
-				+ rho1*(swarm[i].pos_b.second - swarm[i].pos.second)
-				+ rho2*(swarm[i].pos_nb.second - swarm[i].pos.second);
-			// update position
-			swarm[i].pos.first += swarm[i].vel.first;
-			swarm[i].pos.second += swarm[i].vel.second;
+			
+			for (int j=0;j<swarm[i].pos.size();j++)
+			{
+				// update velocity
+				swarm[i].vel[j].first = w*swarm[i].vel[j].first
+					+ rho1*(swarm[i].pos_b[j].first - swarm[i].pos[j].first)
+					+ rho2*(swarm[i].pos_nb[j].first - swarm[i].pos[j].first);
+				swarm[i].vel[j].second = w*swarm[i].vel[j].second
+					+ rho1*(swarm[i].pos_b[j].second - swarm[i].pos[j].second)
+					+ rho2*(swarm[i].pos_nb[j].second - swarm[i].pos[j].second);
+				// update position
+
+				swarm[i].pos[j].first += swarm[i].vel[j].first;
+				swarm[i].pos[j].second += swarm[i].vel[j].second;
+			}
+			
+			
 			// update particle fitness
 			swarm[i].fit = pso_obj_fun_t(swarm[i]);
 			// update personal best position?
@@ -192,102 +206,106 @@ std::vector<std::pair<int, int>> PSO::pso_solve()
 				solution.fit_b = swarm[i].fit;
 				// copy particle pos to gbest vector
 				solution.gbest = swarm[i].pos;
+				solution.resualt = swarm[i].resualt;
 			}
 
 		}
 		qDebug() << step << solution.fit_b;
 
 	}
-	std::vector<pair<int, int>> resualt;
-	IntPoint p;
-	Path rec(4);
-	Paths sol;
-	Clipper solver;
-
-	for (p.X = settings.clamp_pos[1].X+solution.gbest.first; p.X < settings.clamp_pos[0].X; p.X += dense_.X)
-	{
-		for (p.Y = settings.clamp_pos[1].Y+ solution.gbest.second; p.Y < settings.clamp_pos[0].Y; p.Y += dense_.Y)
-		{
-
-			for (int k = 0; k < remain_paths_.size(); k++)
-			{
-				if (PointInPolygon(p, remain_paths_[k]) == 0)
-				{
-					rec[0].X = p.X - dense_.X / 2;
-					rec[0].Y = p.Y - dense_.Y / 2;
-					rec[1].X = p.X + dense_.X / 2;
-					rec[1].Y = p.Y - dense_.Y / 2;
-					rec[2].X = p.X + dense_.X / 2;
-					rec[2].Y = p.Y + dense_.Y / 2;
-					rec[3].X = p.X - dense_.X / 2;
-					rec[3].Y = p.Y + dense_.Y / 2;
-					solver.Clear();
-					solver.AddPaths(remain_paths_, ptClip, true);
-					solver.AddPath(rec, ptSubject, true);
-					solver.Execute(ctIntersection, sol, pftNonZero, pftNonZero);
-					if (sol.size())
-					{
-
-						resualt.push_back(make_pair(p.X, p.Y));
-					}
-				}
-				else
-				{
-					resualt.push_back(make_pair(p.X, p.Y));
-				}
-			}
-		}
-
-	}
-	qDebug() << "end run solver and we have" << resualt.size() << "points";
-	return resualt;
+	
+	qDebug() << "end run solver and we have" << solution.resualt.size() << "points";
+	return solution.resualt;
 }
 
-double PSO::pso_obj_fun_t(particle bird)
+double PSO::pso_obj_fun_t(particle& bird)
 {
+	bird.resualt.clear();
+	std::vector<std::pair<int, int>> que;
+	for (auto iter=bird.pos.rbegin();iter!=bird.pos.rend();iter++)
+	{
+		que.push_back(*iter);
+	}
+	
 	//calculate the non-overlap area
 	IntPoint p;
 	Path rec(4);
-	Paths solution;
-	Clipper solver;
+	Paths solution, lastclipper;
+	Clipper tsolver;
 	int fitness = 0;
-	
-	
-	for (p.X = settings.clamp_pos[1].X + bird.pos.first; p.X < settings.clamp_pos[0].X; p.X += dense_.X)
+	for (int i=0;i<meshs_.size();i++)
 	{
-		for (p.Y = settings.clamp_pos[1].Y + bird.pos.second; p.Y <settings.clamp_pos[0].Y; p.Y += dense_.Y)
-		{
 
-			for (int k=0;k<remain_paths_.size();k++)
+		for (int j = 0; j <meshs_[i].size();j++)
+		{
+			
+			std::vector<Vec3f> box = meshs_[i][j]->getBoundingBox();
+			auto loop_list_ = meshs_[i][j]->GetBLoop();
+			using namespace ClipperLib;
+			ClipperLib::Paths polygon;
+			polygon.resize(loop_list_.size());
+			IntPoint p;
+			for (int m = 0; m < loop_list_.size(); m++)
 			{
-				if (PointInPolygon(p, remain_paths_[k]) == 0)
+				for (int n = 0; n < loop_list_[m].size(); n++)
 				{
-					rec[0].X = p.X - dense_.X / 2;
-					rec[0].Y = p.Y - dense_.Y / 2;
-					rec[1].X = p.X + dense_.X / 2;
-					rec[1].Y = p.Y - dense_.Y / 2;
-					rec[2].X = p.X + dense_.X / 2;
-					rec[2].Y = p.Y + dense_.Y / 2;
-					rec[3].X = p.X - dense_.X / 2;
-					rec[3].Y = p.Y + dense_.Y / 2;
+					p.X = (int)(loop_list_[m][n]->pvert_->position().x()*1e3);
+					p.Y = (int)(loop_list_[m][n]->pvert_->position().y()*1e3);
+					polygon[m] << p;
+				}
+			}
+			Paths sub,union_rec;
+			Clipper solver;
+			solver.AddPaths(lastclipper, ptClip, true);
+			solver.AddPaths(polygon, ptSubject, true);
+			solver.Execute(ctDifference, sub, pftNonZero, pftNonZero);
+
+			int min_x_, min_y_, max_x_, max_y_;
+			min_x_ = ((int)box[1].x() - 2) * 1000;
+			min_y_ = ((int)box[1].y() - 2) * 1000;
+			max_x_ = ((int)box[0].x() + 2) * 1000;
+			max_y_ = ((int)box[0].y() + 2) * 1000;
+
+			Path rec(4);
+			pair<int, int> location = que.back();
+			que.pop_back();
+		
+			for (p.X = min_x_; p.X < max_x_; p.X += dense.X)
+			{
+				for (p.Y = min_y_; p.Y < max_y_; p.Y += dense.Y)
+				{
+					p.X += location.first;
+					p.Y += location.second;
+				
 					solver.Clear();
-					solver.AddPaths(remain_paths_, ptClip, true);
+					Paths solution;
+					rec[0].X = p.X - dense.X / 2;
+					rec[0].Y = p.Y - dense.Y / 2;
+					rec[1].X = p.X + dense.X / 2;
+					rec[1].Y = p.Y - dense.Y / 2;
+					rec[2].X = p.X + dense.X / 2;
+					rec[2].Y = p.Y + dense.Y / 2;
+					rec[3].X = p.X - dense.X / 2;
+					rec[3].Y = p.Y + dense.Y / 2;
+					solver.AddPaths(sub, ptClip, true);
 					solver.AddPath(rec, ptSubject, true);
 					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 					if (solution.size())
 					{
-
+						
+						bird.resualt.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
 						fitness++;
+						union_rec<<rec;
 					}
 				}
-				else
-				{
-					fitness++;
-				}
 			}
+			tsolver.Clear();
+			tsolver.AddPaths(lastclipper, ptSubject, true);
+			tsolver.AddPaths(union_rec, ptClip, true);
+			tsolver.Execute(ctUnion, lastclipper, pftNonZero, pftNonZero);
 		}
-
 	}
+
 	return fitness;
 }
 

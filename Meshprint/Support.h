@@ -27,7 +27,7 @@ public:
 	std::map<int,std::vector<Vec3f>> sample_points_;
 	Mesh3D sp_mesh;
 private:
-	void sam_project_to_mesh(std::map<int, std::vector<Vec3f>> sample_points_);
+	void sam_project_to_mesh(std::vector<Vec3f> sample_points_);
 	int pso_target_ = { 0 };
 };
 

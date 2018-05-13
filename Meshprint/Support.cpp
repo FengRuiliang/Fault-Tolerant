@@ -57,7 +57,7 @@ void Support::angle_dfs(HE_face* facet, Mesh3D* mesh, int angle_id_)
 		if (facet!=NULL&&!facet->selected())
 		{
 			int angle_ = 180 - acos(facet->normal()*Vec3f(0, 0, 1.0)) * 180 / PI;
-			if (angle_<(angle_id_+1)*5+0.5&&angle_id_>angle_id_*5)
+			if (angle_<(angle_id_+1)*5+0.5&&angle_>=angle_id_*5)
 			{
 				angle_dfs(facet, mesh, angle_id_);
 			}
@@ -146,18 +146,34 @@ void Support::find_support_area()
 		std::map<int, Mesh3D> map_one_mesh;
 		sup_areas_[i]->UpdateMeshSup();
 		face_list_ = sup_areas_[i]->get_faces_list();
-		for (int j = 0; j < face_list_->size(); j++)
+		for (int id=0;id<6;id++)
 		{
-			if (face_list_->at(j)->selected())
+			for (int j = 0; j < face_list_->size(); j++)
 			{
-				continue;
+				if (face_list_->at(j)->selected())
+				{
+					continue;
+				}
+				int angle = 180 - acos(face_list_->at(j)->normal()*perpendicular) * 180 / PI;
+				if (angle < (id + 1) * 5 + 0.5&&angle > id * 5-0.5)
+				{
+					Mesh3D* me = new Mesh3D;
+					angle_dfs(face_list_->at(j), me, id);
+					if (me->num_of_face_list() == 1)
+					{
+						face_list_->at(j)->selected_ = false;
+						delete me;
+					}
+					else
+					{
+						me->UpdateMeshSup();
+						sup_ptr_aera_list_[id].push_back(me);
+					}
+
+				}
+
 			}
-			int angle= 180 - acos(face_list_->at(j)->normal()*perpendicular) * 180 / PI;
-			int angle_id = (int)(angle/5), chooced_id_(-1);
-			Mesh3D* me = new Mesh3D;
-			angle_dfs(face_list_->at(j),me, angle_id);
-			me->UpdateMeshSup();
-			sup_ptr_aera_list_[angle_id].push_back(me);
+
 		}
 	}
 }
@@ -199,8 +215,11 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.meshs_ = sup_ptr_aera_list_;
 		pso_solver.settings.size = 100;
 		pso_solver.settings.steps = 50;
+		pso_solver.dense.X = 1000;
+		pso_solver.dense.Y = 1000;
 		pso_solver.pso_swarm_init();
-
+		auto pos_ = pso_solver.pso_solve();
+		sam_project_to_mesh(pos_);
 	}
 	else
 	{
@@ -234,7 +253,7 @@ void Support::support_point_sampling(int counter_)
 					}
 				}
 				Clipper solver;
-				Paths sub;
+				Paths sub,rec_union;
 				solver.AddPaths(lastclipper, ptClip, true);
 				solver.AddPaths(polygon, ptSubject, true);
 				solver.Execute(ctDifference, sub, pftNonZero, pftNonZero);
@@ -265,13 +284,15 @@ void Support::support_point_sampling(int counter_)
 						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 						if (solution.size())
 						{
-							//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
 							sample_points_[iter->first].push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
-							tsolver.AddPath(rec, ptClip, true);
+							rec_union<<rec;
 						}
 					}
 				}
+				tsolver.Clear();
 				tsolver.AddPaths(lastclipper, ptSubject, true);
+				tsolver.AddPaths(rec_union, ptClip, true);
 				tsolver.Execute(ctUnion, lastclipper, pftNonZero, pftNonZero);
 			}
 		}
@@ -279,7 +300,7 @@ void Support::support_point_sampling(int counter_)
 	}
 
 
-	//sam_project_to_mesh(sample_points_);
+	
 
 	int num_of_sam = 0;
 	for (int i=0;i<sup_ptr_aera_list_.size();i++)
@@ -326,20 +347,16 @@ IntPoint Support::get_dense(int angle)
 	return d_;
 }
 
-void Support::sam_project_to_mesh(std::map<int, std::vector<Vec3f>> points_)
+void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 {
 	int num_of_sam = 0;
-	for (int i = 0; i < sup_ptr_aera_list_.size(); i++)
+
+	MeshOctree octree;
+	octree.BuildOctree(sup_areas_[0]);std::vector<Vec3f> re_sample_p;
+	for (int i=0;i<points_.size();i++)
 	{
-		MeshOctree octree;
-		octree.BuildOctree(wholemesh);
-		std::vector<Vec3f> re_sample_p;
-		for (int j = 0; j < points_[i].size(); j++)
-		{
-			re_sample_p.push_back(octree.InteractPoint(points_[i][j], Vec3f(0, 0, 1)));
-		}
-		num_of_sam += re_sample_p.size();
-		sample_points_[i] = re_sample_p;
+		sample_points_[0].push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
 	}
-	qDebug() <<"zong dianshu:"<< num_of_sam;
+
+	qDebug() <<"zong dianshu:"<< sample_points_.size();
 }

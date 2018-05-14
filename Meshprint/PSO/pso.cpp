@@ -54,7 +54,15 @@ void PSO::pso_swarm_init()
 			std::vector < std:: pair<int, int> > m_degree_center;
 			for (int n=0;n<meshs_[m].size();n++)
 			{
-				m_degree_center.push_back(make_pair(rand() % 101 - 50, rand() % 101 - 50));
+				if (i==0)
+				{
+					m_degree_center.push_back(make_pair(0, 0));
+				}
+				else
+				{
+					m_degree_center.push_back(make_pair(rand() % 101 - 50, rand() % 101 - 50));
+				}
+
 			}
 			swarm[i].pos.insert(swarm[i].pos.end(), m_degree_center.begin(), m_degree_center.end());
 		}
@@ -233,13 +241,17 @@ double PSO::pso_obj_fun_t(particle& bird)
 	Paths solution, lastclipper;
 	Clipper tsolver;
 	int fitness = 0;
+	int min_x_ = settings.clamp_pos[0].X;
+	int min_y_ = settings.clamp_pos[0].Y;
+	int max_x_ = settings.clamp_pos[1].X;
+	int max_y_ = settings.clamp_pos[1].Y;
+	
 	for (int i=0;i<meshs_.size();i++)
 	{
 
-		for (int j = 0; j <meshs_[i].size();j++)
+		for (int j = 0; j < meshs_[i].size(); j++)
 		{
-			
-			std::vector<Vec3f> box = meshs_[i][j]->getBoundingBox();
+			tsolver.Clear();
 			auto loop_list_ = meshs_[i][j]->GetBLoop();
 			using namespace ClipperLib;
 			ClipperLib::Paths polygon;
@@ -254,29 +266,20 @@ double PSO::pso_obj_fun_t(particle& bird)
 					polygon[m] << p;
 				}
 			}
-			Paths sub,union_rec;
 			Clipper solver;
+			Paths sub, rec_union;
 			solver.AddPaths(lastclipper, ptClip, true);
 			solver.AddPaths(polygon, ptSubject, true);
 			solver.Execute(ctDifference, sub, pftNonZero, pftNonZero);
 
-			int min_x_, min_y_, max_x_, max_y_;
-			min_x_ = ((int)box[1].x() - 2) * 1000;
-			min_y_ = ((int)box[1].y() - 2) * 1000;
-			max_x_ = ((int)box[0].x() + 2) * 1000;
-			max_y_ = ((int)box[0].y() + 2) * 1000;
 
-			Path rec(4);
-			pair<int, int> location = que.back();
+			auto temp = que.back();
 			que.pop_back();
-		
-			for (p.X = min_x_; p.X < max_x_; p.X += dense.X)
+			Path rec(4);
+			for (p.X = 0+temp.first; p.X < max_x_; p.X += dense.X)
 			{
-				for (p.Y = min_y_; p.Y < max_y_; p.Y += dense.Y)
+				for (p.Y = 0+temp.second; p.Y < max_y_; p.Y += dense.Y)
 				{
-					p.X += location.first;
-					p.Y += location.second;
-				
 					solver.Clear();
 					Paths solution;
 					rec[0].X = p.X - dense.X / 2;
@@ -292,21 +295,90 @@ double PSO::pso_obj_fun_t(particle& bird)
 					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 					if (solution.size())
 					{
-						
+						//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
 						bird.resualt.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
-						fitness++;
-						union_rec<<rec;
+						rec_union << rec;
+					}
+				}
+				for (p.Y = temp.second-dense.Y; p.Y >= min_y_; p.Y -= dense.Y)
+				{
+					solver.Clear();
+					Paths solution;
+					rec[0].X = p.X - dense.X / 2;
+					rec[0].Y = p.Y - dense.Y / 2;
+					rec[1].X = p.X + dense.X / 2;
+					rec[1].Y = p.Y - dense.Y / 2;
+					rec[2].X = p.X + dense.X / 2;
+					rec[2].Y = p.Y + dense.Y / 2;
+					rec[3].X = p.X - dense.X / 2;
+					rec[3].Y = p.Y + dense.Y / 2;
+					solver.AddPaths(sub, ptClip, true);
+					solver.AddPath(rec, ptSubject, true);
+					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
+					if (solution.size())
+					{
+						//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+						bird.resualt.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+						rec_union << rec;
 					}
 				}
 			}
+			for (p.X = temp.first-dense.X; p.X >= min_x_; p.X -= dense.X)
+			{
+				for (p.Y = temp.second; p.Y < max_y_; p.Y += dense.Y)
+				{
+					solver.Clear();
+					Paths solution;
+					rec[0].X = p.X - dense.X / 2;
+					rec[0].Y = p.Y - dense.Y / 2;
+					rec[1].X = p.X + dense.X / 2;
+					rec[1].Y = p.Y - dense.Y / 2;
+					rec[2].X = p.X + dense.X / 2;
+					rec[2].Y = p.Y + dense.Y / 2;
+					rec[3].X = p.X - dense.X / 2;
+					rec[3].Y = p.Y + dense.Y / 2;
+					solver.AddPaths(sub, ptClip, true);
+					solver.AddPath(rec, ptSubject, true);
+					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
+					if (solution.size())
+					{
+						//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+						bird.resualt.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+						rec_union << rec;
+					}
+				}
+				for (p.Y = temp.second-dense.Y; p.Y >= min_y_; p.Y -= dense.Y)
+				{
+					solver.Clear();
+					Paths solution;
+					rec[0].X = p.X - dense.X / 2;
+					rec[0].Y = p.Y - dense.Y / 2;
+					rec[1].X = p.X + dense.X / 2;
+					rec[1].Y = p.Y - dense.Y / 2;
+					rec[2].X = p.X + dense.X / 2;
+					rec[2].Y = p.Y + dense.Y / 2;
+					rec[3].X = p.X - dense.X / 2;
+					rec[3].Y = p.Y + dense.Y / 2;
+					solver.AddPaths(sub, ptClip, true);
+					solver.AddPath(rec, ptSubject, true);
+					solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
+					if (solution.size())
+					{
+						//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+						bird.resualt.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+						rec_union << rec;
+					}
+				}
+			}
+
 			tsolver.Clear();
 			tsolver.AddPaths(lastclipper, ptSubject, true);
-			tsolver.AddPaths(union_rec, ptClip, true);
+			tsolver.AddPaths(rec_union, ptClip, true);
 			tsolver.Execute(ctUnion, lastclipper, pftNonZero, pftNonZero);
 		}
 	}
 
-	return fitness;
+	return bird.resualt.size();
 }
 
 //==============================================================

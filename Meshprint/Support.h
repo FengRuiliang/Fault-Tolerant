@@ -19,7 +19,7 @@ private:
 	int limit_angle_ = { 30 };
 	std::vector<bool> face_selected_;
 	std::vector<bool> face_marked_;
-	Mesh3D* wholemesh;// find big support area
+
 
 public:
 	std::map<int, std::vector<Mesh3D*>> sup_ptr_aera_list_;

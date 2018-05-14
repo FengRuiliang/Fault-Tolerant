@@ -195,8 +195,8 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.settings.clamp_pos[0].Y = ((int)box[1].y() - 2) * 1000;
 		pso_solver.settings.clamp_pos[1].X = ((int)box[0].x() - 2) * 1000;
 		pso_solver.settings.clamp_pos[1].Y = ((int)box[0].y() - 2) * 1000;
-		pso_solver.settings.size = 100;
-		pso_solver.settings.steps = 50;
+		pso_solver.settings.size = 1000;
+		pso_solver.settings.steps = 2000;
 		pso_solver.dense.X = 2000;
 		pso_solver.dense.Y = 2000;
 		pso_solver.pso_swarm_init();

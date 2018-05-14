@@ -106,6 +106,7 @@ public:
 	void pso_set_default_settings();
 	double calc_inertia_lin_dec(int step);
 	int pso_calc_swarm_size(int dim);
+	IntPoint get_dense(int angle);
 	std::vector<Vec3f> pso_solve();
 public:
 	double pso_obj_fun_t(particle& bird);

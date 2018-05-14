@@ -248,7 +248,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 	
 	for (int i=0;i<meshs_.size();i++)
 	{
-
+		dense = get_dense(i * 5);
 		for (int j = 0; j < meshs_[i].size(); j++)
 		{
 			tsolver.Clear();
@@ -386,4 +386,37 @@ double PSO::pso_obj_fun_t(particle& bird)
 int PSO::pso_calc_swarm_size(int dim) {
 	int size = 10. + 2. * sqrt(dim);
 	return (size > PSO_MAX_SIZE ? PSO_MAX_SIZE : size);
+}
+IntPoint PSO::get_dense(int angle)
+{
+	IntPoint d_;
+	if (angle < 15)
+	{
+		d_.X = 2000;
+
+		if (angle < 5)
+		{
+			d_.Y = 2000;
+		}
+		else if (angle < 10)
+		{
+			d_.Y = 2500;
+		}
+		else if (angle < 15)
+		{
+			d_.Y = 8000;
+		}
+	}
+	else
+	{
+		d_.X = 2500;
+
+		if (angle < 18)
+		{
+			d_.Y = 10000;
+		}
+		else
+			d_.Y = 15000;
+	}
+	return d_;
 }

@@ -14,6 +14,7 @@ public:
 	void find_support_area();
 	void support_point_sampling(int counter_);
 	ClipperLib::IntPoint get_dense(int angle);
+	void exportcylinder(const char * fouts);
 private:
 	Mesh3D* target_mesh;
 	int limit_angle_ = { 30 };
@@ -28,6 +29,7 @@ public:
 	Mesh3D sp_mesh;
 private:
 	void sam_project_to_mesh(std::vector<Vec3f> sample_points_);
+	
 	int pso_target_ = { 0 };
 };
 

@@ -4,6 +4,8 @@
 #include "Library/clipper.hpp"
 #include "Library/Octree.h"
 #include <qdebug.h>
+#include <QFileDialog>
+#include <fstream>
 #define PI 3.1415926
 Support::Support()
 {
@@ -195,8 +197,8 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.settings.clamp_pos[0].Y = ((int)box[1].y() - 2) * 1000;
 		pso_solver.settings.clamp_pos[1].X = ((int)box[0].x() - 2) * 1000;
 		pso_solver.settings.clamp_pos[1].Y = ((int)box[0].y() - 2) * 1000;
-		pso_solver.settings.size = 1000;
-		pso_solver.settings.steps = 2000;
+		pso_solver.settings.size = 100;
+		pso_solver.settings.steps = 100;
 		pso_solver.dense.X = 2000;
 		pso_solver.dense.Y = 2000;
 		pso_solver.pso_swarm_init();
@@ -244,8 +246,6 @@ void Support::support_point_sampling(int counter_)
 				solver.AddPaths(polygon, ptSubject, true);
 				solver.Execute(ctDifference, sub, pftNonZero, pftNonZero);
 
-				
-
 				Path rec(4);
 				for (p.X = 0; p.X < max_x_; p.X += dense.X)
 				{
@@ -266,8 +266,8 @@ void Support::support_point_sampling(int counter_)
 						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 						if (solution.size())
 						{
-							//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+							sample_points_[iter->first].push_back(intersectP);
 							rec_union<<rec;
 						}
 					}
@@ -288,8 +288,8 @@ void Support::support_point_sampling(int counter_)
 						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 						if (solution.size())
 						{
-							//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+							sample_points_[iter->first].push_back(intersectP);
 							rec_union << rec;
 						}
 					}
@@ -313,8 +313,8 @@ void Support::support_point_sampling(int counter_)
 						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 						if (solution.size())
 						{
-							//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+							sample_points_[iter->first].push_back(intersectP);
 							rec_union << rec;
 						}
 					}
@@ -335,8 +335,8 @@ void Support::support_point_sampling(int counter_)
 						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
 						if (solution.size())
 						{
-							//Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
+							sample_points_[iter->first].push_back(intersectP);
 							rec_union << rec;
 						}
 					}
@@ -405,6 +405,24 @@ void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 	{
 		sample_points_[0].push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
 	}
-
-	qDebug() <<"zong dianshu:"<< sample_points_.size();
+}
+void Support::exportcylinder(const char* fouts)
+{
+	std::ofstream fout(fouts);
+	fout.precision(16);
+	MeshOctree oct_obj;
+	oct_obj.BuildOctree(target_mesh);
+	for (int i=0;i<sample_points_.size();i++)
+	{
+		for (int j=0;j<sample_points_[i].size();j++)
+		{
+			
+			fout << sample_points_[i][j].x() << " " << sample_points_[i][j].y() << " " << sample_points_[i][j].z() <<" "<< 1.0<<"\n";
+			Vec3f lp = oct_obj.InteractPoint(sample_points_[i][j], Vec3f(0, 0, -1));
+			(sample_points_[i][j] - lp).length();
+			fout << lp.x() << " " << lp.y() << " " << lp.z() <<" "<< 1.0<<"\n";
+		}
+	}
+	fout.close();
+	
 }

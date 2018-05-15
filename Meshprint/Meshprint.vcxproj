@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cylinder.cpp" />
     <ClCompile Include="Library\ArcBall.cpp" />
     <ClCompile Include="Library\clipper.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_meshprint.cpp">
@@ -239,6 +240,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cylinder.h" />
     <ClInclude Include="Library\ArcBall.h" />
     <ClInclude Include="Library\clipper.hpp" />
     <ClInclude Include="Cutline.h" />

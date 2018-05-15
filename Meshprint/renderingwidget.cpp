@@ -831,7 +831,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 					HE_edge* cur = sta;
 					do
 					{
-						glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
+						//glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
+						glVertex3fv(cur->pvert_->position());
 						cur = cur->pnext_;
 					} while (cur != sta);
 
@@ -921,6 +922,13 @@ void RenderingWidget::add_support()
 	counter_++;
 	ptr_support_->find_support_area();
 	ptr_support_->support_point_sampling(counter_);
+	QString filename = QFileDialog::
+		getSaveFileName(this, tr("Write Mesh"),
+			"..", tr("grs (*.grs)"));
+	if (filename.isEmpty())
+		return;
+	QByteArray byfilename = filename.toLocal8Bit();
+	ptr_support_->exportcylinder(byfilename);
 }
 
 

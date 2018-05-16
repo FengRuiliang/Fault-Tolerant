@@ -6,6 +6,8 @@
 #include <qdebug.h>
 #include <QFileDialog>
 #include <fstream>
+#include "Library/IntervalTree.h"
+#include "Library/space2dKDTree.h"
 #define PI 3.1415926
 Support::Support()
 {
@@ -97,12 +99,15 @@ void Support::find_support_area()
 	auto face_list_ = target_mesh->get_faces_list();
 	face_selected_.resize(face_list_->size());
 	Mesh3D wholemesh;// find big support area
-
+					 // local minimal point
+	
+	
 	for (int i = 0; i < face_list_->size(); i++)
 	{
 		int angle_ = 180 - acos(face_list_->at(i)->normal()*perpendicular) * 180 / PI;
 		if (angle_ < 30)
 		{
+			face_list_->at(i)->selected_ = true;
 			std::vector<HE_vert*> verts, input;
 			face_list_->at(i)->face_verts(verts);
 			for (auto iterV = verts.begin(); iterV != verts.end(); iterV++)
@@ -113,6 +118,7 @@ void Support::find_support_area()
 		}
 	}
 	wholemesh.UpdateMeshSup();
+	
 	// find connected component
 	face_list_ = wholemesh.get_faces_list();
 	for (int i = 0; i < face_list_->size(); i++)
@@ -136,12 +142,8 @@ void Support::find_support_area()
 	// for every support connected component
 	for (int i = 0; i < sup_areas_.size(); i++)
 	{
-		if (i != 0)
-		{
-			continue;
-		}
 		//detect all the  facet support angle  and put them into the corresponding mesh
-		std::map<int, Mesh3D> map_one_mesh;
+		std::map<int, std::vector<Mesh3D*>> regions_;
 		sup_areas_[i]->UpdateMeshSup();
 		face_list_ = sup_areas_[i]->get_faces_list();
 		for (int id=0;id<6;id++)
@@ -165,7 +167,7 @@ void Support::find_support_area()
 					else
 					{
 						me->UpdateMeshSup();
-						sup_ptr_aera_list_[id].push_back(me);
+						regions_[id].push_back(me);
 					}
 
 				}
@@ -173,25 +175,25 @@ void Support::find_support_area()
 			}
 
 		}
+		component_regions_.push_back(regions_);
 	}
 }
 void Support::support_point_sampling(int counter_)
 {
-#define UNIFORM (int)2
-#define SPARSE (int)1
+#define UNIFORM (int)1
+#define SPARSE (int)2
 #define OPTIMAL (int)0
 
 	sample_points_.clear();
-	IntPoint dense(2000, 2000);
+	Vec2f dense(2.0, 2.0);
 	MeshOctree wholeoctree;
-	wholeoctree.BuildOctree(sup_areas_[0]);
 
 
 	if (counter_%3==OPTIMAL)
 	{
 		qDebug() << "optimal";
 		PSO pso_solver;
-		pso_solver.meshs_ = sup_ptr_aera_list_;
+		//pso_solver.meshs_ = regions_;
 		std::vector<Vec3f> box = sup_areas_[0]->getBoundingBox();
 		pso_solver.settings.clamp_pos[0].X = ((int)box[1].x() - 2) * 1000;
 		pso_solver.settings.clamp_pos[0].Y = ((int)box[1].y() - 2) * 1000;
@@ -205,175 +207,218 @@ void Support::support_point_sampling(int counter_)
 		auto pos_ = pso_solver.pso_solve();
 		sam_project_to_mesh(pos_);
 	}
-	else
-	{
-		Paths lastclipper;
-		Clipper tsolver;
-		int min_x_, min_y_, max_x_, max_y_;
-		std::vector<Vec3f> box = sup_areas_[0]->getBoundingBox();
-		min_x_ = ((int)box[1].x() - 2) * 1000;
-		min_y_ = ((int)box[1].y() - 2) * 1000;
-		max_x_ = ((int)box[0].x() + 2) * 1000;
-		max_y_ = ((int)box[0].y() + 2) * 1000;
-		for (auto iter = sup_ptr_aera_list_.begin(); iter != sup_ptr_aera_list_.end(); iter++)
+	else if (counter_%3==UNIFORM)
+	{		
+		for (int i=0;i<sup_areas_.size();i++)
 		{
-			//for every component
-			if (counter_ % 3 == SPARSE)
+			auto belist = sup_areas_[i]->GetBLoop();
+			std::vector<LineSegment*> segments;
+			for (int ii = 0; ii < belist.size(); ii++)
 			{
-				dense = get_dense(iter->first * 5);
+
+				for (int jj = 0; jj < belist[ii].size(); jj++)
+				{
+
+					Vec3f p1 = belist[ii][jj]->pvert_->position();
+					Vec3f p2 = belist[ii][jj]->start_->position();
+					LineSegment* s = new LineSegment(p1, p2);
+					segments.push_back(s);
+				}
 			}
 
-			for (int i = 0; i < iter->second.size(); i++)
+			Space2dKDTree* sKDT = new Space2dKDTree(segments); // segments are no longer in ordered after this
+			// infill support point
+			MeshOctree octree;
+			octree.BuildOctree(sup_areas_[i]);
+			std::vector<Vec3f> box = sup_areas_[i]->getBoundingBox();
+			int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
+			int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
+			int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
+			int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
+			for (int x_ = min_x_; x_ <= max_x_; x_++)
 			{
-				tsolver.Clear();
-				auto loop_list_ = iter->second[i]->GetBLoop();
-				using namespace ClipperLib;
-				ClipperLib::Paths polygon;
-				polygon.resize(loop_list_.size());
-				IntPoint p;
-				for (int j = 0; j < loop_list_.size(); j++)
+				for (int y_ = min_y_; y_ <= max_y_; y_++)
 				{
-					for (int k = 0; k < loop_list_[j].size(); k++)
+
+					
+					Vec3f sPoint(x_, y_, 0);
+					sample_points_.push_back(sPoint);
+					continue;
+					std::vector<Vec3f> hitPointList;
+					sKDT->RayIntersection2d(sPoint, sKDT->rootNode, segments, hitPointList);
+					int cc = 0;
+					for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
 					{
-						p.X = (int)(loop_list_[j][k]->pvert_->position().x()*1e3);
-						p.Y = (int)(loop_list_[j][k]->pvert_->position().y()*1e3);
-						polygon[j] << p;
-					}
-				}
-				Clipper solver;
-
-				tsolver.Clear();
-				for (int m=0;m<i;m++)
-				{
-					Path rec(4);
-					for (int n=0;n<sample_points_[m].size();n++)
-					{
-						rec[0].X = p.X - dense.X / 2;
-						rec[0].Y = p.Y - dense.Y / 2;
-						rec[1].X = p.X + dense.X / 2;
-						rec[1].Y = p.Y - dense.Y / 2;
-						rec[2].X = p.X + dense.X / 2;
-						rec[2].Y = p.Y + dense.Y / 2;
-						rec[3].X = p.X - dense.X / 2;
-						rec[3].Y = p.Y + dense.Y / 2;
-						lastclipper << rec;
-					}
-
-				}
-				tsolver.AddPaths(lastclipper, ptSubject, true);
-				tsolver.Execute(ctUnion, lastclipper, pftNonZero, pftNonZero);
-
-
-
-				Paths sub,rec_union;
-				solver.AddPaths(lastclipper, ptClip, true);
-				solver.AddPaths(polygon, ptSubject, true);
-				solver.Execute(ctDifference, sub, pftNonZero, pftNonZero);
-
-				Path rec(4);
-				for (p.X = 0; p.X < max_x_; p.X += dense.X)
-				{
-					for (p.Y = 0; p.Y < max_y_; p.Y += dense.Y)
-					{
-						solver.Clear();
-						Paths solution;
-						rec[0].X = p.X - dense.X / 2;
-						rec[0].Y = p.Y - dense.Y / 2;
-						rec[1].X = p.X + dense.X / 2;
-						rec[1].Y = p.Y - dense.Y / 2;
-						rec[2].X = p.X + dense.X / 2;
-						rec[2].Y = p.Y + dense.Y / 2;
-						rec[3].X = p.X - dense.X / 2;
-						rec[3].Y = p.Y + dense.Y / 2;
-						solver.AddPaths(sub, ptClip, true);
-						solver.AddPath(rec, ptSubject, true);
-						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-						if (solution.size())
+						if (iter->x() > x_)
 						{
-							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(intersectP);
+							cc++;
 						}
 					}
-					for (p.Y = -dense.Y; p.Y >=min_y_; p.Y -= dense.Y)
+					if (cc % 2 == 1)
 					{
-						solver.Clear();
-						Paths solution;
-						rec[0].X = p.X - dense.X / 2;
-						rec[0].Y = p.Y - dense.Y / 2;
-						rec[1].X = p.X + dense.X / 2;
-						rec[1].Y = p.Y - dense.Y / 2;
-						rec[2].X = p.X + dense.X / 2;
-						rec[2].Y = p.Y + dense.Y / 2;
-						rec[3].X = p.X - dense.X / 2;
-						rec[3].Y = p.Y + dense.Y / 2;
-						solver.AddPaths(sub, ptClip, true);
-						solver.AddPath(rec, ptSubject, true);
-						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-						if (solution.size())
+						Vec3f ps = octree.InteractPoint(sPoint, Vec3f(0, 0, 1));
+						sample_points_.push_back(ps);
+					}
+					else
+					{
+						hitPointList.clear();
+						Vec3f pr[4];
+						pr[0] = sPoint - Vec3f(dense.x() / 2, 0, 0);
+						pr[1] = sPoint - Vec3f(0, dense.y() / 2, 0);
+						pr[2] = sPoint + Vec3f(dense.x() / 2, 0, 0);
+						pr[3] = sPoint + Vec3f(0, dense.y() / 2, 0);
+						for (int r = 0; r < 4; r++)
 						{
-							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(intersectP);
+
+							hitPointList.clear();
+							sKDT->RayIntersection2d(pr[r], sKDT->rootNode, segments, hitPointList);
+							int cc = 0;
+							for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
+							{
+								if (iter->x() > x_)
+								{
+									cc++;
+								}
+							}
+							if (cc % 2 == 1)
+							{
+								Vec3f prs = octree.InteractPoint(pr[r], Vec3f(0, 0, 1));
+								sample_points_.push_back(prs);
+							}
 						}
 					}
 				}
-				for (p.X = -dense.X; p.X >=min_x_; p.X -= dense.X)
+			}
+			// free memory
+			for (std::vector<LineSegment*>::iterator f = segments.begin(); f != segments.end(); f++)
+				SafeDelete(*f);
+			SafeDelete(sKDT);
+
+			// add local minimal support point
+			auto vList = *(sup_areas_[i]->get_vertex_list());
+			sup_areas_[i]->UpdateMesh();
+			for (int j = 0; j < vList.size(); j++)
+			{
+				if (vList[j]->boundary_flag_==0)
 				{
-					for (p.Y = 0; p.Y < max_y_; p.Y += dense.Y)
+					continue;
+				}
+				std::vector<size_t> va = vList[j]->neighborIdx;
+				int k = 0;
+				for (k = 0; k < va.size(); k++)
+				{
+					if (vList[va[k]]->position().z() < vList[j]->position().z())
 					{
-						solver.Clear();
-						Paths solution;
-						rec[0].X = p.X - dense.X / 2;
-						rec[0].Y = p.Y - dense.Y / 2;
-						rec[1].X = p.X + dense.X / 2;
-						rec[1].Y = p.Y - dense.Y / 2;
-						rec[2].X = p.X + dense.X / 2;
-						rec[2].Y = p.Y + dense.Y / 2;
-						rec[3].X = p.X - dense.X / 2;
-						rec[3].Y = p.Y + dense.Y / 2;
-						solver.AddPaths(sub, ptClip, true);
-						solver.AddPath(rec, ptSubject, true);
-						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-						if (solution.size())
-						{
-							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(intersectP);
-						}
-					}
-					for (p.Y = -dense.Y; p.Y >= min_y_; p.Y -= dense.Y)
-					{
-						solver.Clear();
-						Paths solution;
-						rec[0].X = p.X - dense.X / 2;
-						rec[0].Y = p.Y - dense.Y / 2;
-						rec[1].X = p.X + dense.X / 2;
-						rec[1].Y = p.Y - dense.Y / 2;
-						rec[2].X = p.X + dense.X / 2;
-						rec[2].Y = p.Y + dense.Y / 2;
-						rec[3].X = p.X - dense.X / 2;
-						rec[3].Y = p.Y + dense.Y / 2;
-						solver.AddPaths(sub, ptClip, true);
-						solver.AddPath(rec, ptSubject, true);
-						solver.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-						if (solution.size())
-						{
-							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
-							sample_points_[iter->first].push_back(intersectP);
-						}
+
+						break;
 					}
 				}
+				if (k == va.size())
+				{
+					sample_points_.push_back(vList[j]->position());
+					qDebug() << "local minimal point";
+				}
+			}
+		}
+	}
+	else if (counter_ % 3 == SPARSE)
+	{
+		for (int i=0;i<component_regions_.size();i++)
+		{
+			for (int j=0;j<component_regions_[i].size();j++)
+			{
+				for (int k=0;k<component_regions_[i][j].size();k++)
+				{
+					auto belist = component_regions_[i][j][k]->GetBLoop();
 
 				
+					std::vector<LineSegment*> segments;
+					for (int ii=0;ii<belist.size();ii++)
+					{
+			
+						for (int jj=0;jj<belist[ii].size();jj++)
+						{
+						
+							Vec3f p1 = belist[ii][jj]->pvert_->position();
+							Vec3f p2 = belist[ii][jj]->start_->position();
+							LineSegment* s = new LineSegment(p1, p2);
+							segments.push_back(s);
+						}
+					}	
+					Space2dKDTree* sKDT = new Space2dKDTree(segments); // segments are no longer in ordered after this
+				
+
+
+					// infill support point
+				
+					MeshOctree octree;
+					octree.BuildOctree(component_regions_[i][j][k]);
+					std::vector<Vec3f> box = component_regions_[i][j][k]->getBoundingBox();
+					int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
+					int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
+					int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
+					int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
+					for (int x_ = min_x_; x_ <= max_x_; x_++)
+					{
+						for (int y_ = min_y_; y_ <= max_y_; y_++)
+						{
+						
+							Vec3f sPoint(x_, y_, 0);
+							std::vector<Vec3f> hitPointList;
+							sKDT->RayIntersection2d(sPoint, sKDT->rootNode, segments, hitPointList);
+							int cc = 0;
+							for (auto iter=hitPointList.begin();iter!=hitPointList.end();iter++)
+							{
+								if (iter->x()>x_)
+								{
+									cc++;
+								}
+							}
+							if (cc % 2 == 1)
+							{
+								Vec3f ps = octree.InteractPoint(sPoint, Vec3f(0, 0, 1));
+								sample_points_.push_back(ps);
+							}
+							else
+							{
+								hitPointList.clear();
+								Vec3f pr[4];
+								pr[0] = sPoint - Vec3f(dense.x() / 2, 0, 0);
+								pr[1] = sPoint - Vec3f(0, dense.y() / 2, 0);
+								pr[2] = sPoint + Vec3f(dense.x() / 2, 0, 0);
+								pr[3] = sPoint + Vec3f(0, dense.y() / 2, 0);
+								for (int r = 0; r < 4; r++)
+								{
+									
+									hitPointList.clear();
+									sKDT->RayIntersection2d(pr[r], sKDT->rootNode, segments, hitPointList);
+									int cc = 0;
+									for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
+									{
+										if (iter->x() > x_)
+										{
+											cc++;
+										}
+									}
+									if (cc%2==1)
+									{
+										Vec3f prs = octree.InteractPoint(pr[r], Vec3f(0, 0, 1));
+										sample_points_.push_back(prs);
+									}
+								}
+							}
+						}
+					}
+					// free memory
+					for (std::vector<LineSegment*>::iterator f = segments.begin(); f != segments.end(); f++)
+						SafeDelete(*f);
+					SafeDelete(sKDT);
+				}
 			}
 		}
 
 	}
-	int num_of_sam = 0;
-	for (int i=0;i<sup_ptr_aera_list_.size();i++)
-	{
-
-		num_of_sam += sample_points_[i].size();
-	}
-	qDebug() << "the total number of sample point is "<<num_of_sam;
+	
 }
 
 
@@ -420,7 +465,7 @@ void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 	octree.BuildOctree(sup_areas_[0]);std::vector<Vec3f> re_sample_p;
 	for (int i=0;i<points_.size();i++)
 	{
-		sample_points_[0].push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
+		sample_points_.push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
 	}
 }
 void Support::exportcylinder(const char* fouts)
@@ -431,18 +476,16 @@ void Support::exportcylinder(const char* fouts)
 	oct_obj.BuildOctree(target_mesh);
 	fout << "ENTITY/OBJ" << endl;
 
-	for (int i=0;i<sample_points_.size();i++)
-	{
-		for (int j=0;j<sample_points_[i].size();j++)
+
+		for (int j=0;j<sample_points_.size();j++)
 		{
 			
-			Vec3f lp = oct_obj.InteractPoint(sample_points_[i][j], Vec3f(0, 0, -1));
-			Vec3f c = lp - sample_points_[i][j];
-			fout << "OBJ=SOLCYL/ORIGIN," << sample_points_[i][j].x()<< "," << sample_points_[i][j].y() << "," << sample_points_[i][j].z() 
-				<< ",HEIGHT,$" << endl << (sample_points_[i][j] - lp).length() << ",DIAMTR," << 1.0 << ",AXIS," << c.x() << "," << c.y() << "," << c.z() << endl;
+			Vec3f lp = oct_obj.InteractPoint(sample_points_[j], Vec3f(0, 0, -1));
+			Vec3f c = lp - sample_points_[j];
+			fout << "OBJ=SOLCYL/ORIGIN," << sample_points_[j].x()<< "," << sample_points_[j].y() << "," << sample_points_[j].z() 
+				<< ",HEIGHT,$" << endl << (sample_points_[j] - lp).length() << ",DIAMTR," << 1.0 << ",AXIS," << c.x() << "," << c.y() << "," << c.z() << endl;
 
 		}
-	}
 	fout << "HALT" << endl;
 	fout.close();
 	

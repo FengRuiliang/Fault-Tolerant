@@ -607,10 +607,14 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		glNormal3fv(faces[i]->normal());
-		glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
-		glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
-		glVertex3fv(faces[i]->vec_ptr_vert_[2]->position());
+		if (!faces[i]->selected_)
+		{
+			glNormal3fv(faces[i]->normal());
+			glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
+			glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
+			glVertex3fv(faces[i]->vec_ptr_vert_[2]->position());
+		}
+
 	}
 	glEnd();
 }
@@ -813,62 +817,65 @@ void RenderingWidget::draw_support_aera(bool bv)
 	{
 		auto sp_flist_ = *ptr_support_->sp_mesh.get_faces_list();
 		auto sup_point_ = ptr_support_->sample_points_;
-		for (auto iter = ptr_support_->sup_ptr_aera_list_.begin(); iter != ptr_support_->sup_ptr_aera_list_.end(); iter++)
+		auto sup_component_region = ptr_support_->component_regions_;
+		for (int i=0;i<sup_component_region.size();i++)
 		{
-			if (field_id!=iter->first&&slice_check_id_==0)
+			if (i!=slice_check_id_)
 			{
 				continue;
 			}
-			for (int i=0;i<iter->second.size();i++)
+			for (int j=0;j<sup_component_region[i].size();j++)
 			{
-			
-				auto face_list_ = iter->second[i]->get_faces_list();
-				glBegin(GL_TRIANGLES);
-				glColor3f(sin(iter->first * 10 + 1), cos(iter->first * 10 + 1), tan(iter->first * 10 + 1));
-				for (int j = 0; j < face_list_->size(); j++)
+				if (j!=field_id)
 				{
-					HE_edge* sta = face_list_->at(j)->pedge_;
-					HE_edge* cur = sta;
-					do
-					{
-						//glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
-						glVertex3fv(cur->pvert_->position());
-						cur = cur->pnext_;
-					} while (cur != sta);
-
+					continue;
 				}
-				glEnd();
-				auto boundary_loop_ = iter->second[i]->GetBLoop();
-				for (int j = 0; j < boundary_loop_.size(); j++)
+				glColor3f(sin(j * 10 + 1), cos(j * 10 + 1), tan(j * 10 + 1));
+				for (int k=0;k<sup_component_region[i][j].size();k++)
 				{
-					glBegin(GL_LINE_LOOP);
-					for (int k = 0; k < boundary_loop_[j].size(); k++)
+				
+					glBegin(GL_TRIANGLES);
+					
+					auto face_list_ =sup_component_region[i][j][k]->get_faces_list();
+					for (int ii = 0; ii < face_list_->size(); ii++)
 					{
-						glVertex3fv(boundary_loop_[j][k]->pvert_->position());
+						HE_edge* sta = face_list_->at(ii)->pedge_;
+						HE_edge* cur = sta;
+						do
+						{
+							//glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
+							glVertex3fv(cur->pvert_->position());
+							cur = cur->pnext_;
+						} while (cur != sta);
+
 					}
 					glEnd();
+
 				}
 			}
-			// draw support point
-			glColor3f(1.0, 0.0, 0.0);
-			glBegin(GL_TRIANGLES);
-			for (int j = 0; j < sup_point_[iter->first].size(); j++)
-			{
-				for (int k = 0; k < sp_flist_.size(); k++)
-				{
-					HE_edge* sta = sp_flist_[k]->pedge_;
-					HE_edge* cur = sta;
-					do
-					{
-						glVertex3fv(cur->pvert_->position() + sup_point_[iter->first][j]);
-						cur = cur->pnext_;
-					} while (cur != sta);
-				}
-			}
-			glEnd();
 		}
 
+
+
+		// draw support point
+		glColor3f(1.0, 0.0, 0.0);
+		glBegin(GL_TRIANGLES);
+		for (int j = 0; j < sup_point_.size(); j++)
+		{
+			for (int k = 0; k < sp_flist_.size(); k++)
+			{
+				HE_edge* sta = sp_flist_[k]->pedge_;
+				HE_edge* cur = sta;
+				do
+				{
+					glVertex3fv(cur->pvert_->position() + sup_point_[j]);
+					cur = cur->pnext_;
+				} while (cur != sta);
+			}
+		}
+		glEnd();
 	}
+
 }
 void RenderingWidget::DoSlice()
 {
@@ -922,13 +929,13 @@ void RenderingWidget::add_support()
 	counter_++;
 	ptr_support_->find_support_area();
 	ptr_support_->support_point_sampling(counter_);
-	QString filename = QFileDialog::
-		getSaveFileName(this, tr("Write Mesh"),
-			"..", tr("grs (*.grs)"));
-	if (filename.isEmpty())
-		return;
-	QByteArray byfilename = filename.toLocal8Bit();
-	ptr_support_->exportcylinder(byfilename);
+// 	QString filename = QFileDialog::
+// 		getSaveFileName(this, tr("Write Mesh"),
+// 			"..", tr("grs (*.grs)"));
+// 	if (filename.isEmpty())
+// 		return;
+// 	QByteArray byfilename = filename.toLocal8Bit();
+// 	ptr_support_->exportcylinder(byfilename);
 }
 
 

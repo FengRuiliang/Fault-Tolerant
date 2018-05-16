@@ -23,9 +23,10 @@ private:
 
 
 public:
-	std::map<int, std::vector<Mesh3D*>> sup_ptr_aera_list_;
+
 	std::vector<Mesh3D*> sup_areas_;
-	std::map<int,std::vector<Vec3f>> sample_points_;
+	std::vector<Vec3f> sample_points_;
+	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_;
 	Mesh3D sp_mesh;
 private:
 	void sam_project_to_mesh(std::vector<Vec3f> sample_points_);

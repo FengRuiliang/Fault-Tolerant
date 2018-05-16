@@ -803,8 +803,7 @@ void Mesh3D::UpdateMesh(void)
 	countBoundaryComponat();
 	UpdateNormal();
 	ComputeAvarageEdgeLength();
-	if (input_vertex_list_.size() == 0)
-		SetNeighbors();
+	SetNeighbors();
 }
 
 void Mesh3D::SetBoundaryFlag(void)

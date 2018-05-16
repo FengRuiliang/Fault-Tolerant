@@ -182,7 +182,7 @@ void Support::support_point_sampling(int counter_)
 #define OPTIMAL (int)0
 
 	sample_points_.clear();
-	IntPoint dense(2000, 2000),dense_high;
+	IntPoint dense(2000, 2000);
 	MeshOctree wholeoctree;
 	wholeoctree.BuildOctree(sup_areas_[0]);
 
@@ -221,7 +221,6 @@ void Support::support_point_sampling(int counter_)
 			if (counter_ % 3 == SPARSE)
 			{
 				dense = get_dense(iter->first * 5);
-				dense_high = get_dense(iter->first * 5 + 5);
 			}
 
 			for (int i = 0; i < iter->second.size(); i++)
@@ -242,6 +241,30 @@ void Support::support_point_sampling(int counter_)
 					}
 				}
 				Clipper solver;
+
+				tsolver.Clear();
+				for (int m=0;m<i;m++)
+				{
+					Path rec(4);
+					for (int n=0;n<sample_points_[m].size();n++)
+					{
+						rec[0].X = p.X - dense.X / 2;
+						rec[0].Y = p.Y - dense.Y / 2;
+						rec[1].X = p.X + dense.X / 2;
+						rec[1].Y = p.Y - dense.Y / 2;
+						rec[2].X = p.X + dense.X / 2;
+						rec[2].Y = p.Y + dense.Y / 2;
+						rec[3].X = p.X - dense.X / 2;
+						rec[3].Y = p.Y + dense.Y / 2;
+						lastclipper << rec;
+					}
+
+				}
+				tsolver.AddPaths(lastclipper, ptSubject, true);
+				tsolver.Execute(ctUnion, lastclipper, pftNonZero, pftNonZero);
+
+
+
 				Paths sub,rec_union;
 				solver.AddPaths(lastclipper, ptClip, true);
 				solver.AddPaths(polygon, ptSubject, true);
@@ -269,18 +292,6 @@ void Support::support_point_sampling(int counter_)
 						{
 							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
 							sample_points_[iter->first].push_back(intersectP);
-							rec[0].X = p.X - dense_high.X / 2;
-							rec[0].Y = p.Y - dense_high.Y / 2;
-							rec[1].X = p.X + dense_high.X / 2;
-							rec[1].Y = p.Y - dense_high.Y / 2;
-							rec[2].X = p.X + dense_high.X / 2;
-							rec[2].Y = p.Y + dense_high.Y / 2;
-							rec[3].X = p.X - dense_high.X / 2;
-							rec[3].Y = p.Y + dense_high.Y / 2;
-
-
-
-							rec_union<<rec;
 						}
 					}
 					for (p.Y = -dense.Y; p.Y >=min_y_; p.Y -= dense.Y)
@@ -302,15 +313,6 @@ void Support::support_point_sampling(int counter_)
 						{
 							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
 							sample_points_[iter->first].push_back(intersectP);
-							rec[0].X = p.X - dense_high.X / 2;
-							rec[0].Y = p.Y - dense_high.Y / 2;
-							rec[1].X = p.X + dense_high.X / 2;
-							rec[1].Y = p.Y - dense_high.Y / 2;
-							rec[2].X = p.X + dense_high.X / 2;
-							rec[2].Y = p.Y + dense_high.Y / 2;
-							rec[3].X = p.X - dense_high.X / 2;
-							rec[3].Y = p.Y + dense_high.Y / 2;
-							rec_union << rec;
 						}
 					}
 				}
@@ -335,15 +337,6 @@ void Support::support_point_sampling(int counter_)
 						{
 							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
 							sample_points_[iter->first].push_back(intersectP);
-							rec[0].X = p.X - dense_high.X / 2;
-							rec[0].Y = p.Y - dense_high.Y / 2;
-							rec[1].X = p.X + dense_high.X / 2;
-							rec[1].Y = p.Y - dense_high.Y / 2;
-							rec[2].X = p.X + dense_high.X / 2;
-							rec[2].Y = p.Y + dense_high.Y / 2;
-							rec[3].X = p.X - dense_high.X / 2;
-							rec[3].Y = p.Y + dense_high.Y / 2;
-							rec_union << rec;
 						}
 					}
 					for (p.Y = -dense.Y; p.Y >= min_y_; p.Y -= dense.Y)
@@ -365,23 +358,11 @@ void Support::support_point_sampling(int counter_)
 						{
 							Vec3f  intersectP = wholeoctree.InteractPoint(Vec3f(p.X / 1000, p.Y / 1000, 0), Vec3f(0, 0, 1));
 							sample_points_[iter->first].push_back(intersectP);
-							rec[0].X = p.X - dense_high.X / 2;
-							rec[0].Y = p.Y - dense_high.Y / 2;
-							rec[1].X = p.X + dense_high.X / 2;
-							rec[1].Y = p.Y - dense_high.Y / 2;
-							rec[2].X = p.X + dense_high.X / 2;
-							rec[2].Y = p.Y + dense_high.Y / 2;
-							rec[3].X = p.X - dense_high.X / 2;
-							rec[3].Y = p.Y + dense_high.Y / 2;
-							rec_union << rec;
 						}
 					}
 				}
 
-				tsolver.Clear();
-				tsolver.AddPaths(lastclipper, ptSubject, true);
-				tsolver.AddPaths(rec_union, ptClip, true);
-				tsolver.Execute(ctUnion, lastclipper, pftNonZero, pftNonZero);
+				
 			}
 		}
 

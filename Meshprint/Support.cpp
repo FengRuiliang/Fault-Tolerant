@@ -448,17 +448,21 @@ void Support::exportcylinder(const char* fouts)
 	fout.precision(16);
 	MeshOctree oct_obj;
 	oct_obj.BuildOctree(target_mesh);
+	fout << "ENTITY/OBJ" << endl;
+
 	for (int i=0;i<sample_points_.size();i++)
 	{
 		for (int j=0;j<sample_points_[i].size();j++)
 		{
 			
-			fout << sample_points_[i][j].x() << " " << sample_points_[i][j].y() << " " << sample_points_[i][j].z() <<" "<< 1.0<<"\n";
 			Vec3f lp = oct_obj.InteractPoint(sample_points_[i][j], Vec3f(0, 0, -1));
-			(sample_points_[i][j] - lp).length();
-			fout << lp.x() << " " << lp.y() << " " << lp.z() <<" "<< 1.0<<"\n";
+			Vec3f c = lp - sample_points_[i][j];
+			fout << "OBJ=SOLCYL/ORIGIN," << sample_points_[i][j].x()<< "," << sample_points_[i][j].y() << "," << sample_points_[i][j].z() 
+				<< ",HEIGHT,$" << endl << (sample_points_[i][j] - lp).length() << ",DIAMTR," << 1.0 << ",AXIS," << c.x() << "," << c.y() << "," << c.z() << endl;
+
 		}
 	}
+	fout << "HALT" << endl;
 	fout.close();
 	
 }

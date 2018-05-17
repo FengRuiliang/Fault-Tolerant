@@ -609,11 +609,13 @@ void RenderingWidget::DrawFace(bool bv)
 	{
 		if (!faces[i]->selected_)
 		{
+			glColor4ub(0, 170, 0, 255);
+		}
+		else { glColor3f(sin(0 * 10 + 1), cos(0 * 10 + 1), tan(0 * 10 + 1)); }
 			glNormal3fv(faces[i]->normal());
 			glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
 			glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
 			glVertex3fv(faces[i]->vec_ptr_vert_[2]->position());
-		}
 
 	}
 	glEnd();
@@ -818,45 +820,6 @@ void RenderingWidget::draw_support_aera(bool bv)
 		auto sp_flist_ = *ptr_support_->sp_mesh.get_faces_list();
 		auto sup_point_ = ptr_support_->sample_points_;
 		auto sup_component_region = ptr_support_->component_regions_;
-		for (int i=0;i<sup_component_region.size();i++)
-		{
-			if (i!=slice_check_id_)
-			{
-				continue;
-			}
-			for (int j=0;j<sup_component_region[i].size();j++)
-			{
-				if (j!=field_id)
-				{
-					continue;
-				}
-				glColor3f(sin(j * 10 + 1), cos(j * 10 + 1), tan(j * 10 + 1));
-				for (int k=0;k<sup_component_region[i][j].size();k++)
-				{
-				
-					glBegin(GL_TRIANGLES);
-					
-					auto face_list_ =sup_component_region[i][j][k]->get_faces_list();
-					for (int ii = 0; ii < face_list_->size(); ii++)
-					{
-						HE_edge* sta = face_list_->at(ii)->pedge_;
-						HE_edge* cur = sta;
-						do
-						{
-							//glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
-							glVertex3fv(cur->pvert_->position());
-							cur = cur->pnext_;
-						} while (cur != sta);
-
-					}
-					glEnd();
-
-				}
-			}
-		}
-
-
-
 		// draw support point
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_TRIANGLES);
@@ -874,6 +837,47 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 		}
 		glEnd();
+		return;
+		for (int i=0;i<sup_component_region.size();i++)
+		{
+// 			if (i!=slice_check_id_)
+// 			{
+// 				continue;
+// 			}
+			for (int j=0;j<sup_component_region[i].size();j++)
+			{
+// 				if (j!=field_id)
+// 				{
+// 					continue;
+// 				}
+				glColor3f(sin(j * 10 + 1), cos(j * 10 + 1), tan(j * 10 + 1));
+				for (int k=0;k<sup_component_region[i][j].size();k++)
+				{
+				
+					glBegin(GL_TRIANGLES);
+					
+					auto face_list_ =sup_component_region[i][j][k]->get_faces_list();
+					for (int ii = 0; ii < face_list_->size(); ii++)
+					{
+						HE_edge* sta = face_list_->at(ii)->pedge_;
+						HE_edge* cur = sta;
+						do
+						{
+							glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
+							//glVertex3fv(cur->pvert_->position());
+							cur = cur->pnext_;
+						} while (cur != sta);
+
+					}
+					glEnd();
+
+				}
+			}
+		}
+
+
+
+	
 	}
 
 }

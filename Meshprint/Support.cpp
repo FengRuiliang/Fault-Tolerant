@@ -105,7 +105,7 @@ void Support::find_support_area()
 	for (int i = 0; i < face_list_->size(); i++)
 	{
 		int angle_ = 180 - acos(face_list_->at(i)->normal()*perpendicular) * 180 / PI;
-		if (angle_ < 30)
+		if (angle_ < 30&&face_list_->at(i)->center().z()>1e-1)
 		{
 			face_list_->at(i)->selected_ = true;
 			std::vector<HE_vert*> verts, input;
@@ -235,21 +235,19 @@ void Support::support_point_sampling(int counter_)
 			int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
 			int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
 			int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-			for (int x_ = min_x_; x_ <= max_x_; x_++)
+			for (int x_ = min_x_; x_ <= max_x_+1; x_++)
 			{
-				for (int y_ = min_y_; y_ <= max_y_; y_++)
+				for (int y_ = min_y_; y_ <= max_y_+1; y_++)
 				{
 
 					
-					Vec3f sPoint(x_, y_, 0);
-					sample_points_.push_back(sPoint);
-					continue;
+					Vec3f sPoint(x_*dense.x(), y_*dense.y(), 0);
 					std::vector<Vec3f> hitPointList;
 					sKDT->RayIntersection2d(sPoint, sKDT->rootNode, segments, hitPointList);
 					int cc = 0;
 					for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
 					{
-						if (iter->x() > x_)
+						if (iter->x() > sPoint.x())
 						{
 							cc++;
 						}
@@ -261,6 +259,7 @@ void Support::support_point_sampling(int counter_)
 					}
 					else
 					{
+					
 						hitPointList.clear();
 						Vec3f pr[4];
 						pr[0] = sPoint - Vec3f(dense.x() / 2, 0, 0);
@@ -275,7 +274,7 @@ void Support::support_point_sampling(int counter_)
 							int cc = 0;
 							for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
 							{
-								if (iter->x() > x_)
+								if (iter->x() > pr[r].x())
 								{
 									cc++;
 								}
@@ -327,6 +326,7 @@ void Support::support_point_sampling(int counter_)
 		{
 			for (int j=0;j<component_regions_[i].size();j++)
 			{
+				dense = get_dense(j * 5);
 				for (int k=0;k<component_regions_[i][j].size();k++)
 				{
 					auto belist = component_regions_[i][j][k]->GetBLoop();
@@ -358,18 +358,19 @@ void Support::support_point_sampling(int counter_)
 					int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
 					int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
 					int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-					for (int x_ = min_x_; x_ <= max_x_; x_++)
+					for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
 					{
-						for (int y_ = min_y_; y_ <= max_y_; y_++)
+						for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
 						{
-						
-							Vec3f sPoint(x_, y_, 0);
+
+
+							Vec3f sPoint(x_*dense.x(), y_*dense.y(), 0);
 							std::vector<Vec3f> hitPointList;
 							sKDT->RayIntersection2d(sPoint, sKDT->rootNode, segments, hitPointList);
 							int cc = 0;
-							for (auto iter=hitPointList.begin();iter!=hitPointList.end();iter++)
+							for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
 							{
-								if (iter->x()>x_)
+								if (iter->x() > sPoint.x())
 								{
 									cc++;
 								}
@@ -381,6 +382,7 @@ void Support::support_point_sampling(int counter_)
 							}
 							else
 							{
+
 								hitPointList.clear();
 								Vec3f pr[4];
 								pr[0] = sPoint - Vec3f(dense.x() / 2, 0, 0);
@@ -389,18 +391,18 @@ void Support::support_point_sampling(int counter_)
 								pr[3] = sPoint + Vec3f(0, dense.y() / 2, 0);
 								for (int r = 0; r < 4; r++)
 								{
-									
+
 									hitPointList.clear();
 									sKDT->RayIntersection2d(pr[r], sKDT->rootNode, segments, hitPointList);
 									int cc = 0;
 									for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
 									{
-										if (iter->x() > x_)
+										if (iter->x() > pr[r].x())
 										{
 											cc++;
 										}
 									}
-									if (cc%2==1)
+									if (cc % 2 == 1)
 									{
 										Vec3f prs = octree.InteractPoint(pr[r], Vec3f(0, 0, 1));
 										sample_points_.push_back(prs);
@@ -423,36 +425,36 @@ void Support::support_point_sampling(int counter_)
 
 
 
-IntPoint Support::get_dense(int angle)
+Vec2f Support::get_dense(int angle)
 {
-	IntPoint d_;
+	Vec2f d_;
 	if (angle < 15)
 	{
-		d_.X = 2000;
+		d_.x() = 2.0;
 
 		if (angle < 5)
 		{
-			d_.Y = 2000;
+			d_.y() = 2.0;
 		}
 		else if (angle < 10)
 		{
-			d_.Y = 2500;
+			d_.y() = 2.5;
 		}
 		else if (angle < 15)
 		{
-			d_.Y = 8000;
+			d_.y() = 8.0;
 		}
 	}
 	else
 	{
-		d_.X = 2500;
+		d_.x() = 2.5;
 
 		if (angle < 18)
 		{
-			d_.Y = 10000;
+			d_.y() = 10.0;
 		}
 		else
-			d_.Y = 15000;
+			d_.y() = 15.0;
 	}
 	return d_;
 }

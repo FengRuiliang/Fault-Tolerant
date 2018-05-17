@@ -13,7 +13,7 @@ public:
 	void sup_mesh_dfs(HE_face * facet, Mesh3D * mesh);
 	void find_support_area();
 	void support_point_sampling(int counter_);
-	ClipperLib::IntPoint get_dense(int angle);
+	Vec2f get_dense(int angle);
 	void exportcylinder(const char * fouts);
 private:
 	Mesh3D* target_mesh;

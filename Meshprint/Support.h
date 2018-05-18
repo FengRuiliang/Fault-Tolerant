@@ -2,6 +2,7 @@
 #include "HE_mesh/Mesh3D.h"
 #include "HE_mesh/Vec.h"
 #include "Library/clipper.hpp"
+using namespace ClipperLib;
 class Support
 {
 public:
@@ -15,6 +16,10 @@ public:
 	void support_point_sampling(int counter_);
 	Vec2f get_dense(int angle);
 	void exportcylinder(const char * fouts);
+	void single_area_sampling(Mesh3D * mesh, Vec2f dense, std::vector<Vec3f>& vec_vec3f);
+
+	std::vector<Vec3f> compute_local_low_point(Mesh3D *mesh);
+
 private:
 	Mesh3D* target_mesh;
 	int limit_angle_ = { 30 };
@@ -28,9 +33,12 @@ public:
 	std::vector<Vec3f> sample_points_;
 	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_;
 	Mesh3D sp_mesh;
+
+	Paths test_path;
 private:
 	void sam_project_to_mesh(std::vector<Vec3f> sample_points_);
-	
+	Mesh3D* wholemesh;// find big support area
+					 // local minimal point
 	int pso_target_ = { 0 };
 };
 

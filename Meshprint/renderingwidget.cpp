@@ -837,6 +837,20 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 		}
 		glEnd();
+
+		auto test = ptr_support_->test_path;
+		for (int i=0;i<test.size();i++)
+		{
+			glBegin(GL_LINE_LOOP);
+			for (int j=0;j<test[i].size();j++)
+			{
+				glVertex3f((float)test[i][j].X / 1000, (float)test[i][j].Y / 1000, 0);
+			}
+			glEnd();
+		}
+
+
+
 		return;
 		for (int i=0;i<sup_component_region.size();i++)
 		{

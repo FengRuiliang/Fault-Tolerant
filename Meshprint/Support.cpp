@@ -21,6 +21,7 @@ Support::Support(Mesh3D* mesh)
 
 Support::~Support()
 {
+	delete wholemesh;
 }
 void Support::sup_face_dfs(HE_face* facet, std::vector<HE_face*>* faces, int angle_id_)
 {
@@ -98,10 +99,8 @@ void Support::find_support_area()
 	Vec3f perpendicular(0.0, 0.0, 1.0);
 	auto face_list_ = target_mesh->get_faces_list();
 	face_selected_.resize(face_list_->size());
-	Mesh3D wholemesh;// find big support area
-					 // local minimal point
 	
-	
+	wholemesh = new Mesh3D;
 	for (int i = 0; i < face_list_->size(); i++)
 	{
 		int angle_ = 180 - acos(face_list_->at(i)->normal()*perpendicular) * 180 / PI;
@@ -112,15 +111,15 @@ void Support::find_support_area()
 			face_list_->at(i)->face_verts(verts);
 			for (auto iterV = verts.begin(); iterV != verts.end(); iterV++)
 			{
-				input.push_back(wholemesh.InsertVertex((*iterV)->position()));
+				input.push_back(wholemesh->InsertVertex((*iterV)->position()));
 			}
-			wholemesh.InsertFaceSup(input);
+			wholemesh->InsertFaceSup(input);
 		}
 	}
-	wholemesh.UpdateMeshSup();
+	wholemesh->UpdateMeshSup();
 	
 	// find connected component
-	face_list_ = wholemesh.get_faces_list();
+	face_list_ = wholemesh->get_faces_list();
 	for (int i = 0; i < face_list_->size(); i++)
 	{
 		if (!face_list_->at(i)->selected_)
@@ -185,10 +184,9 @@ void Support::support_point_sampling(int counter_)
 #define OPTIMAL (int)0
 
 	sample_points_.clear();
-	Vec2f dense(2.0, 2.0);
-	MeshOctree wholeoctree;
-
-
+	
+	// add local minimal support point
+	
 	if (counter_%3==OPTIMAL)
 	{
 		qDebug() << "optimal";
@@ -208,219 +206,35 @@ void Support::support_point_sampling(int counter_)
 		sam_project_to_mesh(pos_);
 	}
 	else if (counter_%3==UNIFORM)
-	{		
+	{
+		Vec2f dense(2.0, 2.0);
 		for (int i=0;i<sup_areas_.size();i++)
 		{
-			auto belist = sup_areas_[i]->GetBLoop();
-			std::vector<LineSegment*> segments;
-			for (int ii = 0; ii < belist.size(); ii++)
-			{
-
-				for (int jj = 0; jj < belist[ii].size(); jj++)
-				{
-
-					Vec3f p1 = belist[ii][jj]->pvert_->position();
-					Vec3f p2 = belist[ii][jj]->start_->position();
-					LineSegment* s = new LineSegment(p1, p2);
-					segments.push_back(s);
-				}
-			}
-
-			Space2dKDTree* sKDT = new Space2dKDTree(segments); // segments are no longer in ordered after this
-			// infill support point
-			MeshOctree octree;
-			octree.BuildOctree(sup_areas_[i]);
-			std::vector<Vec3f> box = sup_areas_[i]->getBoundingBox();
-			int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
-			int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
-			int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
-			int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-			for (int x_ = min_x_; x_ <= max_x_+1; x_++)
-			{
-				for (int y_ = min_y_; y_ <= max_y_+1; y_++)
-				{
-
-					
-					Vec3f sPoint(x_*dense.x(), y_*dense.y(), 0);
-					std::vector<Vec3f> hitPointList;
-					sKDT->RayIntersection2d(sPoint, sKDT->rootNode, segments, hitPointList);
-					int cc = 0;
-					for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
-					{
-						if (iter->x() > sPoint.x())
-						{
-							cc++;
-						}
-					}
-					if (cc % 2 == 1)
-					{
-						Vec3f ps = octree.InteractPoint(sPoint, Vec3f(0, 0, 1));
-						sample_points_.push_back(ps);
-					}
-					else
-					{
-					
-						hitPointList.clear();
-						Vec3f pr[4];
-						pr[0] = sPoint - Vec3f(dense.x() / 2, 0, 0);
-						pr[1] = sPoint - Vec3f(0, dense.y() / 2, 0);
-						pr[2] = sPoint + Vec3f(dense.x() / 2, 0, 0);
-						pr[3] = sPoint + Vec3f(0, dense.y() / 2, 0);
-						for (int r = 0; r < 4; r++)
-						{
-
-							hitPointList.clear();
-							sKDT->RayIntersection2d(pr[r], sKDT->rootNode, segments, hitPointList);
-							int cc = 0;
-							for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
-							{
-								if (iter->x() > pr[r].x())
-								{
-									cc++;
-								}
-							}
-							if (cc % 2 == 1)
-							{
-								Vec3f prs = octree.InteractPoint(pr[r], Vec3f(0, 0, 1));
-								sample_points_.push_back(prs);
-							}
-						}
-					}
-				}
-			}
-			// free memory
-			for (std::vector<LineSegment*>::iterator f = segments.begin(); f != segments.end(); f++)
-				SafeDelete(*f);
-			SafeDelete(sKDT);
-
-			// add local minimal support point
-			auto vList = *(sup_areas_[i]->get_vertex_list());
-			sup_areas_[i]->UpdateMesh();
-			for (int j = 0; j < vList.size(); j++)
-			{
-				if (vList[j]->boundary_flag_==0)
-				{
-					continue;
-				}
-				std::vector<size_t> va = vList[j]->neighborIdx;
-				int k = 0;
-				for (k = 0; k < va.size(); k++)
-				{
-					if (vList[va[k]]->position().z() < vList[j]->position().z())
-					{
-
-						break;
-					}
-				}
-				if (k == va.size())
-				{
-					sample_points_.push_back(vList[j]->position());
-					qDebug() << "local minimal point";
-				}
-			}
+			std::vector<Vec3f> last_loop_point = compute_local_low_point(sup_areas_[i]);
+			single_area_sampling(sup_areas_[i], dense,last_loop_point);
+			sample_points_.insert(sample_points_.end(), last_loop_point.begin(), last_loop_point.end());
 		}
 	}
 	else if (counter_ % 3 == SPARSE)
 	{
 		for (int i=0;i<component_regions_.size();i++)
 		{
+			std::vector<Vec3f> single_point;
 			for (int j=0;j<component_regions_[i].size();j++)
 			{
-				dense = get_dense(j * 5);
+				Vec2f dense = get_dense(j * 5);
+				
 				for (int k=0;k<component_regions_[i][j].size();k++)
 				{
-					auto belist = component_regions_[i][j][k]->GetBLoop();
-
-				
-					std::vector<LineSegment*> segments;
-					for (int ii=0;ii<belist.size();ii++)
-					{
-			
-						for (int jj=0;jj<belist[ii].size();jj++)
-						{
-						
-							Vec3f p1 = belist[ii][jj]->pvert_->position();
-							Vec3f p2 = belist[ii][jj]->start_->position();
-							LineSegment* s = new LineSegment(p1, p2);
-							segments.push_back(s);
-						}
-					}	
-					Space2dKDTree* sKDT = new Space2dKDTree(segments); // segments are no longer in ordered after this
-				
-
-
-					// infill support point
-				
-					MeshOctree octree;
-					octree.BuildOctree(component_regions_[i][j][k]);
-					std::vector<Vec3f> box = component_regions_[i][j][k]->getBoundingBox();
-					int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
-					int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
-					int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
-					int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-					for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
-					{
-						for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
-						{
-
-
-							Vec3f sPoint(x_*dense.x(), y_*dense.y(), 0);
-							std::vector<Vec3f> hitPointList;
-							sKDT->RayIntersection2d(sPoint, sKDT->rootNode, segments, hitPointList);
-							int cc = 0;
-							for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
-							{
-								if (iter->x() > sPoint.x())
-								{
-									cc++;
-								}
-							}
-							if (cc % 2 == 1)
-							{
-								Vec3f ps = octree.InteractPoint(sPoint, Vec3f(0, 0, 1));
-								sample_points_.push_back(ps);
-							}
-							else
-							{
-
-								hitPointList.clear();
-								Vec3f pr[4];
-								pr[0] = sPoint - Vec3f(dense.x() / 2, 0, 0);
-								pr[1] = sPoint - Vec3f(0, dense.y() / 2, 0);
-								pr[2] = sPoint + Vec3f(dense.x() / 2, 0, 0);
-								pr[3] = sPoint + Vec3f(0, dense.y() / 2, 0);
-								for (int r = 0; r < 4; r++)
-								{
-
-									hitPointList.clear();
-									sKDT->RayIntersection2d(pr[r], sKDT->rootNode, segments, hitPointList);
-									int cc = 0;
-									for (auto iter = hitPointList.begin(); iter != hitPointList.end(); iter++)
-									{
-										if (iter->x() > pr[r].x())
-										{
-											cc++;
-										}
-									}
-									if (cc % 2 == 1)
-									{
-										Vec3f prs = octree.InteractPoint(pr[r], Vec3f(0, 0, 1));
-										sample_points_.push_back(prs);
-									}
-								}
-							}
-						}
-					}
-					// free memory
-					for (std::vector<LineSegment*>::iterator f = segments.begin(); f != segments.end(); f++)
-						SafeDelete(*f);
-					SafeDelete(sKDT);
+					
+					single_area_sampling(component_regions_[i][j][k], dense,single_point);
 				}
 			}
 		}
 
 	}
 	
+	sam_project_to_mesh(sample_points_);
 }
 
 
@@ -462,9 +276,9 @@ Vec2f Support::get_dense(int angle)
 void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 {
 	int num_of_sam = 0;
-
+	sample_points_.clear();
 	MeshOctree octree;
-	octree.BuildOctree(sup_areas_[0]);std::vector<Vec3f> re_sample_p;
+	octree.BuildOctree(wholemesh);
 	for (int i=0;i<points_.size();i++)
 	{
 		sample_points_.push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
@@ -492,3 +306,132 @@ void Support::exportcylinder(const char* fouts)
 	fout.close();
 	
 }
+
+
+
+void Support::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point)
+{
+	Paths ori;
+	auto belist = mesh->GetBLoop();
+	for (int i = 0; i < belist.size(); i++)
+	{
+		Path loop;
+		for (int j = 0; j < belist[i].size(); j++)
+		{
+			loop << IntPoint(belist[i][j]->pvert_->position().x() * 1000, belist[i][j]->pvert_->position().y() * 1000);
+		}
+		ori << loop;
+	}
+	
+	 Paths clip;
+	 for (int i = 0; i < last_loop_point.size(); i++)
+	 {
+		 Path rectangle;
+		 rectangle << IntPoint((last_loop_point[i].x() - dense.x()) * 1000, (last_loop_point[i].y() - dense.y()) * 1000)
+			 << IntPoint((last_loop_point[i].x() + dense.x()) * 1000, (last_loop_point[i].y() - dense.y()) * 1000)
+			 << IntPoint((last_loop_point[i].x() + dense.x()) * 1000, (last_loop_point[i].y() + dense.y()) * 1000)
+			 << IntPoint((last_loop_point[i].x() - dense.x()) * 1000, (last_loop_point[i].y() + dense.y()) * 1000);
+		 clip << rectangle;
+	 } 
+	 Clipper sol;
+	 sol.AddPaths(clip, ptClip, true);
+	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
+
+	
+	 Paths subject;
+	 sol.Clear();
+	 sol.AddPaths(clip, ptClip, true);
+	 sol.AddPaths(ori, ptSubject, true); 
+	 sol.Execute(ctDifference, subject, pftNonZero, pftNonZero);
+	 if (subject.size() == 0)
+	 {
+		 return;
+	 }
+	 std::vector<Vec3f> box = mesh->getBoundingBox();
+	 int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
+	 int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
+	 int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
+	 int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
+	 for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
+	 {
+		 for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
+		 {
+			 IntPoint p(x_*dense.x() * 1000, y_*dense.y() * 1000);
+			 bool in_polygons(true);
+			 for (int i = 0; i < subject.size(); i++)
+			 {
+				 if (Orientation(subject[i]))
+				 {
+					 in_polygons = in_polygons&&PointInPolygon(p, subject[i]);
+				 }
+				 else
+				 {
+					 in_polygons = in_polygons&&!PointInPolygon(p, subject[i]);
+				 }
+
+			 }
+			 if (in_polygons)
+			 {
+				 last_loop_point.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+			 }
+			 else
+			 {
+				
+				 IntPoint pr[4] = {p,p,p,p};
+				 pr[0].X -=dense.x() / 2 * 1000; 
+				 pr[1].Y -=dense.y() / 2 * 1000;
+				 pr[2].X +=dense.x() / 2 * 1000;
+				 pr[3].Y += dense.y() / 2 * 1000;
+				 for (int r = 0; r < 4; r++)
+				 {
+					 in_polygons = true;
+					 for (int i = 0; i < subject.size(); i++)
+					 {
+						 if (Orientation(subject[i]))
+						 {
+							 in_polygons = in_polygons&&PointInPolygon(pr[r], subject[i]);
+						 }
+						 else
+						 {
+							 in_polygons = in_polygons && !PointInPolygon(pr[r], subject[i]);
+						 }
+					 }
+					 if (in_polygons)
+					 {
+						 last_loop_point.push_back(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
+					 }
+				 }
+			 }
+		 }
+	 }
+ }
+
+
+ std::vector<Vec3f> Support::compute_local_low_point(Mesh3D* mesh)
+ {
+	 std::vector<Vec3f> local_minimal_point;
+	 auto vList = *(mesh->get_vertex_list());
+	 mesh->UpdateMesh();
+	 for (int j = 0; j < vList.size(); j++)
+	 {
+		 if (vList[j]->boundary_flag_ == 0)
+		 {
+			 continue;
+		 }
+		 std::vector<size_t> va = vList[j]->neighborIdx;
+		 int k = 0;
+		 for (k = 0; k < va.size(); k++)
+		 {
+			 if (vList[va[k]]->position().z() < vList[j]->position().z())
+			 {
+
+				 break;
+			 }
+		 }
+		 if (k == va.size())
+		 {
+			 local_minimal_point.push_back(vList[j]->position());
+		 }
+	 }
+	 return local_minimal_point;
+ }

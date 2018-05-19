@@ -129,7 +129,7 @@ void Support::find_support_area()
 			sup_mesh_dfs(face_list_->at(i), mesh_a_);
 			if (mesh_a_->num_of_face_list() != 1)
 			{
-				sup_areas_.push_back(mesh_a_);
+				component.push_back(mesh_a_);
 			}
 			else
 			{
@@ -139,12 +139,12 @@ void Support::find_support_area()
 		face_list_->at(i)->selected_;
 	}
 	// for every support connected component
-	for (int i = 0; i < sup_areas_.size(); i++)
+	for (int i = 0; i < component.size(); i++)
 	{
 		//detect all the  facet support angle  and put them into the corresponding mesh
 		std::map<int, std::vector<Mesh3D*>> regions_;
-		sup_areas_[i]->UpdateMeshSup();
-		face_list_ = sup_areas_[i]->get_faces_list();
+		component[i]->UpdateMeshSup();
+		face_list_ = component[i]->get_faces_list();
 		for (int id=0;id<6;id++)
 		{
 			for (int j = 0; j < face_list_->size(); j++)
@@ -174,9 +174,10 @@ void Support::find_support_area()
 			}
 
 		}
-		component_regions_.push_back(regions_);
+		component_regions_mesh.push_back(regions_);
 	}
 }
+
 void Support::support_point_sampling(int counter_)
 {
 #define UNIFORM (int)1
@@ -191,87 +192,53 @@ void Support::support_point_sampling(int counter_)
 	{
 		qDebug() << "optimal";
 		PSO pso_solver;
-		//pso_solver.meshs_ = regions_;
-		std::vector<Vec3f> box = sup_areas_[0]->getBoundingBox();
-		pso_solver.settings.clamp_pos[0].X = ((int)box[1].x() - 2) * 1000;
-		pso_solver.settings.clamp_pos[0].Y = ((int)box[1].y() - 2) * 1000;
-		pso_solver.settings.clamp_pos[1].X = ((int)box[0].x() - 2) * 1000;
-		pso_solver.settings.clamp_pos[1].Y = ((int)box[0].y() - 2) * 1000;
-		pso_solver.settings.size = 100;
-		pso_solver.settings.steps = 100;
-		pso_solver.dense.X = 2000;
-		pso_solver.dense.Y = 2000;
+		pso_solver.component_regions_mesh = component_regions_mesh;
+		pso_solver.component = component;
+		pso_solver.settings.size = 50;
+		pso_solver.settings.steps = 10;
 		pso_solver.pso_swarm_init();
-		auto pos_ = pso_solver.pso_solve();
-		sam_project_to_mesh(pos_);
+		//sample_points_ = pso_solver.solution.resualt;
+		sample_points_ = pso_solver.pso_solve();
 	}
 	else if (counter_%3==UNIFORM)
 	{
+		qDebug() << "uniform";
 		Vec2f dense(2.0, 2.0);
-		for (int i=0;i<sup_areas_.size();i++)
+		for (int i=0;i<component.size();i++)
 		{
-			std::vector<Vec3f> last_loop_point = compute_local_low_point(sup_areas_[i]);
-			single_area_sampling(sup_areas_[i], dense,last_loop_point);
-			sample_points_.insert(sample_points_.end(), last_loop_point.begin(), last_loop_point.end());
+			std::vector<Vec3f> last_sampling = SupportLib::compute_local_low_point(component[i]);
+			SupportLib::single_area_sampling(component[i], dense,last_sampling);
+			sample_points_.insert(sample_points_.end(), last_sampling.begin(), last_sampling.end());
 		}
 	}
 	else if (counter_ % 3 == SPARSE)
 	{
-		for (int i=0;i<component_regions_.size();i++)
+		qDebug() << "sparse:";
+		for (int i=0;i<component_regions_mesh.size();i++)
 		{
-			std::vector<Vec3f> single_point;
-			for (int j=0;j<component_regions_[i].size();j++)
+			std::vector<Vec3f> last_sampling;
+			last_sampling = SupportLib::compute_local_low_point(component[i]);
+			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
-				Vec2f dense = get_dense(j * 5);
+				Vec2f dense = SupportLib::get_dense(j * 5);
 				
-				for (int k=0;k<component_regions_[i][j].size();k++)
+				for (int k=0;k<component_regions_mesh[i][j].size();k++)
 				{
 					
-					single_area_sampling(component_regions_[i][j][k], dense,single_point);
+					SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense,last_sampling);
 				}
 			}
+			sample_points_.insert(sample_points_.end(), last_sampling.begin(), last_sampling.end());
 		}
-
+		
 	}
-	
+	qDebug() << "sample point number is:"<<sample_points_.size();
 	sam_project_to_mesh(sample_points_);
+
 }
 
 
 
-Vec2f Support::get_dense(int angle)
-{
-	Vec2f d_;
-	if (angle < 15)
-	{
-		d_.x() = 2.0;
-
-		if (angle < 5)
-		{
-			d_.y() = 2.0;
-		}
-		else if (angle < 10)
-		{
-			d_.y() = 2.5;
-		}
-		else if (angle < 15)
-		{
-			d_.y() = 8.0;
-		}
-	}
-	else
-	{
-		d_.x() = 2.5;
-
-		if (angle < 18)
-		{
-			d_.y() = 10.0;
-		}
-		else
-			d_.y() = 15.0;
-	}
-	return d_;
-}
 
 void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 {
@@ -308,8 +275,41 @@ void Support::exportcylinder(const char* fouts)
 }
 
 
+Vec2f SupportLib::get_dense(int angle)
+{
+	Vec2f d_;
+	if (angle < 15)
+	{
+		d_.x() = 2.0;
 
-void Support::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point)
+		if (angle < 5)
+		{
+			d_.y() = 2.0;
+		}
+		else if (angle < 10)
+		{
+			d_.y() = 2.5;
+		}
+		else if (angle < 15)
+		{
+			d_.y() = 8.0;
+		}
+	}
+	else
+	{
+		d_.x() = 2.5;
+
+		if (angle < 18)
+		{
+			d_.y() = 10.0;
+		}
+		else
+			d_.y() = 15.0;
+	}
+	return d_;
+}
+
+void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point,Vec2f center)
 {
 	Paths ori;
 	auto belist = mesh->GetBLoop();
@@ -356,7 +356,7 @@ void Support::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>
 	 {
 		 for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
 		 {
-			 IntPoint p(x_*dense.x() * 1000, y_*dense.y() * 1000);
+			 IntPoint p((x_*dense.x()+center.x()) * 1000, (y_*dense.y()+center.y()) * 1000);
 			 bool in_polygons(true);
 			 for (int i = 0; i < subject.size(); i++)
 			 {
@@ -407,7 +407,7 @@ void Support::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>
  }
 
 
- std::vector<Vec3f> Support::compute_local_low_point(Mesh3D* mesh)
+ std::vector<Vec3f> SupportLib::compute_local_low_point(Mesh3D* mesh)
  {
 	 std::vector<Vec3f> local_minimal_point;
 	 auto vList = *(mesh->get_vertex_list());
@@ -435,3 +435,5 @@ void Support::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>
 	 }
 	 return local_minimal_point;
  }
+
+

@@ -14,11 +14,11 @@ public:
 	void sup_mesh_dfs(HE_face * facet, Mesh3D * mesh);
 	void find_support_area();
 	void support_point_sampling(int counter_);
-	Vec2f get_dense(int angle);
+	
 	void exportcylinder(const char * fouts);
-	void single_area_sampling(Mesh3D * mesh, Vec2f dense, std::vector<Vec3f>& vec_vec3f);
+	
 
-	std::vector<Vec3f> compute_local_low_point(Mesh3D *mesh);
+	
 
 private:
 	Mesh3D* target_mesh;
@@ -29,9 +29,9 @@ private:
 
 public:
 
-	std::vector<Mesh3D*> sup_areas_;
+	std::vector<Mesh3D*> component;
 	std::vector<Vec3f> sample_points_;
-	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_;
+	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_mesh;
 	Mesh3D sp_mesh;
 
 	Paths test_path;
@@ -41,4 +41,9 @@ private:
 					 // local minimal point
 	int pso_target_ = { 0 };
 };
-
+namespace SupportLib
+{
+	Vec2f get_dense(int angle);
+	void single_area_sampling(Mesh3D * mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point, Vec2f center=Vec2f(0,0));
+	std::vector<Vec3f> compute_local_low_point(Mesh3D *mesh);
+}

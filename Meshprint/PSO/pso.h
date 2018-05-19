@@ -68,18 +68,18 @@ public:
 	struct pso_result_t {
 		int error, error_last;
 		double fit_b;
-		std::vector<std::pair<int, int>> gbest; // should contain DIM elements!!
+		std::vector<Vec2f> gbest; // should contain DIM elements!!
 		std::vector<int> isavailable;
 		std::vector<Vec3f> resualt;
 	}solution;
 	// Particles
 	struct particle {
-		std::vector<std::pair<int, int>> pos;// position matrix
-		std::vector<std::pair<int, int>>	vel;// velocity matrix
-		std::vector<std::pair<int, int>> pos_b;// best position matrix
-		std::vector<std::pair<int, int>> pos_nb;	// what is the best informed position for each particle
+		std::vector<Vec2f> pos;// position matrix
+		std::vector<Vec2f> vel;// velocity matrix
+		std::vector<Vec2f> pos_hist_b;// best position matrix
+		std::vector<Vec2f> pos_nb;	// what is the best informed position for each particle
 		std::vector<Vec3f> resualt;
-		double fit, fit_b;		// particle fitness 
+		double fit, fit_hist_b;		// particle fitness 
 								// best fitness 
 
 	};
@@ -106,14 +106,14 @@ public:
 	void pso_set_default_settings();
 	double calc_inertia_lin_dec(int step);
 	int pso_calc_swarm_size(int dim);
-	IntPoint get_dense(int angle);
+	Vec2f get_dense(int angle);
 	std::vector<Vec3f> pso_solve();
 public:
 	double pso_obj_fun_t(particle& bird);
 	ClipperLib::Paths remain_paths_,grid_paths_;
-	IntPoint dense;
+	Vec2f dense;
 	std::vector<IntPoint> original;
-	std::map<int, std::vector<Mesh3D*>> meshs_;
-
+	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_mesh;
+	std::vector<Mesh3D*> component;
 };
 

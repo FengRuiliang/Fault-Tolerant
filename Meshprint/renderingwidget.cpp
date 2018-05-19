@@ -819,7 +819,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 	{
 		auto sp_flist_ = *ptr_support_->sp_mesh.get_faces_list();
 		auto sup_point_ = ptr_support_->sample_points_;
-		auto sup_component_region = ptr_support_->component_regions_;
+		auto sup_component_region = ptr_support_->component_regions_mesh;
 		// draw support point
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_TRIANGLES);

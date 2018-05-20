@@ -93,20 +93,16 @@ void Support::angle_dfs(HE_face* facet, Mesh3D* mesh, int angle_id_)
 void Support::angle_dfs(HE_face* facet,std::vector<HE_face*>& re_faces, int angle_id_)
 {
 	facet->selected_ = false;
-	facet->com_flag = angle_id_;
+	//facet->com_flag = angle_id_;
 	re_faces.push_back(facet);
 	HE_edge* sta = facet->pedge_;
 	HE_edge* cur = sta;
 	do
 	{
 		facet = cur->ppair_->pface_;
-		if (facet != NULL&&facet->selected())
+		if (facet != NULL&&facet->selected() && facet->com_flag == angle_id_)
 		{
-			int angle_ = 180 - acos(facet->normal()*Vec3f(0, 0, 1.0)) * 180 / PI;
-			if (angle_ < (angle_id_ + 1) * 5/*+0.5*/ && angle_ >= angle_id_ * 5)
-			{
-				angle_dfs(facet, re_faces, angle_id_);
-			}
+			angle_dfs(facet, re_faces, angle_id_);
 		}
 		cur = cur->pnext_;
 	} while (cur != sta);
@@ -161,7 +157,7 @@ void Support::find_support_area()
 		if (sele_f[i]->selected_)
 		{
 			std::vector<HE_face*> con_faces;
-			sup_face_dfs(sele_f[i], con_faces);
+			sup_face_dfs(sele_f[i], con_faces);//mark facet as unselected
 			if (con_faces.size() == 1)
 			{
 				con_faces[0]->selected_ = false;
@@ -170,9 +166,13 @@ void Support::find_support_area()
 			{
 				//for every component
 				Mesh3D* mesh_component = new Mesh3D;
+				std::map<int, std::vector<HE_face*>> map_id_fs;
 				for (int j=0;j<con_faces.size();j++)
 				{
-					con_faces[j]->selected_ = true;	
+					//con_faces[j]->selected_ = true;	
+					int region_id = (180 - acos(con_faces[j]->normal()*perpendicular) * 180 / PI)/5;
+					con_faces[j]->com_flag = region_id;
+					map_id_fs[region_id].push_back(con_faces[j]);
 					// find connected component
 					std::vector<HE_vert*> verts, input;
 					con_faces[j]->face_verts(verts);
@@ -181,42 +181,57 @@ void Support::find_support_area()
 						input.push_back(mesh_component->InsertVertex((*iterV)->position()));
 					}
 					mesh_component->InsertFaceSup(input);
-					component.push_back(mesh_component);
+					
 				}
+				component.push_back(mesh_component);
 				//mark off different region
-				std::map<int, std::vector<Mesh3D*>> regions_;
-				for (int id = 5; id >=0; id--)
+				for (int id = 5; id >= 0; id--)
 				{
-					for (int j = 0; j < con_faces.size(); j++)
+					for (auto iter=map_id_fs[id].begin();iter!=map_id_fs[id].end();iter++)
 					{
-						if (con_faces[j]->selected())
+
+						HE_edge* s_ = (*iter)->pedge_;
+						HE_edge* c_ = s_;
+						int is_same=0;
+						do 
 						{
-							int angle = 180 - acos(con_faces[j]->normal()*perpendicular) * 180 / PI;
-							if (angle < (id + 1) * 5 + 0.5&&angle > id * 5)
+							if (c_->ppair_->pface_->com_flag == id)
 							{
-
-								std::vector<HE_face*> vec_region_face;
-								angle_dfs(con_faces[j], vec_region_face, id);
-
-								Mesh3D* me = new Mesh3D;
-								angle_dfs(con_faces[j], me, id);
-								me->UpdateMeshSup();
-								if (me->num_of_face_list() == 1)
-								{
-									/*face_list_->at(j)->selected_ = false;*/
-									delete me;
-								}
-								else
-								{
-									regions_[id].push_back(me);
-								}
+								is_same++;
 							}
+							c_ = c_->pnext_;
+						} while (c_!=s_);
+						if (!is_same)
+						{
+							(*iter)->com_flag--;
+							map_id_fs[id - 1].push_back(*iter);
 						}
 					}
 				}
-				component_regions_mesh.push_back(regions_);
-			}
+				for (auto iter=map_id_fs[-1].begin();iter!=map_id_fs[-1].end();iter++)
+				{
+					HE_edge* s_ = (*iter)->pedge_;
+					HE_edge* c_ = s_;
+					int ids[6] = {0,0,0,0,0,0};
+					do
+					{
+						ids[c_->ppair_->pface_->com_flag]++;
+						c_ = c_->pnext_;
+					} while (c_ != s_);
+					int max_id, max_val = -1;
+					for (int k=0;k<6;k++)
+					{
+						if (ids[k]>max_val)
+						{
+							max_id = k;
+							max_val = ids[k];
+						}
+					}
+					(*iter)->com_flag = max_id;
 
+				}
+				//generate different region
+			}
 		}
 	}
 }

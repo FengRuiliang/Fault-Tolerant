@@ -135,7 +135,7 @@ public:
 	int			selected_;		//!< a tag: whether the face is selected
 	Vec4f		color_;			//!< the color of this face
 	BoundaryTag boundary_flag_;	//!< this flag is used to split the mesh
-	int com_flag;
+	int com_flag = {-1};
 	std::vector<HE_vert*> vec_ptr_vert_;
 public:
 	HE_face()

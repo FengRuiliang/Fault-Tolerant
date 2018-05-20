@@ -90,28 +90,6 @@ void Support::angle_dfs(HE_face* facet, Mesh3D* mesh, int angle_id_)
 		cur = cur->pnext_;
 	} while (cur != sta);
 }
-void Support::angle_dfs(HE_face* facet,std::vector<HE_face*>& re_faces, int angle_id_)
-{
-	facet->selected_ = false;
-	facet->com_flag = angle_id_;
-	re_faces.push_back(facet);
-	HE_edge* sta = facet->pedge_;
-	HE_edge* cur = sta;
-	do
-	{
-		facet = cur->ppair_->pface_;
-		if (facet != NULL&&facet->selected())
-		{
-			int angle_ = 180 - acos(facet->normal()*Vec3f(0, 0, 1.0)) * 180 / PI;
-			if (angle_ < (angle_id_ + 1) * 5/*+0.5*/ && angle_ >= angle_id_ * 5)
-			{
-				angle_dfs(facet, re_faces, angle_id_);
-			}
-		}
-		cur = cur->pnext_;
-	} while (cur != sta);
-}
-
 
 void Support::sup_mesh_dfs(HE_face* facet, Mesh3D* mesh)
 {
@@ -185,19 +163,15 @@ void Support::find_support_area()
 				}
 				//mark off different region
 				std::map<int, std::vector<Mesh3D*>> regions_;
-				for (int id = 5; id >=0; id--)
+				for (int id = 0; id < 6; id++)
 				{
 					for (int j = 0; j < con_faces.size(); j++)
 					{
 						if (con_faces[j]->selected())
 						{
 							int angle = 180 - acos(con_faces[j]->normal()*perpendicular) * 180 / PI;
-							if (angle < (id + 1) * 5 + 0.5&&angle > id * 5)
+							if (angle < (id + 1) * 5 + 0.5&&angle > id * 5 - 0.5)
 							{
-
-								std::vector<HE_face*> vec_region_face;
-								angle_dfs(con_faces[j], vec_region_face, id);
-
 								Mesh3D* me = new Mesh3D;
 								angle_dfs(con_faces[j], me, id);
 								me->UpdateMeshSup();

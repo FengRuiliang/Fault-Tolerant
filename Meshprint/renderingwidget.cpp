@@ -607,15 +607,18 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		if (!faces[i]->selected_)
+		if (faces[i]->com_flag == -1)
 		{
 			glColor4ub(0, 170, 0, 255);
 		}
-		else { glColor3f(sin(0 * 10 + 1), cos(0 * 10 + 1), tan(0 * 10 + 1)); }
-			glNormal3fv(faces[i]->normal());
-			glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
-			glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
-			glVertex3fv(faces[i]->vec_ptr_vert_[2]->position());
+		else
+		{
+			glColor3f(sin(faces[i]->com_flag * 10 + 1), cos(faces[i]->com_flag * 10 + 1), tan(faces[i]->com_flag * 10 + 1));
+		}
+		glNormal3fv(faces[i]->normal());
+		glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
+		glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
+		glVertex3fv(faces[i]->vec_ptr_vert_[2]->position());
 
 	}
 	glEnd();
@@ -946,7 +949,7 @@ void RenderingWidget::add_support()
 	}
 	counter_++;
 	ptr_support_->find_support_area();
-	ptr_support_->support_point_sampling(counter_);
+//	ptr_support_->support_point_sampling(counter_);
 // 	QString filename = QFileDialog::
 // 		getSaveFileName(this, tr("Write Mesh"),
 // 			"..", tr("grs (*.grs)"));

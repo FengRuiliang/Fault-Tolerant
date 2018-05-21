@@ -59,6 +59,7 @@ RenderingWidget::~RenderingWidget()
 void RenderingWidget::initializeGL()
 {
 	glClearColor(0.78, 0.78, 0.78, 0.0);
+	glClearColor(1, 1, 1, 0.0);
 	glShadeModel(GL_SMOOTH);
 	//glShadeModel(GL_FLAT);
 
@@ -824,7 +825,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		auto sup_point_ = ptr_support_->sample_points_;
 		auto sup_component_region = ptr_support_->component_regions_mesh;
 		// draw support point
-		glColor3f(1.0, 0.0, 0.0);
+		glColor3f(1.0, 1.0, 1.0);
 		glBegin(GL_TRIANGLES);
 		for (int j = 0; j < sup_point_.size(); j++)
 		{
@@ -840,21 +841,20 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 		}
 		glEnd();
-
-		auto test = ptr_support_->test_path;
-		for (int i=0;i<test.size();i++)
+		return;
+		
+		for (int i = 0; i < test_path.size(); i++)
 		{
 			glBegin(GL_LINE_LOOP);
-			for (int j=0;j<test[i].size();j++)
+			for (int j = 0; j < test_path[i].size(); j++)
 			{
-				glVertex3f((float)test[i][j].X / 1000, (float)test[i][j].Y / 1000, 0);
+				glVertex3f((float)test_path[i][j].X / 1000, (float)test_path[i][j].Y / 1000, 0);
 			}
 			glEnd();
 		}
+	
 
 
-
-		return;
 		for (int i=0;i<sup_component_region.size();i++)
 		{
 // 			if (i!=slice_check_id_)
@@ -949,14 +949,14 @@ void RenderingWidget::add_support()
 	}
 	counter_++;
 	ptr_support_->find_support_area();
-//	ptr_support_->support_point_sampling(counter_);
-// 	QString filename = QFileDialog::
-// 		getSaveFileName(this, tr("Write Mesh"),
-// 			"..", tr("grs (*.grs)"));
-// 	if (filename.isEmpty())
-// 		return;
-// 	QByteArray byfilename = filename.toLocal8Bit();
-// 	ptr_support_->exportcylinder(byfilename);
+	ptr_support_->support_point_sampling(counter_);
+	QString filename = QFileDialog::
+		getSaveFileName(this, tr("Write Mesh"),
+			"..", tr("grs (*.grs)"));
+	if (filename.isEmpty())
+		return;
+	QByteArray byfilename = filename.toLocal8Bit();
+	ptr_support_->exportcylinder(byfilename);
 }
 
 

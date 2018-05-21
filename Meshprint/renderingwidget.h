@@ -149,7 +149,7 @@ public:
 	std::vector<LayerOffDis> offdis;
 	std::vector<std::vector<CutLine>>  offsetcircul_;
 	std::vector<std::vector<CutLine>>  offset_cutline;
-
+	
 	std::vector<Vec3f>  points;
 };
 

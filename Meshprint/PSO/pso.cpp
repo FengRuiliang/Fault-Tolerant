@@ -168,6 +168,10 @@ std::vector<Vec3f> PSO::pso_solve()
 
 	for (int step = 0; step < settings.steps; step++)
 	{
+		if (solution.fit_b<=9)
+		{
+			break;
+		}
 		// update current step
 		settings.step = step;
 		// update inertia weight

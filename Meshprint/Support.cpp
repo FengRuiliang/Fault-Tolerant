@@ -291,10 +291,10 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.component_regions_mesh = component_regions_mesh;
 		pso_solver.component = component;
 		pso_solver.settings.size = 100;
-		pso_solver.settings.steps = 1000;
+		pso_solver.settings.steps = 200;
 		pso_solver.pso_swarm_init();
-		sample_points_ = pso_solver.solution.resualt;
-		//sample_points_ = pso_solver.pso_solve();
+		//sample_points_ = pso_solver.solution.resualt;
+		sample_points_ = pso_solver.pso_solve();
 	}
 	else if (counter_%3==UNIFORM)
 	{
@@ -310,11 +310,10 @@ void Support::support_point_sampling(int counter_)
 	else if (counter_ % 3 == SPARSE)
 	{
 		qDebug() << "sparse:";
-		for (int i=0;i<1/*component_regions_mesh.size()*/;i++)
+		for (int i=0;i<component_regions_mesh.size();i++)
 		{
 			std::vector<Vec3f> last_sampling;
 			last_sampling = SupportLib::compute_local_low_point(component[i]);
-			Paths last_polygon;
 			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
 				Vec2f dense = SupportLib::get_dense(j * 5);
@@ -322,7 +321,7 @@ void Support::support_point_sampling(int counter_)
 				for (int k=0;k<component_regions_mesh[i][j].size();k++)
 				{
 					
-					SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense,last_sampling, last_polygon);
+					qDebug()<<SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense,last_sampling);
 				}
 				
 			}
@@ -332,12 +331,9 @@ void Support::support_point_sampling(int counter_)
 		
 	}
 	qDebug() << "sample point number is:"<<sample_points_.size();
-	sam_project_to_mesh(sample_points_);
+	//sam_project_to_mesh(sample_points_);
 
 }
-
-
-
 
 void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 {
@@ -349,6 +345,8 @@ void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 	{
 		sample_points_.push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
 	}
+
+	qDebug() << "the final resualt is " << sample_points_.size();
 }
 void Support::exportcylinder(const char* fouts)
 {
@@ -409,7 +407,7 @@ Vec2f SupportLib::get_dense(int angle)
 	return d_;
 }
 
-void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point,Vec2f center)
+float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point,Vec2f center)
 {
 	Paths ori;
 	auto belist = mesh->GetBLoop();
@@ -447,7 +445,7 @@ void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec
 	 PolyTreeToPaths(polytree, subject);
 	 if (subject.size()== 0)
 	 {
-		 return;
+		 return 0;
 	 }
 	
 	 std::vector<Vec3f> box = mesh->getBoundingBox();
@@ -487,6 +485,8 @@ void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec
 				 }
 				 else
 				 {
+					 polynode = polynode->GetNext();
+					 continue;
 					 IntPoint pr[4] = { p,p,p,p };
 					 pr[0].X -= dense.x() / 2 * 1000;
 					 pr[1].Y -= dense.y() / 2 * 1000;
@@ -517,30 +517,14 @@ void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec
 					 }
 
 				 }
-
-
 				 polynode = polynode->GetNext();
 			 }
 			
 		 }
 	 }
- }
- void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point,Paths& last_polygons,Vec2f center)
- {
-	 Paths ori;
-	 auto belist = mesh->GetBLoop();
-	 for (int i = 0; i < belist.size(); i++)
-	 {
-		 Path loop;
-		 for (int j = 0; j < belist[i].size(); j++)
-		 {
-			 loop << IntPoint(belist[i][j]->pvert_->position().x() * 1000, belist[i][j]->pvert_->position().y() * 1000);
-		 }
-		 ori << loop;
-	 }
 
-	 test_path = ori;
-	 Paths clip;
+
+	 clip.clear();
 	 for (int i = 0; i < last_loop_point.size(); i++)
 	 {
 		 Path rectangle;
@@ -550,101 +534,21 @@ void SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec
 			 << IntPoint((last_loop_point[i].x() - dense.x()) * 1000, (last_loop_point[i].y() + dense.y()) * 1000);
 		 clip << rectangle;
 	 }
-	 Clipper sol;
+	 sol.Clear();
 	 sol.AddPaths(clip, ptClip, true);
 	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
-	 test_path = clip;
-	 sol.Clear();
-	 sol.AddPaths(last_polygons, ptClip, true);
-	 sol.AddPaths(ori, ptClip, true);
-	 sol.Execute(ctUnion, ori, pftNonZero, pftNonZero);
-
-	 PolyTree polytree;
-	 Paths subject;
 	 sol.Clear();
 	 sol.AddPaths(clip, ptClip, true);
 	 sol.AddPaths(ori, ptSubject, true);
-	 sol.Execute(ctDifference, polytree, pftNonZero, pftNonZero);
-	 PolyTreeToPaths(polytree, subject);
-	 if (subject.size() == 0)
+	 Paths diff_path;
+	 sol.Execute(ctDifference, diff_path, pftNegative, pftNonZero);
+	 int diff_area=0;
+	 for (int i=0;i<diff_path.size();i++)
 	 {
-		 return;
+		 diff_area += Area(diff_path[i])/1e6;
+		 qDebug() << "there is some area dose not been cover";
 	 }
-	 
-	 std::vector<Vec3f> box = mesh->getBoundingBox();
-	 int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
-	 int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
-	 int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
-	 int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-	 for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
-	 {
-		 for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
-		 {
-			 IntPoint p((x_*dense.x() + center.x()) * 1000, (y_*dense.y() + center.y()) * 1000);
-			 PolyNode* polynode = polytree.GetFirst();
-			 while (polynode)
-			 {
-				 //do stuff with polynode here
-				 bool in_polygons = true;
-				 if (polynode->IsHole())
-				 {
-					 in_polygons = in_polygons && !PointInPolygon(p, polynode->Contour);
-				 }
-				 else
-					 in_polygons = in_polygons && PointInPolygon(p, polynode->Contour);
-
-				 for (int ii = 0; ii < polynode->ChildCount(); ii++)
-				 {
-					 if (polynode->Childs[ii]->IsHole())
-					 {
-						 in_polygons = in_polygons && !PointInPolygon(p, polynode->Childs[ii]->Contour);
-					 }
-					 else
-						 in_polygons = in_polygons && PointInPolygon(p, polynode->Childs[ii]->Contour);
-				 }
-				 if (in_polygons)
-				 {
-					 last_loop_point.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
-				 }
-				 else
-				 {
-					 IntPoint pr[4] = { p,p,p,p };
-					 pr[0].X -= dense.x() / 2 * 1000;
-					 pr[1].Y -= dense.y() / 2 * 1000;
-					 pr[2].X += dense.x() / 2 * 1000;
-					 pr[3].Y += dense.y() / 2 * 1000;
-					 for (int r = 0; r < 4; r++)
-					 {
-						 in_polygons = true;
-						 if (polynode->IsHole())
-						 {
-							 in_polygons = in_polygons && !PointInPolygon(pr[r], polynode->Contour);
-						 }
-						 else
-							 in_polygons = in_polygons && PointInPolygon(pr[r], polynode->Contour);
-						 for (int ii = 0; ii < polynode->ChildCount(); ii++)
-						 {
-							 if (polynode->Childs[ii]->IsHole())
-							 {
-								 in_polygons = in_polygons && !PointInPolygon(p, polynode->Childs[ii]->Contour);
-							 }
-							 else
-								 in_polygons = in_polygons && PointInPolygon(p, polynode->Childs[ii]->Contour);
-						 }
-						 if (in_polygons)
-						 {
-							 last_loop_point.push_back(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
-						 }
-					 }
-
-				 }
-
-
-				 polynode = polynode->GetNext();
-			 }
-
-		 }
-	 }
+	 return diff_area;
  }
 
 

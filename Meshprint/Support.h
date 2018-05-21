@@ -50,7 +50,6 @@ private:
 namespace SupportLib
 {
 	Vec2f get_dense(int angle);
-	void single_area_sampling(Mesh3D * mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point, Vec2f center=Vec2f(0,0));
-	void single_area_sampling(Mesh3D * mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point, Paths& last_polygons, Vec2f center = Vec2f(0, 0));
+	float single_area_sampling(Mesh3D * mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point, Vec2f center=Vec2f(0,0));
 	std::vector<Vec3f> compute_local_low_point(Mesh3D *mesh);
 }

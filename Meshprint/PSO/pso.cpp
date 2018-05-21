@@ -55,7 +55,7 @@ void PSO::pso_swarm_init()
 		{
 			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
-				dense = get_dense(j*5);
+				dense = get_dense(j * 5);
 				for (int k=0;k<component_regions_mesh[i][j].size();k++)
 				{
 
@@ -246,6 +246,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 		que.push_back(*iter);
 	}
 	
+	float int_aera = 0;
 	for (int i = 0; i < component_regions_mesh.size(); i++)
 	{
 		std::vector<Vec3f> last_sampling;
@@ -256,14 +257,14 @@ double PSO::pso_obj_fun_t(particle& bird)
 			dense = get_dense(j*5);
 			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
 			{
-
-				SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, last_sampling, que.back());
+				int_aera+=SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, last_sampling, que.back());
 				que.pop_back();
 			}
 		}
+
 		bird.resualt.insert(bird.resualt.end(), last_sampling.begin(), last_sampling.end());
 	}
-	return bird.resualt.size();
+	return bird.resualt.size()+int_aera;
 }
 
 //==============================================================

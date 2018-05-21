@@ -264,7 +264,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 
 		bird.resualt.insert(bird.resualt.end(), last_sampling.begin(), last_sampling.end());
 	}
-	return bird.resualt.size()+int_aera;
+	return bird.resualt.size()+int_aera/30;
 }
 
 //==============================================================

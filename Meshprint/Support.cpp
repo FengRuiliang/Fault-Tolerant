@@ -326,15 +326,15 @@ void Support::support_point_sampling(int counter_)
 				{
 					
 				a+=	SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense,last_sampling);
-				//break;
+				break;
 				}
-				//break;
+				break;
 			}
 			for (auto it = last_sampling.begin(); it != last_sampling.end(); it++)
 			{
 				sample_points_.push_back(*it);
 			}
-			//break;
+			break;
 		}
 		qDebug() <<  "area is:" << a;
 	}
@@ -378,15 +378,12 @@ void Support::exportcylinder(const char* fouts)
 			Vec3f lp = oct_obj.InteractPoint(sample_points_[j], Vec3f(0, 0, -1));
 			Vec3f c = lp - sample_points_[j];
 			fout << "OBJ=SOLCYL/ORIGIN," << sample_points_[j].x()<< "," << sample_points_[j].y() << "," << sample_points_[j].z() 
-				<< ",HEIGHT,$" << endl << (sample_points_[j] - lp).length() << ",DIAMTR," << 1.5 << ",AXIS," << c.x() << "," << c.y() << "," << c.z() << endl;
+				<< ",HEIGHT,$" << endl << (sample_points_[j] - lp).length() << ",DIAMTR," << 1.0 << ",AXIS," << c.x() << "," << c.y() << "," << c.z() << endl;
 
 		}
 	fout << "HALT" << endl;
 	fout.close();
-	for (int j=0;j<6;j++)
-	{
-		qDebug() << sin(j * 10 + 1) * 255 << cos(j * 10 + 1) * 255 << tan(j * 10 + 1) * 255;
-	}
+
 }
 
 
@@ -465,7 +462,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::set<Vec3f
 	 {
 		 return 0;
 	 }
-	
+	 test_path = subject;
 	 std::vector<Vec3f> box = mesh->getBoundingBox();
 	 int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
 	 int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
@@ -490,7 +487,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::set<Vec3f
 			}
 			else
 			{
-				//continue;
+				continue;
 				IntPoint pr[4] = { p,p,p,p };
 				pr[0].X -= dense.x() / 2 * 1000;
 				pr[1].Y -= dense.y() / 2 * 1000;
@@ -512,7 +509,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::set<Vec3f
 			}
 		 }
 	 }
-
+	
 
 	 clip.clear();
 	 for (auto iter = last_loop_point.begin(); iter != last_loop_point.end(); iter++)
@@ -524,11 +521,11 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::set<Vec3f
 			 << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
 		 clip << rectangle;
 	 }
-	
+	 test_path.insert(test_path.end(), clip.begin(), clip.end());
 	 sol.Clear();
 	 sol.AddPaths(clip, ptClip, true);
 	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
-	 test_path = clip;
+	
 	 sol.Clear();
 	 sol.AddPaths(clip, ptClip, true);
 	 sol.AddPaths(ori, ptSubject, true);

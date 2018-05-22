@@ -844,18 +844,24 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 		}
 		glEnd();
-		return;
+		//return;
 		
+		glColor4ub(255, 255, 255, 255);
+		glLineWidth(1.0);
+		glLineStipple(2, 0x5555);
+		glEnable(GL_LINE_STIPPLE);
 		for (int i = 0; i < test_path.size(); i++)
 		{
 			glBegin(GL_LINE_LOOP);
 			for (int j = 0; j < test_path[i].size(); j++)
 			{
-				glVertex3f((float)test_path[i][j].X / 1000, (float)test_path[i][j].Y / 1000, 0);
+				glVertex3f((float)test_path[i][j].X / 1000, (float)test_path[i][j].Y / 1000, 2);
 			}
 			glEnd();
 		}
-	
+		glDisable(GL_LINE_STIPPLE);
+
+		return;
 
 
 		for (int i=0;i<sup_component_region.size();i++)
@@ -870,7 +876,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 // 				{
 // 					continue;
 // 				}
-				glColor3f(sin(j * 10 + 1), cos(j * 10 + 1), tan(j * 10 + 1));
+				Vec3f color = SetColor(j);
+				glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
 				for (int k=0;k<sup_component_region[i][j].size();k++)
 				{
 				

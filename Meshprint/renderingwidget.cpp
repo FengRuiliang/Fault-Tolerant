@@ -306,7 +306,7 @@ void RenderingWidget::SetLight()
 	//glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 	//glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, bright);
@@ -314,7 +314,7 @@ void RenderingWidget::SetLight()
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, bright);
 	glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, dim_light);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, bright);
 	//glLightfv(GL_LIGHT1, GL_SPECULAR, white_light);
 	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
@@ -608,14 +608,17 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		if (faces[i]->com_flag == -1)
-		{
-			glColor4ub(0, 170, 0, 255);
-		}
-		else
-		{
-			glColor3f(sin(faces[i]->com_flag * 10 + 1), cos(faces[i]->com_flag * 10 + 1), tan(faces[i]->com_flag * 10 + 1));
-		}
+// 		if (faces[i]->com_flag == -1)
+// 		{
+// 			glColor4ub(0, 170, 0, 255);
+// 		}
+// 		else
+// 		{
+// 		
+// 			glColor3f(sin(faces[i]->com_flag * 10 + 1), cos(faces[i]->com_flag * 10 + 1), tan(faces[i]->com_flag * 10 + 1));
+// 		}
+		Vec3f color = SetColor(faces[i]->com_flag);
+		glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
 		glNormal3fv(faces[i]->normal());
 		glVertex3fv(faces[i]->vec_ptr_vert_[0]->position());
 		glVertex3fv(faces[i]->vec_ptr_vert_[1]->position());
@@ -825,7 +828,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		auto sup_point_ = ptr_support_->sample_points_;
 		auto sup_component_region = ptr_support_->component_regions_mesh;
 		// draw support point
-		glColor3f(1.0, 1.0, 1.0);
+		glColor3f(0.0, 0.0, 0.0);
 		glBegin(GL_TRIANGLES);
 		for (int j = 0; j < sup_point_.size(); j++)
 		{
@@ -891,12 +894,42 @@ void RenderingWidget::draw_support_aera(bool bv)
 				}
 			}
 		}
-
-
-
-	
 	}
+}
+Vec3f RenderingWidget::SetColor(int j)
+{
+	
+	switch (j)
+	{
+	case 0:
+		return Vec3f(228, 26, 28);
 
+	case 1:
+		return Vec3f(55, 126, 184);
+
+	case 2:
+		return Vec3f(77, 175, 14);
+
+	case 3:
+		return Vec3f(152, 78, 163);
+
+	case 4:
+		return Vec3f(255.0, 172.0, 0.0);
+
+	case 5:
+		return Vec3f(255.0, 255.0, 51.0);
+
+	case 6:
+		return Vec3f(166.0, 84.0, 40.0);
+	case 7:
+		return Vec3f(247.0, 129.0, 191.0);
+	case 8:
+		
+	default:
+		return Vec3f(153.0, 153.0, 153.0);
+		return Vec3f(0.0,170.0, 0.0);
+
+	}
 }
 void RenderingWidget::DoSlice()
 {
@@ -950,13 +983,13 @@ void RenderingWidget::add_support()
 	counter_++;
 	ptr_support_->find_support_area();
 	ptr_support_->support_point_sampling(counter_);
-// 	QString filename = QFileDialog::
-// 		getSaveFileName(this, tr("Write Mesh"),
-// 			"..", tr("grs (*.grs)"));
-// 	if (filename.isEmpty())
-// 		return;
-// 	QByteArray byfilename = filename.toLocal8Bit();
-// 	ptr_support_->exportcylinder(byfilename);
+	QString filename = QFileDialog::
+		getSaveFileName(this, tr("Write Mesh"),
+			"..", tr("grs (*.grs)"));
+	if (filename.isEmpty())
+		return;
+	QByteArray byfilename = filename.toLocal8Bit();
+	ptr_support_->exportcylinder(byfilename);
 }
 
 

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <qdebug.h>
 #include "Support.h"
+#include <omp.h>
 
 PSO::PSO()
 {
@@ -56,7 +57,7 @@ void PSO::pso_swarm_init()
 			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
 				dense = get_dense(j * 5);
-				for (int k=0;k<component_regions_mesh[i][j].size();k++)
+				for (int k=1;k<component_regions_mesh[i][j].size();k++)
 				{
 
 					if (id == 0)
@@ -67,7 +68,6 @@ void PSO::pso_swarm_init()
 					{
 						swarm[id].pos.push_back(Vec2f((float)rand()/ RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
 					}
-
 				}
 			}
 		}
@@ -85,7 +85,7 @@ void PSO::pso_swarm_init()
 		swarm[id].fit_hist_b = swarm[id].fit;
 		swarm[id].pos_hist_b = swarm[id].pos;
 		
-		qDebug() << " the " << id << "st fitness is" << swarm[id].fit;
+		//qDebug() << " the " << id << "st fitness is" << swarm[id].fit;
 	}
 	for (int i = 0; i < settings.size; i++)
 	{
@@ -165,13 +165,10 @@ std::vector<Vec3f> PSO::pso_solve()
 	// initialize omega using standard value
 	float  w = PSO_INERTIA;// current omega
 							// RUN ALGORITHM
-
+	int count = 0;
 	for (int step = 0; step < settings.steps; step++)
 	{
-		if (solution.fit_b<=9)
-		{
-			break;
-		}
+
 		// update current step
 		settings.step = step;
 		// update inertia weight
@@ -184,6 +181,7 @@ std::vector<Vec3f> PSO::pso_solve()
 		improved = 0;	// the value of improved was just used; reset it
 		float rho1, rho2; // random numbers (coefficients)
 		// update all particles
+
 		for (int i = 0; i < settings.size; i++)
 		{
 
@@ -193,7 +191,9 @@ std::vector<Vec3f> PSO::pso_solve()
 			// calculate stochastic coefficients
 			rho1 = settings.c1 * rand() / RAND_MAX;
 			rho2 = settings.c2 * rand() / RAND_MAX;
-			
+		/*	float rho3 = pow(-1.0, (float)(rand() % 3));
+			rho1 *= rho3;
+			rho2 *= rho3;*/
 			for (int j=0;j<swarm[i].pos.size();j++)
 			{
 				// update velocity
@@ -229,10 +229,20 @@ std::vector<Vec3f> PSO::pso_solve()
 			}
 
 		}
+		
+		if (improved)
+		{
+			count = 0;
+		}
+		else
+			count++;
+		if (count == 200)
+		{
+			break;
+		}
 		qDebug() << step << solution.fit_b;
 
 	}
-	
 	qDebug() << "end run solver and we have" << solution.resualt.size() << "points";
 	return solution.resualt;
 }
@@ -249,22 +259,29 @@ double PSO::pso_obj_fun_t(particle& bird)
 	float int_aera = 0;
 	for (int i = 0; i < component_regions_mesh.size(); i++)
 	{
-		std::vector<Vec3f> last_sampling;
+		std::set<Vec3f> last_sampling;
 		last_sampling = SupportLib::compute_local_low_point(component[i]);
 		for (int j = 0; j < component_regions_mesh[i].size(); j++)
 		{
 			//Vec2f dense = SupportLib::get_dense(j * 5);
-			dense = get_dense(j*5);
-			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
+			dense = get_dense(j * 5);
+			for (int k = 1; k < component_regions_mesh[i][j].size(); k++)
 			{
-				int_aera+=SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, last_sampling, que.back());
+				int_aera += SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, last_sampling, que.back());
 				que.pop_back();
 			}
 		}
-
-		bird.resualt.insert(bird.resualt.end(), last_sampling.begin(), last_sampling.end());
+		for (auto it = last_sampling.begin(); it != last_sampling.end(); it++)
+		{
+			bird.resualt.push_back(*it);
+		}
+		
 	}
-	return bird.resualt.size()+int_aera/30;
+// 	if (int_aera>40)
+// 	{
+// 		int_aera = 999;
+// 	}
+	return 2*bird.resualt.size()+int_aera;
 }
 
 //==============================================================
@@ -279,11 +296,11 @@ Vec2f PSO::get_dense(int angle)
 	Vec2f d_;
 	if (angle < 15)
 	{
-		d_.x() = 2.0;
+		d_.x() = 2.5;
 
 		if (angle < 5)
 		{
-			d_.y() = 2.0;
+			d_.y() = 2.5;
 		}
 		else if (angle < 10)
 		{
@@ -296,7 +313,7 @@ Vec2f PSO::get_dense(int angle)
 	}
 	else
 	{
-		d_.x() = 2.5;
+		d_.x() = 3.0;
 
 		if (angle < 18)
 		{

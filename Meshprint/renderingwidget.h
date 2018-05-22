@@ -102,6 +102,7 @@ private:
 
 	void draw_support_aera(bool bv);
 	
+	Vec3f SetColor(int j);
 public:
 	MainWindow					*ptr_mainwindow_;
 	CArcBall					*ptr_arcball_;

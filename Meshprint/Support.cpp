@@ -291,7 +291,7 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.component_regions_mesh = component_regions_mesh;
 		pso_solver.component = component;
 		pso_solver.settings.size = 100;
-		pso_solver.settings.steps = 200;
+		pso_solver.settings.steps = 2000;
 		pso_solver.pso_swarm_init();
 		//sample_points_ = pso_solver.solution.resualt;
 		sample_points_ = pso_solver.pso_solve();
@@ -302,37 +302,45 @@ void Support::support_point_sampling(int counter_)
 		Vec2f dense(2.0, 2.0);
 		for (int i=0;i<component.size();i++)
 		{
-			std::vector<Vec3f> last_sampling = SupportLib::compute_local_low_point(component[i]);
+			std::set<Vec3f> last_sampling = SupportLib::compute_local_low_point(component[i]);
 			SupportLib::single_area_sampling(component[i], dense,last_sampling);
-			sample_points_.insert(sample_points_.end(), last_sampling.begin(), last_sampling.end());
-		
+			for (auto it=last_sampling.begin();it!=last_sampling.end();it++)
+			{
+				sample_points_.push_back(*it);
+			}
 		}
 	}
 	else if (counter_ % 3 == SPARSE)
 	{
 		qDebug() << "sparse:";
+		float a=0;
 		for (int i=0;i<component_regions_mesh.size();i++)
 		{
-			std::vector<Vec3f> last_sampling;
+			std::set<Vec3f> last_sampling;
 			last_sampling = SupportLib::compute_local_low_point(component[i]);
 			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
 				Vec2f dense = SupportLib::get_dense(j * 5);
 				
-				for (int k=0;k<component_regions_mesh[i][j].size();k++)
+				for (int k=1;k<component_regions_mesh[i][j].size();k++)
 				{
 					
-					SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense,last_sampling);
+				a+=	SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense,last_sampling);
+				//break;
 				}
-				
+				//break;
 			}
-			sample_points_.insert(sample_points_.end(), last_sampling.begin(), last_sampling.end());
+			for (auto it = last_sampling.begin(); it != last_sampling.end(); it++)
+			{
+				sample_points_.push_back(*it);
+			}
+			//break;
 		}
-		
+		qDebug() <<  "area is:" << a;
 	}
 	qDebug() << "sample point number is:"<<sample_points_.size();
 	sam_project_to_mesh(sample_points_);
-
+	//qDebug() << "final resualt" << sample_points_.size();
 }
 
 void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
@@ -341,9 +349,15 @@ void Support::sam_project_to_mesh(std::vector<Vec3f> points_)
 	sample_points_.clear();
 	MeshOctree octree;
 	octree.BuildOctree(wholemesh);
-	for (int i=0;i<points_.size();i++)
+	for (int i = 0; i < points_.size(); i++)
 	{
-		sample_points_.push_back(octree.InteractPoint(points_[i], Vec3f(0, 0, 1)));
+
+		Vec3f p = octree.InteractPoint(points_[i], Vec3f(0, 0, 1));
+		if (p.z() < 999.0)
+		{
+			sample_points_.push_back(p);
+		}
+
 	}
 
 	qDebug() << "the final resualt is " << sample_points_.size();
@@ -369,7 +383,10 @@ void Support::exportcylinder(const char* fouts)
 		}
 	fout << "HALT" << endl;
 	fout.close();
-	
+	for (int j=0;j<6;j++)
+	{
+		qDebug() << sin(j * 10 + 1) * 255 << cos(j * 10 + 1) * 255 << tan(j * 10 + 1) * 255;
+	}
 }
 
 
@@ -407,7 +424,7 @@ Vec2f SupportLib::get_dense(int angle)
 	return d_;
 }
 
-float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Vec3f>& last_loop_point,Vec2f center)
+float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::set<Vec3f>& last_loop_point,Vec2f center)
 {
 	Paths ori;
 	auto belist = mesh->GetBLoop();
@@ -422,15 +439,16 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Ve
 	}
 	//test_path = ori;
 	 Paths clip;
-	 for (int i = 0; i < last_loop_point.size(); i++)
+	 for (auto iter=last_loop_point.begin();iter!=last_loop_point.end();iter++)
 	 {
 		 Path rectangle;
-		 rectangle << IntPoint((last_loop_point[i].x() - dense.x() / 2) * 1000, (last_loop_point[i].y() - dense.y() / 2) * 1000)
-			 << IntPoint((last_loop_point[i].x() + dense.x() / 2) * 1000, (last_loop_point[i].y() - dense.y() / 2) * 1000)
-			 << IntPoint((last_loop_point[i].x() + dense.x() / 2) * 1000, (last_loop_point[i].y() + dense.y() / 2) * 1000)
-			 << IntPoint((last_loop_point[i].x() - dense.x() / 2) * 1000, (last_loop_point[i].y() + dense.y() / 2) * 1000);
+		 rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+			 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+			 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+			 << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
 		 clip << rectangle;
-	 } 
+	 }
+
 	 Clipper sol;
 	 sol.AddPaths(clip, ptClip, true);
 	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
@@ -468,11 +486,11 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Ve
 			}
 			if (count%2==1)
 			{
-				last_loop_point.push_back(Vec3f(p.X / 1000, p.Y / 1000, 0));
+				last_loop_point.insert(Vec3f((float)p.X / 1000, (float)p.Y / 1000, 0));
 			}
 			else
 			{
-				
+				//continue;
 				IntPoint pr[4] = { p,p,p,p };
 				pr[0].X -= dense.x() / 2 * 1000;
 				pr[1].Y -= dense.y() / 2 * 1000;
@@ -488,7 +506,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Ve
 						}
 					if (count % 2 == 1)
 					{
-						last_loop_point.push_back(Vec3f(pr[r].X / 1000, pr[r].Y / 1000, 0));
+						last_loop_point.insert(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
 					}
 				}
 			}
@@ -497,13 +515,13 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Ve
 
 
 	 clip.clear();
-	 for (int i = 0; i < last_loop_point.size(); i++)
+	 for (auto iter = last_loop_point.begin(); iter != last_loop_point.end(); iter++)
 	 {
 		 Path rectangle;
-		 rectangle << IntPoint((last_loop_point[i].x() - dense.x()/2) * 1000, (last_loop_point[i].y() - dense.y() / 2) * 1000)
-			 << IntPoint((last_loop_point[i].x() + dense.x() / 2) * 1000, (last_loop_point[i].y() - dense.y() / 2) * 1000)
-			 << IntPoint((last_loop_point[i].x() + dense.x() / 2) * 1000, (last_loop_point[i].y() + dense.y() / 2) * 1000)
-			 << IntPoint((last_loop_point[i].x() - dense.x() / 2) * 1000, (last_loop_point[i].y() + dense.y() / 2) * 1000);
+		 rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+			 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+			 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+			 << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
 		 clip << rectangle;
 	 }
 	
@@ -525,9 +543,9 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Ve
  }
 
 
- std::vector<Vec3f> SupportLib::compute_local_low_point(Mesh3D* mesh)
+ std::set<Vec3f> SupportLib::compute_local_low_point(Mesh3D* mesh)
  {
-	 std::vector<Vec3f> local_minimal_point;
+	 std::set<Vec3f> local_minimal_point;
 	 auto vList = *(mesh->get_vertex_list());
 	 mesh->UpdateMesh();
 	 for (int j = 0; j < vList.size(); j++)
@@ -548,7 +566,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::vector<Ve
 		 }
 		 if (k == va.size())
 		 {
-			 local_minimal_point.push_back(vList[j]->position());
+			 local_minimal_point.insert(vList[j]->position());
 		 }
 	 }
 	 return local_minimal_point;

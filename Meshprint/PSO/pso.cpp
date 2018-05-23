@@ -71,12 +71,14 @@ void PSO::pso_swarm_init()
 				}
 			}
 		}
+		test_path.clear();
 		swarm[id].fit = pso_obj_fun_t(swarm[id]);
 		if (swarm[id].fit < solution.fit_b)
 		{
 			solution.fit_b = swarm[id].fit;
 			solution.gbest = swarm[id].pos;
 			solution.resualt = swarm[id].resualt;
+			solution.angle_paths = test_path;
 
 		}
 		swarm[id].vel = swarm[id].pos;
@@ -159,7 +161,7 @@ double PSO::calc_inertia_lin_dec(int step)
 
 
 
-std::vector<Vec3f> PSO::pso_solve()
+std::map<int,std::set<Vec3f>> PSO::pso_solve()
 {
 	qDebug() << "star pso solution";
 	// initialize omega using standard value
@@ -168,7 +170,7 @@ std::vector<Vec3f> PSO::pso_solve()
 	int count = 0;
 	for (int step = 0; step < settings.steps; step++)
 	{
-
+		test_path.clear();
 		// update current step
 		settings.step = step;
 		// update inertia weight
@@ -226,6 +228,7 @@ std::vector<Vec3f> PSO::pso_solve()
 				// copy particle pos to gbest vector
 				solution.gbest = swarm[i].pos;
 				solution.resualt = swarm[i].resualt;
+				solution.angle_paths = test_path;
 			}
 
 		}
@@ -259,30 +262,42 @@ double PSO::pso_obj_fun_t(particle& bird)
 	float int_aera = 0;
 	for (int i = 0; i < component_regions_mesh.size(); i++)
 	{
-		std::set<Vec3f> last_sampling;
-		last_sampling = SupportLib::compute_local_low_point(component[i]);
+		auto set_p = SupportLib::compute_local_low_point(component[i]);
 
+		std::map<int, std::set<Vec3f>> temp_int_set;
+		for (auto iter = set_p.begin(); iter != set_p.end(); iter++)
+		{
+			temp_int_set[0].insert(*iter);
+		}
 		for (int j = 0; j < component_regions_mesh[i].size(); j++)
 		{
 			//Vec2f dense = SupportLib::get_dense(j * 5);
 			dense = get_dense(j * 5);
-			for (int k = 1; k < component_regions_mesh[i][j].size(); k++)
+			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
 			{
-				int_aera += SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, last_sampling, que.back());
+				int_aera += SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j,que.back());
 				que.pop_back();
 			}
-		}
-		for (auto it = last_sampling.begin(); it != last_sampling.end(); it++)
+		}	
+		for (int i = 0; i < 6; i++)
 		{
-			bird.resualt.push_back(*it);
+			for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
+			{
+				bird.resualt[i].insert(*iter);
+			}
+
 		}
-		
 	}
 // 	if (int_aera>40)
 // 	{
 // 		int_aera = 999;
 // 	}
-	return 2*bird.resualt.size()+int_aera;
+
+	for (int i=0;i<6;i++)
+	{
+		int_aera += 2*bird.resualt[i].size();
+	}
+	return int_aera;
 }
 
 //==============================================================

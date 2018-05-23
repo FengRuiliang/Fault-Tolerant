@@ -22,7 +22,8 @@ CArcBall::CArcBall()
 			else	mId[i][j] = 0.f;
 		}
 	}
-
+	mId[1][1] = -1;
+	mId[2][2] = -1;
 	otherAxis[0][0] = -0.48f;
 	otherAxis[0][1] = 0.80f;
 	otherAxis[0][2] = 0.36f;
@@ -52,7 +53,6 @@ CArcBall::CArcBall(int winWidth,int winHeight)
                     else	mId[i][j] = 0.f;
             }
     }
-
     otherAxis[0][0] = -0.48f;
     otherAxis[0][1] = 0.80f;
     otherAxis[0][2] = 0.36f;

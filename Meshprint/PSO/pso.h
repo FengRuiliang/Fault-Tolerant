@@ -70,7 +70,8 @@ public:
 		double fit_b;
 		std::vector<Vec2f> gbest; // should contain DIM elements!!
 		std::vector<int> isavailable;
-		std::vector<Vec3f> resualt;
+		std::map<int,std::set<Vec3f>> resualt;
+		std::map<int, Paths> angle_paths;
 	}solution;
 	// Particles
 	struct particle {
@@ -78,7 +79,7 @@ public:
 		std::vector<Vec2f> vel;// velocity matrix
 		std::vector<Vec2f> pos_hist_b;// best position matrix
 		std::vector<Vec2f> pos_nb;	// what is the best informed position for each particle
-		std::vector<Vec3f> resualt;
+		std::map<int,std::set<Vec3f>> resualt;
 		double fit, fit_hist_b;		// particle fitness 
 								// best fitness 
 
@@ -106,8 +107,9 @@ public:
 	void pso_set_default_settings();
 	double calc_inertia_lin_dec(int step);
 	int pso_calc_swarm_size(int dim);
+	std::map<int, Paths> returnPaths() { return solution.angle_paths; }
 	Vec2f get_dense(int angle);
-	std::vector<Vec3f> pso_solve();
+	std::map<int, std::set<Vec3f>> pso_solve();
 public:
 	double pso_obj_fun_t(particle& bird);
 	ClipperLib::Paths remain_paths_,grid_paths_;

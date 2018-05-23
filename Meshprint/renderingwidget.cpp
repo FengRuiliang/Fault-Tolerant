@@ -128,8 +128,20 @@ void RenderingWidget::paintGL()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glMultMatrixf(ptr_arcball_->GetBallMatrix());
-
+	float mId[4][4];
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				if (i == j)
+					mId[i][j] = 1.f;
+				else	mId[i][j] = 0.f;
+			}
+		}
+	mId[1][1] = -1;
+	mId[2][2] = -1;
+	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
+	glMultMatrixf((float*)mId);
 	Render();
 
 }
@@ -830,36 +842,53 @@ void RenderingWidget::draw_support_aera(bool bv)
 		// draw support point
 		glColor3f(0.0, 0.0, 0.0);
 		glBegin(GL_TRIANGLES);
-		for (int j = 0; j < sup_point_.size(); j++)
+		for (int i = 0; i < 6; i++)
 		{
-			for (int k = 0; k < sp_flist_.size(); k++)
+			if (i > slice_check_id_)
 			{
-				HE_edge* sta = sp_flist_[k]->pedge_;
-				HE_edge* cur = sta;
-				do
-				{
-					glVertex3fv(cur->pvert_->position() + sup_point_[j]);
-					cur = cur->pnext_;
-				} while (cur != sta);
+				continue;
 			}
+			for (auto iter = sup_point_[i].begin(); iter != sup_point_[i].end(); iter++)
+			{
+				for (int k = 0; k < sp_flist_.size(); k++)
+				{
+					HE_edge* sta = sp_flist_[k]->pedge_;
+					HE_edge* cur = sta;
+					do
+					{
+						glVertex3fv(cur->pvert_->position() + *iter);
+						cur = cur->pnext_;
+					} while (cur != sta);
+				}
+			}
+
 		}
 		glEnd();
-		//return;
-			
+	
 		glColor4ub(255, 255, 255, 255);
-		glLineWidth(1.0);
-		glLineStipple(2, 0x5555);
+		glLineWidth(3.0);
+		//glLineStipple(1, 0x3F07);
 		glEnable(GL_LINE_STIPPLE);
-		for (int i = 0; i < test_path.size(); i++)
+
+		for (int i=0;i<6;i++)
 		{
-			glBegin(GL_LINE_LOOP);
+			if (i!=slice_check_id_)
+			{
+				continue;
+			}
+
 			for (int j = 0; j < test_path[i].size(); j++)
 			{
-				glVertex3f((float)test_path[i][j].X / 1000, (float)test_path[i][j].Y / 1000, 2);
+				glBegin(GL_LINE_LOOP);
+				for (int k = 0; k < test_path[i][j].size(); k++)
+				{
+					glVertex3f((float)test_path[i][j][k].X / 1000, (float)test_path[i][j][k].Y / 1000, -1);
+				}
+				glEnd();
 			}
-			glEnd();
 		}
 		glDisable(GL_LINE_STIPPLE);
+	
 		return;
 
 

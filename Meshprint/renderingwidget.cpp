@@ -845,7 +845,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		}
 		glEnd();
 		//return;
-		
+			
 		glColor4ub(255, 255, 255, 255);
 		glLineWidth(1.0);
 		glLineStipple(2, 0x5555);
@@ -860,8 +860,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 			glEnd();
 		}
 		glDisable(GL_LINE_STIPPLE);
-
 		return;
+
 
 
 		for (int i=0;i<sup_component_region.size();i++)

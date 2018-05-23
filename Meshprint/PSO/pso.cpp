@@ -261,6 +261,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 	{
 		std::set<Vec3f> last_sampling;
 		last_sampling = SupportLib::compute_local_low_point(component[i]);
+
 		for (int j = 0; j < component_regions_mesh[i].size(); j++)
 		{
 			//Vec2f dense = SupportLib::get_dense(j * 5);

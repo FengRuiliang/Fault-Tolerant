@@ -42,13 +42,15 @@ public:
 	std::vector<int> vec_angle;
 
 private:
-	void sam_project_to_mesh(std::vector<Vec3f> sample_points_);
 	Mesh3D* wholemesh;// find big support area
 					 // local minimal point
+	void sam_project_to_mesh(std::vector<Vec3f>& points_);
 	int pso_target_ = { 0 };
 };
 namespace SupportLib
-{
+{	
+
+	
 	Vec2f get_dense(int angle);
 	float single_area_sampling(Mesh3D * mesh, Vec2f dense, std::set<Vec3f>& last_loop_point, Vec2f center=Vec2f(0,0));
 	std::set<Vec3f> compute_local_low_point(Mesh3D *mesh);

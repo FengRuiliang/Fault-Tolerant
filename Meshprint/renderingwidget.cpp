@@ -141,7 +141,7 @@ void RenderingWidget::paintGL()
 	mId[1][1] = -1;
 	mId[2][2] = -1;	
 	glMultMatrixf((float*)mId);
-	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
+	glMultMatrixf(ptr_arcball_->GetBallMatrix());
 
 	Render();
 

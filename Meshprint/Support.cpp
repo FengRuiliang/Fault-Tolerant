@@ -320,7 +320,7 @@ void Support::support_point_sampling(int counter_)
 			sample_points_[-1].insert(*iter);
 		}
 	}
-
+	
 	std::map<int, std::set<Vec3f>> d_sample_points;
 	if (counter_%3==OPTIMAL)
 	{
@@ -642,92 +642,18 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 		 int k = 0;
 		 for (k = 0; k < va.size(); k++)
 		 {
-			 if (vList[va[k]]->position().z() - vList[j]->position().z()<-5e-3)
+			 if (vList[va[k]]->position().z()<vList[j]->position().z())
 			 {
 
 				 break;
 			 }
 		 }
-		 if (k == va.size())
+		 if (k == va.size()&&vList[j]->pedge_->pface_->normal().z()<0)
 		 {
 
 			 local_minimal_point.insert(vList[j]->position());		
 		 }
 	 }
-	 return local_minimal_point;
-	 auto eList = *(mesh->get_edges_list());
-
-	 for (int j=0;j<eList.size();j++)
-	 {
-		 if (eList[j]->is_selected_)
-		 {
-			 continue;
-		 }
-		 if (eList[j]->isBoundary())
-		 {
-			 Vec3f s = eList[j]->ppair_->start_->position();
-			 Vec3f e = eList[j]->ppair_->pvert_->position();
-			Vec3f anoterp= eList[j]->ppair_->pnext_->pvert_->position();
-			if (anoterp.z()>s.z()&&anoterp.z()>e.z())
-			{
-				Vec3f pc = (float)0.5*(s + e);
-			
-				local_minimal_point.insert(pc);
-				continue;
-				MeshOctree octree;
-				octree.BuildOctree(mesh);
-				Vec3f p = octree.InteractPoint(pc - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-				if (p.z() < 999.0)
-					local_minimal_point.insert(p);
-				p = octree.InteractPoint(pc - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-				if (p.z() < 999.0)
-					local_minimal_point.insert(p);
-				p = octree.InteractPoint(pc + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-
-				if (p.z() < 999.0)
-					local_minimal_point.insert(p);
-				p = octree.InteractPoint(pc + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-				if (p.z() < 999.0)
-					local_minimal_point.insert(p);
-			}
-			eList[j]->ppair_->is_selected_ = true;
-			eList[j]->is_selected_ = true;
-		 }
-		 else
-		 {
-			 Vec3f s = eList[j]->start_->position();
-			 Vec3f e = eList[j]->pvert_->position();
-			 Vec3f pan = eList[j]->ppair_->pnext_->pvert_->position();
-			 Vec3f an = eList[j]->pnext_->pvert_->position();
-			 if (an.z()>s.z()&&an.z()>e.z()&&pan.z()>s.z()&&pan.z()>e.z())
-			 {
-				 Vec3f pc = (float)0.5*(s + e);
-				
-				 local_minimal_point.insert(pc); 
-				 continue;
-				 MeshOctree octree;
-				 octree.BuildOctree(mesh);
-				 Vec3f p = octree.InteractPoint(pc - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-				 if (p.z() < 999.0)
-					 local_minimal_point.insert(p);
-				 p = octree.InteractPoint(pc - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-				 if (p.z() < 999.0)
-					 local_minimal_point.insert(p);
-				 p = octree.InteractPoint(pc + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-
-				 if (p.z() < 999.0)
-					 local_minimal_point.insert(p);
-				 p = octree.InteractPoint(pc + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-				 if (p.z() < 999.0)
-					 local_minimal_point.insert(p);
-			 }
-			 eList[j]->ppair_->is_selected_ = true;
-			 eList[j]->is_selected_ = true;
-		 }
-	 }
-
-
-
 	 return local_minimal_point;
  }
 

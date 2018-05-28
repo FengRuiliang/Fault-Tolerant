@@ -117,5 +117,6 @@ public:
 	std::vector<IntPoint> original;
 	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_mesh;
 	std::vector<Mesh3D*> component;
+	map<int, std::vector<Vec3f>> component_local_sup_point;
 };
 

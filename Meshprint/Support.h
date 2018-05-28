@@ -41,7 +41,7 @@ public:
 	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_mesh;
 	Mesh3D sp_mesh;
 	std::vector<int> vec_angle;
-
+	int num;// support point number
 private:
 	Mesh3D* wholemesh;// find big support area
 					 // local minimal point

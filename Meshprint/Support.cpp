@@ -147,7 +147,7 @@ void Support::find_support_area()
 		for (int i = 0; i < face_list_->size(); i++)
 		{
 			int angle_ = 180 - acos(face_list_->at(i)->normal()*perpendicular) * 180 / PI;
-			if (angle_ < 30 && face_list_->at(i)->center().z()>1e-1)
+			if (angle_ < 30 && face_list_->at(i)->center().z()>5e-1)
 			{
 				face_list_->at(i)->selected_ = true;
 				sele_f.push_back(face_list_->at(i));
@@ -165,7 +165,6 @@ void Support::find_support_area()
 	}
 	
 	wholemesh->UpdateMeshSup();
-
 	for (int i=0;i<sele_f.size();i++)
 	{
 		if (sele_f[i]->selected_)
@@ -282,19 +281,60 @@ void Support::support_point_sampling(int counter_)
 	sample_points_.clear();
 	
 	// add local minimal support point
-	
+	auto local_sup_point = SupportLib::compute_local_low_point(target_mesh);
+	std::vector<MeshOctree> octree;
+	octree.resize(component.size());
+	for (int i = 0; i < component.size(); i++)
+	{
+		octree[i].BuildOctree(component[i]);
+	}
+
+	map<int, std::vector<Vec3f>> component_local_minimal_point;
+	for (auto iter = local_sup_point.begin(); iter != local_sup_point.end(); iter++)
+	{
+		bool is_in_component_ = false;
+		for (int i = 0; i < component.size(); i++)
+		{
+			Vec3f p = octree[i].InteractPoint(*iter - Vec3f(0.0, 0.0, (*iter).z()), Vec3f(0, 0, 1));
+			if (p.z() < 999.0f)
+			{
+				is_in_component_ = true;
+				component_local_minimal_point[i].push_back(p);
+				Vec3f p = octree[i].InteractPoint(*iter - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+				p = octree[i].InteractPoint(*iter - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+				p = octree[i].InteractPoint(*iter + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+				p = octree[i].InteractPoint(*iter + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+			}
+		}
+		if (is_in_component_==false)
+		{
+			sample_points_[-1].insert(*iter);
+		}
+	}
+
+	std::map<int, std::set<Vec3f>> d_sample_points;
 	if (counter_%3==OPTIMAL)
 	{
 		qDebug() << "optimal";
 		test_path.clear();
 		PSO pso_solver;
+		pso_solver.component_local_sup_point = component_local_minimal_point;
 		pso_solver.component_regions_mesh = component_regions_mesh;
 		pso_solver.component = component;
 		pso_solver.settings.size = 100;
 		pso_solver.settings.steps = 2000;
 		pso_solver.pso_swarm_init();
 		//sample_points_ = pso_solver.solution.resualt;
-		sample_points_ = pso_solver.pso_solve();
+		d_sample_points = pso_solver.pso_solve();
 		test_path=pso_solver.returnPaths();
 	}
 	else if (counter_%3==UNIFORM)
@@ -303,30 +343,24 @@ void Support::support_point_sampling(int counter_)
 		qDebug() << "uniform";
 		test_path.clear();
 		Vec2f dense(2.0, 2.0);
+		
 		for (int i=0;i<component.size();i++)
 		{
-			auto set_p =SupportLib::compute_local_low_point(component[i]);
-
 			std::map<int, std::set<Vec3f>> temp_int_set;
-			for (auto iter = set_p.begin(); iter != set_p.end(); iter++)
+			for (int j=0;j<component_local_minimal_point[i].size();j++)
 			{
-				temp_int_set[0].insert(*iter);
+				temp_int_set[0].insert(component_local_minimal_point[i][j]);
 			}
-			for (auto iter=set_p.begin();iter!=set_p.end();iter++)
-			{
-				sample_points_[0].insert(*iter);
-			}
-			SupportLib::single_area_sampling(component[i], dense, temp_int_set,0);
+			SupportLib::single_area_sampling(component[i], dense, temp_int_set, 0);
 			for (int i = 0; i < 6; i++)
 			{
 				for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
 				{
-					sample_points_[i].insert(*iter);
+					d_sample_points[i].insert(*iter);
 				}
 
 			}
-
-		}
+		}	
 	}
 	else if (counter_ % 3 == SPARSE)
 	{
@@ -335,52 +369,49 @@ void Support::support_point_sampling(int counter_)
 		float a=0;
 		for (int i=0;i<component_regions_mesh.size();i++)
 		{
-	
-			auto set_p = SupportLib::compute_local_low_point(component[i]);
 			std::map<int, std::set<Vec3f>> temp_int_set;
-			for (auto iter = set_p.begin(); iter != set_p.end(); iter++)
+			for (int j = 0; j < component_local_minimal_point[i].size(); j++)
 			{
-				temp_int_set[0].insert(*iter);
+				temp_int_set[0].insert(component_local_minimal_point[i][j]);
 			}
 			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
 				Vec2f dense = SupportLib::get_dense(j * 5);
-				
-				for (int k=0;k<component_regions_mesh[i][j].size();k++)
+
+				for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
 				{
-					
-				a+=	SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set,j);
-				//break;
+
+					a += SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j);
+
 				}
-				//break;
 			}
 			for (int i = 0; i < 6; i++)
 			{
 				for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
 				{
-					sample_points_[i].insert(*iter);
+					d_sample_points[i].insert(*iter);
 				}
 
 			}
-
-
-
-			//break;
 		}
-		qDebug() <<  "area is:" << a;
 	}
-	qDebug() << "sample point number is:"<<sample_points_.size();
-	Support::sam_project_to_mesh(sample_points_);
-	//qDebug() << "final resualt" << sample_points_.size();
+
+	Support::sam_project_to_mesh(d_sample_points);
+	num = 0;
+	for (int i = -1; i < 6; i++)
+	{
+		num += sample_points_[i].size();
+	}
 }
 
 void Support::sam_project_to_mesh(std::map<int, std::set<Vec3f>> points_)
 {
-	sample_points_.clear();
+	
 	MeshOctree octree;
 	octree.BuildOctree(wholemesh);
 	for (int i=0;i<6;i++)
 	{
+		sample_points_[i].clear();
 		for (auto iter=points_[i].begin();iter!=points_[i].end();iter++)
 		{
 			Vec3f p = octree.InteractPoint(*iter, Vec3f(0, 0, 1));
@@ -399,18 +430,19 @@ void Support::exportcylinder(const char* fouts)
 	MeshOctree oct_obj;
 	oct_obj.BuildOctree(target_mesh);
 	//fout<<fixed<<::setprecision(4);
-	fout << "ENTITY/OBJ" << endl;
-
-
-// 		for (int j=0;j<sample_points_.size();j++)
-// 		{
-// 			
-// 			Vec3f lp = oct_obj.InteractPoint(sample_points_[j], Vec3f(0, 0, -1));
-// 			Vec3f c = lp - sample_points_[j];
-// 			fout << "OBJ=SOLCYL/ORIGIN," << sample_points_[j].x()<< "," << sample_points_[j].y() << "," << sample_points_[j].z() 
-// 				<< ",HEIGHT,$" << endl << (sample_points_[j] - lp).length() << ",DIAMTR," << 1.0 << ",AXIS," << c.x() << "," << c.y() << "," << c.z() << endl;
-// 
-// 		}
+	fout << "ENTITY/CONE" << endl;
+	for (int i=-1;i<6;i++)
+	{
+		for (auto iter=sample_points_[i].begin();iter!=sample_points_[i].end();iter++)
+		{
+			Vec3f ins_p = oct_obj.InteractPoint(*iter, Vec3f(0, 0, -1));
+ 			Vec3f axis = ins_p-(*iter);
+			//fout << "OBJ=SOLCYL/ORIGIN," << (*iter).x() << "," << (*iter).y() << "," << (*iter).z() << ",HEIGHT,$" << endl 
+			//	<< axis.length() << ",DIAMTR," << 1.0 << ",AXIS," << axis.x() << "," <<axis.y() << "," << axis.z() << endl;
+			fout << "CONE=SOLCON/ORIGIN," << (*iter).x() << "," << (*iter).y() << "," << (*iter).z() << ",HEIGHT,$" << endl;
+			fout << axis.length() << ",DIAMTR," << 0.8 << "," << 1.2 << ",AXIS," << axis[0] << "," << axis[1] << "," << axis[2] << endl;
+		}
+	}
 	fout << "HALT" << endl;
 	fout.close();
 
@@ -537,7 +569,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 			}
 			else
 			{
-				//continue;
+				continue;
 				IntPoint pr[4] = { p,p,p,p };
 				pr[0].X -= dense.x() / 2 * 1000;
 				pr[1].Y -= dense.y() / 2 * 1000;
@@ -602,7 +634,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 	 mesh->UpdateMesh();
 	 for (int j = 0; j < vList.size(); j++)
 	 {
-		 if (vList[j]->boundary_flag_ == 0)
+		 if (vList[j]->position().z()<5e-1)
 		 {
 			 continue;
 		 }
@@ -610,7 +642,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 		 int k = 0;
 		 for (k = 0; k < va.size(); k++)
 		 {
-			 if (vList[va[k]]->position().z() < vList[j]->position().z())
+			 if (vList[va[k]]->position().z() - vList[j]->position().z()<-5e-3)
 			 {
 
 				 break;
@@ -619,24 +651,83 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 		 if (k == va.size())
 		 {
 
-			 local_minimal_point.insert(vList[j]->position());
-			 MeshOctree octree;
-			 octree.BuildOctree(mesh);
-			 Vec3f p = octree.InteractPoint(vList[j]->position() - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-			 if (p.z() < 999.0)
-				 local_minimal_point.insert(p);
-			 p = octree.InteractPoint(vList[j]->position() - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-			 if (p.z() < 999.0)
-				 local_minimal_point.insert(p);
-			 p = octree.InteractPoint(vList[j]->position() + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-
-			 if (p.z() < 999.0)
-				 local_minimal_point.insert(p);
-			 p = octree.InteractPoint(vList[j]->position() + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-			 if (p.z() < 999.0)
-				 local_minimal_point.insert(p);
+			 local_minimal_point.insert(vList[j]->position());		
 		 }
 	 }
+	 return local_minimal_point;
+	 auto eList = *(mesh->get_edges_list());
+
+	 for (int j=0;j<eList.size();j++)
+	 {
+		 if (eList[j]->is_selected_)
+		 {
+			 continue;
+		 }
+		 if (eList[j]->isBoundary())
+		 {
+			 Vec3f s = eList[j]->ppair_->start_->position();
+			 Vec3f e = eList[j]->ppair_->pvert_->position();
+			Vec3f anoterp= eList[j]->ppair_->pnext_->pvert_->position();
+			if (anoterp.z()>s.z()&&anoterp.z()>e.z())
+			{
+				Vec3f pc = (float)0.5*(s + e);
+			
+				local_minimal_point.insert(pc);
+				continue;
+				MeshOctree octree;
+				octree.BuildOctree(mesh);
+				Vec3f p = octree.InteractPoint(pc - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					local_minimal_point.insert(p);
+				p = octree.InteractPoint(pc - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					local_minimal_point.insert(p);
+				p = octree.InteractPoint(pc + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+
+				if (p.z() < 999.0)
+					local_minimal_point.insert(p);
+				p = octree.InteractPoint(pc + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					local_minimal_point.insert(p);
+			}
+			eList[j]->ppair_->is_selected_ = true;
+			eList[j]->is_selected_ = true;
+		 }
+		 else
+		 {
+			 Vec3f s = eList[j]->start_->position();
+			 Vec3f e = eList[j]->pvert_->position();
+			 Vec3f pan = eList[j]->ppair_->pnext_->pvert_->position();
+			 Vec3f an = eList[j]->pnext_->pvert_->position();
+			 if (an.z()>s.z()&&an.z()>e.z()&&pan.z()>s.z()&&pan.z()>e.z())
+			 {
+				 Vec3f pc = (float)0.5*(s + e);
+				
+				 local_minimal_point.insert(pc); 
+				 continue;
+				 MeshOctree octree;
+				 octree.BuildOctree(mesh);
+				 Vec3f p = octree.InteractPoint(pc - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+				 if (p.z() < 999.0)
+					 local_minimal_point.insert(p);
+				 p = octree.InteractPoint(pc - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				 if (p.z() < 999.0)
+					 local_minimal_point.insert(p);
+				 p = octree.InteractPoint(pc + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+
+				 if (p.z() < 999.0)
+					 local_minimal_point.insert(p);
+				 p = octree.InteractPoint(pc + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				 if (p.z() < 999.0)
+					 local_minimal_point.insert(p);
+			 }
+			 eList[j]->ppair_->is_selected_ = true;
+			 eList[j]->is_selected_ = true;
+		 }
+	 }
+
+
+
 	 return local_minimal_point;
  }
 

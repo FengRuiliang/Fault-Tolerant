@@ -139,9 +139,10 @@ void RenderingWidget::paintGL()
 			}
 		}
 	mId[1][1] = -1;
-	mId[2][2] = -1;
-	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
+	mId[2][2] = -1;	
 	glMultMatrixf((float*)mId);
+	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
+
 	Render();
 
 }
@@ -620,15 +621,6 @@ void RenderingWidget::DrawFace(bool bv)
 	glColor4ub(0, 170, 0, 255);
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
-// 		if (faces[i]->com_flag == -1)
-// 		{
-// 			glColor4ub(0, 170, 0, 255);
-// 		}
-// 		else
-// 		{
-// 		
-// 			glColor3f(sin(faces[i]->com_flag * 10 + 1), cos(faces[i]->com_flag * 10 + 1), tan(faces[i]->com_flag * 10 + 1));
-// 		}
 		Vec3f color = SetColor(faces[i]->com_flag);
 		glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
 		glNormal3fv(faces[i]->normal());
@@ -699,49 +691,6 @@ void RenderingWidget::DrawSlice(bool bv)
 {
 	if (!bv || ptr_slice_ == NULL)
 		return;
-	/*glColor3f(0.0, 1.0, 0.0);
-	std::vector < std::vector<std::pair<Vec3f,Vec3f>> >*tc = (ptr_slice_->GetPieces());
-	for (int i = slice_check_id_; i < slice_check_id_+1; i++)
-	{
-		glBegin(GL_LINES);
-		glColor3f(1.0, 0.0, 0.0);
-		for (size_t j = field_id; j < field_id+1; j++)
-		{
-			if (j>=tc[i].size())
-			{
-				break;
-			}
-			for (int k = 0; k < (tc[i])[j].size(); k++)
-			{
-				if (k == 0)
-				{
-					glColor3f(0.0, 0.0, 1.0);
-				}
-				else
-					glColor3f(1.0, 0.0, 0.0);
-				glVertex3fv(tc[i][j][k].first+Vec3f(0.0,0.0,10*thickness_));
-				glVertex3fv(tc[i][j][k].second+ Vec3f(0.0, 0.0, 10*thickness_));
-			}
-			glColor3f(1.0, 1.0, 0.0);
-			for (int k = 0; k < line_id_&&k < (tc[i])[j].size(); k++)
-			{
-				glVertex3fv(tc[i][j][k].first + Vec3f(0.0, 0.0, 20 * thickness_));
-				glVertex3fv(tc[i][j][k].second + Vec3f(0.0, 0.0, 20 * thickness_));
-			}
-		}
-		glColor3f(0.0, 1.0, 0.0);
-		for (size_t j = 0; j < tc[i].size(); j++)
-		{
-			for (int k = 0; k < (tc[i])[j].size(); k++)
-			{
-
-				glVertex3fv(tc[i][j][k].first);
-				glVertex3fv(tc[i][j][k].second );
-			}
-		}
-		glEnd();
-	}
-*/
 //slicing before offset
 	for (int i = 0; i < layers[slice_check_id_].size(); i++) {
 		glBegin(GL_LINE_LOOP); glColor4f(0.0, 0.0, 1.0, 1.0); glLineWidth(2);
@@ -842,7 +791,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		// draw support point
 		glColor3f(0.0, 0.0, 0.0);
 		glBegin(GL_TRIANGLES);
-		for (int i = 0; i < 6; i++)
+		for (int i = -1; i < 6; i++)
 		{
 			if (i > slice_check_id_)
 			{
@@ -1026,6 +975,11 @@ void RenderingWidget::add_support()
 		return;
 	QByteArray byfilename = filename.toLocal8Bit();
 	ptr_support_->exportcylinder(byfilename);
+
+	qDebug() << "the final support point number is " << ptr_support_->num;
+
+
+
 }
 
 

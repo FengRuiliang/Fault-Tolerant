@@ -5,6 +5,7 @@
 #include <qdebug.h>
 #include "Support.h"
 #include <omp.h>
+#include "Library/Octree.h"
 
 PSO::PSO()
 {
@@ -56,8 +57,8 @@ void PSO::pso_swarm_init()
 		{
 			for (int j=0;j<component_regions_mesh[i].size();j++)
 			{
-				dense = get_dense(j * 5);
-				for (int k=1;k<component_regions_mesh[i][j].size();k++)
+				dense = SupportLib::get_dense(j * 5);
+				for (int k=0;k<component_regions_mesh[i][j].size();k++)
 				{
 
 					if (id == 0)
@@ -262,36 +263,33 @@ double PSO::pso_obj_fun_t(particle& bird)
 	float int_aera = 0;
 	for (int i = 0; i < component_regions_mesh.size(); i++)
 	{
-		auto set_p = SupportLib::compute_local_low_point(component[i]);
-
+	
 		std::map<int, std::set<Vec3f>> temp_int_set;
-		for (auto iter = set_p.begin(); iter != set_p.end(); iter++)
+		for (int j = 0; j < component_local_sup_point[i].size(); j++)
 		{
-			temp_int_set[0].insert(*iter);
+			temp_int_set[0].insert(component_local_sup_point[i][j]);
 		}
+
+
 		for (int j = 0; j < component_regions_mesh[i].size(); j++)
 		{
 			//Vec2f dense = SupportLib::get_dense(j * 5);
-			dense = get_dense(j * 5);
+			dense = SupportLib::get_dense(j * 5);
 			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
 			{
 				int_aera += SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j,que.back());
 				que.pop_back();
 			}
 		}	
-		for (int i = 0; i < 6; i++)
+		for (int ii = 0; ii < 6; ii++)
 		{
-			for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
+			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
 			{
-				bird.resualt[i].insert(*iter);
+				bird.resualt[ii].insert(*iter);
 			}
 
 		}
 	}
-// 	if (int_aera>40)
-// 	{
-// 		int_aera = 999;
-// 	}
 
 	for (int i=0;i<6;i++)
 	{

@@ -266,6 +266,8 @@ void Support::find_support_area()
 						}
 					}
 				}
+				id_meshs.clear();
+				id_meshs[0].push_back(mesh_component);
 				component_regions_mesh.push_back(id_meshs);
 			}
 		}
@@ -322,6 +324,9 @@ void Support::support_point_sampling(int counter_)
 	}
 	
 	std::map<int, std::set<Vec3f>> d_sample_points;
+
+
+	component_local_minimal_point.clear();
 	if (counter_%3==OPTIMAL)
 	{
 		qDebug() << "optimal";

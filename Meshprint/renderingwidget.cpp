@@ -141,7 +141,7 @@ void RenderingWidget::paintGL()
 	mId[1][1] = -1;
 	mId[2][2] = -1;	
 	glMultMatrixf((float*)mId);
-	glMultMatrixf(ptr_arcball_->GetBallMatrix());
+	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
 
 	Render();
 
@@ -886,32 +886,43 @@ Vec3f RenderingWidget::SetColor(int j)
 	
 	switch (j)
 	{
+	case -1:
+		return Vec3f(153.0, 153.0, 153.0);
 	case 0:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(228, 26, 28);
 
 	case 1:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(55, 126, 184);
 
 	case 2:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(77, 175, 14);
 
 	case 3:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(152, 78, 163);
 
 	case 4:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 172.0, 0.0);
 
 	case 5:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 255.0, 51.0);
 
 	case 6:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(166.0, 84.0, 40.0);
 	case 7:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(247.0, 129.0, 191.0);
 	case 8:
 		
 	default:
-		return Vec3f(153.0, 153.0, 153.0);
+		//return Vec3f(0.0, 184, 229);
+	
 		return Vec3f(0.0,170.0, 0.0);
 
 	}

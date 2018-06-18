@@ -805,7 +805,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 					HE_edge* cur = sta;
 					do
 					{
-						glVertex3fv(cur->pvert_->position() + *iter);
+						glVertex3fv(cur->pvert_->position() + *iter-Vec3f(0,0,100));
 						cur = cur->pnext_;
 					} while (cur != sta);
 				}
@@ -838,7 +838,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		}
 		glDisable(GL_LINE_STIPPLE);
 	
-		return;
+		//return;
 
 
 
@@ -860,7 +860,6 @@ void RenderingWidget::draw_support_aera(bool bv)
 				{
 				
 					glBegin(GL_TRIANGLES);
-					
 					auto face_list_ =sup_component_region[i][j][k]->get_faces_list();
 					for (int ii = 0; ii < face_list_->size(); ii++)
 					{
@@ -877,7 +876,31 @@ void RenderingWidget::draw_support_aera(bool bv)
 					glEnd();
 
 				}
+				glColor4ub(0,0,0, 255);
+				glLineWidth(1.0);
+				for (int k = 0; k < sup_component_region[i][j].size(); k++)
+				{
+
+					
+					auto face_list_ = sup_component_region[i][j][k]->get_faces_list();
+					for (int ii = 0; ii < face_list_->size(); ii++)
+					{glBegin(GL_LINE_LOOP);
+						HE_edge* sta = face_list_->at(ii)->pedge_;
+						HE_edge* cur = sta;
+						do
+						{
+							glVertex3fv(cur->pvert_->position() - Vec3f(0, 0, cur->pvert_->position().z()+1.0));
+							//glVertex3fv(cur->pvert_->position());
+							cur = cur->pnext_;
+						} while (cur != sta);
+	glEnd();
+					}
+				
+
+				}
+
 			}
+		break;
 		}
 	}
 }
@@ -889,34 +912,35 @@ Vec3f RenderingWidget::SetColor(int j)
 	case -1:
 		return Vec3f(153.0, 153.0, 153.0);
 	case 0:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(228, 26, 28);
 
 	case 1:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(55, 126, 184);
 
 	case 2:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(77, 175, 14);
 
 	case 3:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(152, 78, 163);
 
 	case 4:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 172.0, 0.0);
 
 	case 5:
-		return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(255.0, 172.0, 0.0);
 		return Vec3f(255.0, 255.0, 51.0);
 
 	case 6:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(255.0, 255.0, 51.0);
 		return Vec3f(166.0, 84.0, 40.0);
 	case 7:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(247.0, 129.0, 191.0);
 	case 8:
 		
@@ -978,7 +1002,9 @@ void RenderingWidget::add_support()
 	}
 	counter_++;
 	ptr_support_->find_support_area();
+	
 	ptr_support_->support_point_sampling(counter_);
+	qDebug() << "the final support point number is " << ptr_support_->num;
 	QString filename = QFileDialog::
 		getSaveFileName(this, tr("Write Mesh"),
 			"..", tr("grs (*.grs)"));
@@ -987,7 +1013,7 @@ void RenderingWidget::add_support()
 	QByteArray byfilename = filename.toLocal8Bit();
 	ptr_support_->exportcylinder(byfilename);
 
-	qDebug() << "the final support point number is " << ptr_support_->num;
+	
 
 
 

@@ -281,7 +281,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 				que.pop_back();
 			}
 		}	
-		for (int ii = 0; ii < 6; ii++)
+		for (int ii = 0; ii < COUNTOFANGLE; ii++)
 		{
 			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
 			{
@@ -291,7 +291,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 		}
 	}
 
-	for (int i=0;i<6;i++)
+	for (int i=0;i<COUNTOFANGLE;i++)
 	{
 		int_aera += 2*bird.resualt[i].size();
 	}

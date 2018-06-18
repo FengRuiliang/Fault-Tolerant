@@ -184,11 +184,15 @@ void Support::find_support_area()
 				{
 					//con_faces[j]->selected_ = true;	
 					int region_id = (180 - acos(con_faces[j]->normal()*perpendicular) * 180 / PI)/5;
+					if (region_id==5)
+					{
+						region_id--;
+					}
 					con_faces[j]->com_flag = region_id;
 					map_id_fs[region_id].push_back(con_faces[j]);
 				}
 				//mark off different region
-				for (int id = 5; id >= 0; id--)
+				for (int id = 4; id >= 0; id--)
 				{
 					for (auto iter = map_id_fs[id].begin(); iter != map_id_fs[id].end(); iter++)
 					{
@@ -210,19 +214,19 @@ void Support::find_support_area()
 							map_id_fs[id - 1].push_back(*iter);
 						}
 					}
-				}	
+				}
 				for (auto iter = map_id_fs[-1].begin(); iter != map_id_fs[-1].end(); iter++)
 				{
 					HE_edge* s_ = (*iter)->pedge_;
 					HE_edge* c_ = s_;
-					int ids[6] = { 0,0,0,0,0,0 };
+					int ids[COUNTOFANGLE] = { 0,0,0,0,0};
 					do
 					{
 						ids[c_->ppair_->pface_->com_flag]++;
 						c_ = c_->pnext_;
 					} while (c_ != s_);
 					int max_id, max_val = -1;
-					for (int k = 0; k < 6; k++)
+					for (int k = 0; k < 5; k++)
 					{
 						if (ids[k] > max_val)
 						{
@@ -233,6 +237,7 @@ void Support::find_support_area()
 					(*iter)->com_flag = max_id;
 
 				}
+			
 				// generate one component
 				Mesh3D* mesh_component = new Mesh3D;
 				for (int j = 0; j < con_faces.size(); j++)
@@ -253,7 +258,7 @@ void Support::find_support_area()
 				//generate different region
 				auto fs = *(mesh_component->get_faces_list());
 				std::map<int, std::vector<Mesh3D*>> id_meshs;
-				for (int id = 0; id < 6; id++)
+				for (int id = 0; id < COUNTOFANGLE; id++)
 				{
 					for (auto iterf = fs.begin(); iterf != fs.end(); iterf++)
 					{
@@ -266,8 +271,8 @@ void Support::find_support_area()
 						}
 					}
 				}
-				id_meshs.clear();
-				id_meshs[0].push_back(mesh_component);
+				//id_meshs.clear();
+				//id_meshs[0].push_back(mesh_component);
 				component_regions_mesh.push_back(id_meshs);
 			}
 		}
@@ -357,7 +362,7 @@ void Support::support_point_sampling(int counter_)
 				temp_int_set[0].insert(component_local_minimal_point[i][j]);
 			}
 			SupportLib::single_area_sampling(component[i], dense, temp_int_set, 0);
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < COUNTOFANGLE; i++)
 			{
 				for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
 				{
@@ -390,7 +395,7 @@ void Support::support_point_sampling(int counter_)
 
 				}
 			}
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < COUNTOFANGLE; i++)
 			{
 				for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
 				{
@@ -403,7 +408,7 @@ void Support::support_point_sampling(int counter_)
 
 	Support::sam_project_to_mesh(d_sample_points);
 	num = 0;
-	for (int i = -1; i < 6; i++)
+	for (int i = -1; i < COUNTOFANGLE; i++)
 	{
 		num += sample_points_[i].size();
 	}
@@ -414,7 +419,7 @@ void Support::sam_project_to_mesh(std::map<int, std::set<Vec3f>> points_)
 	
 	MeshOctree octree;
 	octree.BuildOctree(wholemesh);
-	for (int i=0;i<6;i++)
+	for (int i=0;i<COUNTOFANGLE;i++)
 	{
 		sample_points_[i].clear();
 		for (auto iter=points_[i].begin();iter!=points_[i].end();iter++)
@@ -436,7 +441,7 @@ void Support::exportcylinder(const char* fouts)
 	oct_obj.BuildOctree(target_mesh);
 	//fout<<fixed<<::setprecision(4);
 	fout << "ENTITY/CONE" << endl;
-	for (int i=-1;i<6;i++)
+	for (int i=-1;i<COUNTOFANGLE;i++)
 	{
 		for (auto iter=sample_points_[i].begin();iter!=sample_points_[i].end();iter++)
 		{
@@ -503,7 +508,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 	}
 	//test_path = ori;
 	 Paths clip;
-	 for (int i=0;i<6;i++)
+	 for (int i=0;i<COUNTOFANGLE;i++)
 	 {
 		 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
 		 {
@@ -532,7 +537,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 	 if (subject.size()== 0)
 	 {
 		 clip.clear();
-		 for (int i = 0; i < 6; i++)
+		 for (int i = 0; i < COUNTOFANGLE; i++)
 		 {
 			 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
 			 {
@@ -600,7 +605,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 	
 
 	 clip.clear();
-	 for (int i = 0; i < 6; i++)
+	 for (int i = 0; i < COUNTOFANGLE; i++)
 	 {
 		 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
 		 {

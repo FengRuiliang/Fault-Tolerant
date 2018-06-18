@@ -4,6 +4,7 @@
 #include "Library/clipper.hpp"
 using namespace ClipperLib;
 extern std::map<int,Paths> test_path;
+#define COUNTOFANGLE 5
 class Support
 {
 public:

@@ -138,9 +138,13 @@ void RenderingWidget::paintGL()
 				else	mId[i][j] = 0.f;
 			}
 		}
-	mId[1][1] = -1;
-	mId[2][2] = -1;	
-	glMultMatrixf((float*)mId);
+		// 	mId[1][1] = 0;
+		// 	mId[2][2] = 0;
+		// 	mId[2][1] = 1;
+		// 	mId[1][2] = -1;
+		mId[1][1] = -1;
+		mId[2][2] = -1;
+		glMultMatrixf((float*)mId);
 	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
 
 	Render();
@@ -670,17 +674,18 @@ void RenderingWidget::DrawGrid(bool bv)
 	//glDisable(GL_LIGHTING);
 
 	glColor3f(0.9, 0.9, 0.9);
+	glLineWidth(0.5);
 	glBegin(GL_LINES);
 
 
 	Vec3f box(ptr_mesh_->getBoundingBox().at(0)*scaleV - ptr_mesh_->getBoundingBox().at(1)*scaleV);
-	for (int i = 1; i < 16; i++)
+	for (int i = -31; i < 32; i++)
 	{
-		glVertex2f(-box[0], -box[1] + i*box[1] / 8);
-		glVertex2f(box[0], -box[1] + i*box[1] / 8);
+		glVertex2f(-box[0], i);
+		glVertex2f(box[0], i);
 
-		glVertex2f(-box[0] + i*box[0] / 8, -box[1]);
-		glVertex2f(-box[0] + i*box[0] / 8, box[1]);
+		glVertex2f(i, -box[1]);
+		glVertex2f(i, box[1]);
 	}
 
 	glEnd();
@@ -805,7 +810,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 					HE_edge* cur = sta;
 					do
 					{
-						glVertex3fv(cur->pvert_->position() + *iter-Vec3f(0,0,100));
+						glVertex3fv(cur->pvert_->position() + *iter/*-Vec3f(0,0,100)*/);
 						cur = cur->pnext_;
 					} while (cur != sta);
 				}
@@ -813,18 +818,18 @@ void RenderingWidget::draw_support_aera(bool bv)
 
 		}
 		glEnd();
-	
-		glColor4ub(255, 255, 255, 255);
+		
+		glColor4ub(0, 0, 0, 255);
 		glLineWidth(3.0);
 		//glLineStipple(1, 0x3F07);
 		glEnable(GL_LINE_STIPPLE);
 
 		for (int i=0;i<6;i++)
 		{
-			if (i!=slice_check_id_)
-			{
-				continue;
-			}
+// 			if (i!=slice_check_id_)
+// 			{
+// 				continue;
+// 			}
 
 			for (int j = 0; j < test_path[i].size(); j++)
 			{
@@ -837,17 +842,13 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 		}
 		glDisable(GL_LINE_STIPPLE);
-	
-		//return;
+	return;
 
 
 
 		for (int i=0;i<sup_component_region.size();i++)
 		{
-// 			if (i!=slice_check_id_)
-// 			{
-// 				continue;
-// 			}
+
 			for (int j=0;j<sup_component_region[i].size();j++)
 			{
 // 				if (j!=field_id)
@@ -856,6 +857,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 // 				}
 				Vec3f color = SetColor(j);
 				glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
+				glColor4ub(0.0, 170.0, 0.0, 255);//for display
 				for (int k=0;k<sup_component_region[i][j].size();k++)
 				{
 				
@@ -876,31 +878,30 @@ void RenderingWidget::draw_support_aera(bool bv)
 					glEnd();
 
 				}
+				continue;//for display
 				glColor4ub(0,0,0, 255);
 				glLineWidth(1.0);
 				for (int k = 0; k < sup_component_region[i][j].size(); k++)
 				{
 
-					
+
 					auto face_list_ = sup_component_region[i][j][k]->get_faces_list();
 					for (int ii = 0; ii < face_list_->size(); ii++)
-					{glBegin(GL_LINE_LOOP);
+					{
+						glBegin(GL_LINE_LOOP);
 						HE_edge* sta = face_list_->at(ii)->pedge_;
 						HE_edge* cur = sta;
 						do
 						{
-							glVertex3fv(cur->pvert_->position() - Vec3f(0, 0, cur->pvert_->position().z()+1.0));
+							glVertex3fv(cur->pvert_->position() - Vec3f(0, 0, cur->pvert_->position().z() + 1.0));
 							//glVertex3fv(cur->pvert_->position());
 							cur = cur->pnext_;
 						} while (cur != sta);
-	glEnd();
+						glEnd();
 					}
-				
 
 				}
-
 			}
-		break;
 		}
 	}
 }
@@ -912,31 +913,32 @@ Vec3f RenderingWidget::SetColor(int j)
 	case -1:
 		return Vec3f(153.0, 153.0, 153.0);
 	case 0:
-		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(228, 26, 28);
 
 	case 1:
-		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(55, 126, 184);
 
 	case 2:
-		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(77, 175, 14);
 
 	case 3:
-		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(152, 78, 163);
 
 	case 4:
-		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 172.0, 0.0);
 
 	case 5:
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 172.0, 0.0);
 		return Vec3f(255.0, 255.0, 51.0);
 
 	case 6:
-		//return Vec3f(0.0, 170.0, 0.0);
+		return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 255.0, 51.0);
 		return Vec3f(166.0, 84.0, 40.0);
 	case 7:

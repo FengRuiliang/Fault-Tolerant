@@ -523,6 +523,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 	 }
 	
 	 Clipper sol;
+	 clip.clear();//for display
 	 sol.AddPaths(clip, ptClip, true);
 	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
 
@@ -596,7 +597,6 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 					if (count % 2 == 1)
 					{
 						last_loop_point[angle_id].insert(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
-						Path rectangle;
 					}
 				}
 			}
@@ -605,7 +605,7 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 	
 
 	 clip.clear();
-	 for (int i = 0; i < COUNTOFANGLE; i++)
+	 for (int i = angle_id; i < angle_id+1; i++)
 	 {
 		 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
 		 {

@@ -10,7 +10,7 @@
 #include "Library/space2dKDTree.h"
 #include <iomanip>
 #define PI 3.1415926
-std::map<int,Paths> test_path;
+std::map<int, Paths> test_path;
 
 Support::Support()
 {
@@ -25,7 +25,7 @@ Support::Support(Mesh3D* mesh)
 Support::~Support()
 {
 }
-void Support::sup_face_dfs(HE_face* facet, std::vector<HE_face*>& faces, int angle_id_,std::vector<int>& vec_id)
+void Support::sup_face_dfs(HE_face* facet, std::vector<HE_face*>& faces, int angle_id_, std::vector<int>& vec_id)
 {
 	facet->selected_ = true;
 	vec_id[facet->id()] = angle_id_;
@@ -41,7 +41,7 @@ void Support::sup_face_dfs(HE_face* facet, std::vector<HE_face*>& faces, int ang
 			int angle_ = 180 - acos(facet->normal()*Vec3f(0, 0, 1.0)) * 180 / PI;
 			if (angle_ < 30 && angle_ < (angle_id_ + 1) * 5 + 0.5&&angle_ >= angle_id_ * 5)
 			{
-				sup_face_dfs(facet, faces, angle_id_,vec_id);
+				sup_face_dfs(facet, faces, angle_id_, vec_id);
 			}
 		}
 		cur = cur->pnext_;
@@ -81,10 +81,10 @@ void Support::angle_dfs(HE_face* facet, Mesh3D* mesh, int angle_id_)
 	do
 	{
 		facet = cur->ppair_->pface_;
-		if (facet!=NULL&&facet->selected())
+		if (facet != NULL&&facet->selected())
 		{
 			int angle_ = 180 - acos(facet->normal()*Vec3f(0, 0, 1.0)) * 180 / PI;
-			if (angle_<(angle_id_+1)*5/*+0.5*/&&angle_>=angle_id_*5)
+			if (angle_ < (angle_id_ + 1) * 5/*+0.5*/ && angle_ >= angle_id_ * 5)
 			{
 				angle_dfs(facet, mesh, angle_id_);
 			}
@@ -92,7 +92,7 @@ void Support::angle_dfs(HE_face* facet, Mesh3D* mesh, int angle_id_)
 		cur = cur->pnext_;
 	} while (cur != sta);
 }
-void Support::angle_dfs(HE_face* facet,std::vector<HE_face*>& re_faces, int angle_id_)
+void Support::angle_dfs(HE_face* facet, std::vector<HE_face*>& re_faces, int angle_id_)
 {
 	facet->selected_ = false;
 	//facet->com_flag = angle_id_;
@@ -111,7 +111,7 @@ void Support::angle_dfs(HE_face* facet,std::vector<HE_face*>& re_faces, int angl
 }
 
 
-void Support::sup_mesh_dfs(HE_face* facet, Mesh3D* mesh,int angle_id)
+void Support::sup_mesh_dfs(HE_face* facet, Mesh3D* mesh, int angle_id)
 {
 	facet->selected_ = true;
 	std::vector<HE_vert*> verts, input;
@@ -128,9 +128,9 @@ void Support::sup_mesh_dfs(HE_face* facet, Mesh3D* mesh,int angle_id)
 	do
 	{
 		curf = cur->ppair_->pface_;
-		if (curf!= NULL && !curf->selected_&&curf->com_flag==angle_id)
+		if (curf != NULL && !curf->selected_&&curf->com_flag == angle_id)
 		{
-			sup_mesh_dfs(curf, mesh,angle_id);
+			sup_mesh_dfs(curf, mesh, angle_id);
 		}
 		cur = cur->pnext_;
 	} while (cur != sta);
@@ -139,7 +139,7 @@ void Support::sup_mesh_dfs(HE_face* facet, Mesh3D* mesh,int angle_id)
 void Support::find_support_area()
 {
 	Vec3f perpendicular(0.0, 0.0, 1.0);
-	
+
 	wholemesh = new Mesh3D;
 	std::vector<HE_face*> sele_f;
 	{
@@ -163,9 +163,9 @@ void Support::find_support_area()
 			}
 		}
 	}
-	
+
 	wholemesh->UpdateMeshSup();
-	for (int i=0;i<sele_f.size();i++)
+	for (int i = 0; i < sele_f.size(); i++)
 	{
 		if (sele_f[i]->selected_)
 		{
@@ -178,13 +178,13 @@ void Support::find_support_area()
 			else
 			{
 				//for every component
-		
+
 				std::map<int, std::vector<HE_face*>> map_id_fs;
-				for (int j=0;j<con_faces.size();j++)
+				for (int j = 0; j < con_faces.size(); j++)
 				{
 					//con_faces[j]->selected_ = true;	
-					int region_id = (180 - acos(con_faces[j]->normal()*perpendicular) * 180 / PI)/5;
-					if (region_id==5)
+					int region_id = (180 - acos(con_faces[j]->normal()*perpendicular) * 180 / PI) / 5;
+					if (region_id == 5)
 					{
 						region_id--;
 					}
@@ -219,7 +219,7 @@ void Support::find_support_area()
 				{
 					HE_edge* s_ = (*iter)->pedge_;
 					HE_edge* c_ = s_;
-					int ids[COUNTOFANGLE] = { 0,0,0,0,0};
+					int ids[COUNTOFANGLE] = { 0,0,0,0,0 };
 					do
 					{
 						ids[c_->ppair_->pface_->com_flag]++;
@@ -237,7 +237,7 @@ void Support::find_support_area()
 					(*iter)->com_flag = max_id;
 
 				}
-			
+
 				// generate one component
 				Mesh3D* mesh_component = new Mesh3D;
 				for (int j = 0; j < con_faces.size(); j++)
@@ -249,7 +249,7 @@ void Support::find_support_area()
 					{
 						input.push_back(mesh_component->InsertVertex((*iterV)->position()));
 					}
-					mesh_component->InsertFaceSup(input)->com_flag=con_faces[j]->com_flag;
+					mesh_component->InsertFaceSup(input)->com_flag = con_faces[j]->com_flag;
 
 				}
 				mesh_component->UpdateMeshSup();
@@ -262,9 +262,9 @@ void Support::find_support_area()
 				{
 					for (auto iterf = fs.begin(); iterf != fs.end(); iterf++)
 					{
-						if (!(*iterf)->selected_&&(*iterf)->com_flag==id)
+						if (!(*iterf)->selected_ && (*iterf)->com_flag == id)
 						{
-							Mesh3D* m_=new Mesh3D;
+							Mesh3D* m_ = new Mesh3D;
 							sup_mesh_dfs(*iterf, m_, id);
 							id_meshs[id].push_back(m_);
 							m_->UpdateMeshSup();
@@ -286,7 +286,7 @@ void Support::support_point_sampling(int counter_)
 #define OPTIMAL (int)0
 
 	sample_points_.clear();
-	
+
 	// add local minimal support point
 	auto local_sup_point = SupportLib::compute_local_low_point(target_mesh);
 	std::vector<MeshOctree> octree;
@@ -322,17 +322,17 @@ void Support::support_point_sampling(int counter_)
 					component_local_minimal_point[i].push_back(p);
 			}
 		}
-		if (is_in_component_==false)
+		if (is_in_component_ == false)
 		{
 			sample_points_[-1].insert(*iter);
 		}
 	}
-	
+
 	std::map<int, std::set<Vec3f>> d_sample_points;
 
 
 	component_local_minimal_point.clear();
-	if (counter_%3==OPTIMAL)
+	if (counter_ % 3 == OPTIMAL)
 	{
 		qDebug() << "optimal";
 		test_path.clear();
@@ -345,19 +345,19 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.pso_swarm_init();
 		//sample_points_ = pso_solver.solution.resualt;
 		d_sample_points = pso_solver.pso_solve();
-		test_path=pso_solver.returnPaths();
+		test_path = pso_solver.returnPaths();
 	}
-	else if (counter_%3==UNIFORM)
+	else if (counter_ % 3 == UNIFORM)
 	{
 
 		qDebug() << "uniform";
 		test_path.clear();
 		Vec2f dense(2.0, 2.0);
-		
-		for (int i=0;i<component.size();i++)
+
+		for (int i = 0; i < component.size(); i++)
 		{
 			std::map<int, std::set<Vec3f>> temp_int_set;
-			for (int j=0;j<component_local_minimal_point[i].size();j++)
+			for (int j = 0; j < component_local_minimal_point[i].size(); j++)
 			{
 				temp_int_set[0].insert(component_local_minimal_point[i][j]);
 			}
@@ -370,21 +370,21 @@ void Support::support_point_sampling(int counter_)
 				}
 
 			}
-		}	
+		}
 	}
 	else if (counter_ % 3 == SPARSE)
 	{
 		qDebug() << "sparse:";
 		test_path.clear();
-		float a=0;
-		for (int i=0;i<component_regions_mesh.size();i++)
+		float a = 0;
+		for (int i = 0; i < component_regions_mesh.size(); i++)
 		{
 			std::map<int, std::set<Vec3f>> temp_int_set;
 			for (int j = 0; j < component_local_minimal_point[i].size(); j++)
 			{
 				temp_int_set[0].insert(component_local_minimal_point[i][j]);
 			}
-			for (int j=0;j<component_regions_mesh[i].size();j++)
+			for (int j = 0; j < component_regions_mesh[i].size(); j++)
 			{
 				Vec2f dense = SupportLib::get_dense(j * 5);
 
@@ -416,13 +416,13 @@ void Support::support_point_sampling(int counter_)
 
 void Support::sam_project_to_mesh(std::map<int, std::set<Vec3f>> points_)
 {
-	
+
 	MeshOctree octree;
 	octree.BuildOctree(wholemesh);
-	for (int i=0;i<COUNTOFANGLE;i++)
+	for (int i = 0; i < COUNTOFANGLE; i++)
 	{
 		sample_points_[i].clear();
-		for (auto iter=points_[i].begin();iter!=points_[i].end();iter++)
+		for (auto iter = points_[i].begin(); iter != points_[i].end(); iter++)
 		{
 			Vec3f p = octree.InteractPoint(*iter, Vec3f(0, 0, 1));
 			if (p.z() < 999.0)
@@ -431,7 +431,7 @@ void Support::sam_project_to_mesh(std::map<int, std::set<Vec3f>> points_)
 			}
 		}
 	}
-	
+
 }
 void Support::exportcylinder(const char* fouts)
 {
@@ -441,12 +441,12 @@ void Support::exportcylinder(const char* fouts)
 	oct_obj.BuildOctree(target_mesh);
 	//fout<<fixed<<::setprecision(4);
 	fout << "ENTITY/CONE" << endl;
-	for (int i=-1;i<COUNTOFANGLE;i++)
+	for (int i = -1; i < COUNTOFANGLE; i++)
 	{
-		for (auto iter=sample_points_[i].begin();iter!=sample_points_[i].end();iter++)
+		for (auto iter = sample_points_[i].begin(); iter != sample_points_[i].end(); iter++)
 		{
 			Vec3f ins_p = oct_obj.InteractPoint(*iter, Vec3f(0, 0, -1));
- 			Vec3f axis = ins_p-(*iter);
+			Vec3f axis = ins_p - (*iter);
 			//fout << "OBJ=SOLCYL/ORIGIN," << (*iter).x() << "," << (*iter).y() << "," << (*iter).z() << ",HEIGHT,$" << endl 
 			//	<< axis.length() << ",DIAMTR," << 1.0 << ",AXIS," << axis.x() << "," <<axis.y() << "," << axis.z() << endl;
 			fout << "CONE=SOLCON/ORIGIN," << (*iter).x() << "," << (*iter).y() << "," << (*iter).z() << ",HEIGHT,$" << endl;
@@ -493,7 +493,7 @@ Vec2f SupportLib::get_dense(int angle)
 	return d_;
 }
 
-float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,std::set<Vec3f>>& last_loop_point,int angle_id,Vec2f center)
+float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int, std::set<Vec3f>>& last_loop_point, int angle_id, Vec2f center)
 {
 	Paths ori;
 	auto belist = mesh->GetBLoop();
@@ -507,164 +507,187 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int,s
 		ori << loop;
 	}
 	//test_path = ori;
-	 Paths clip;
-	 for (int i=0;i<COUNTOFANGLE;i++)
-	 {
-		 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
-		 {
-			 Path rectangle;
-			 rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-				 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-				 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
-				 << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
-			 clip << rectangle;
-		 }
+	Paths clip;
+	for (int i = 0; i < COUNTOFANGLE; i++)
+	{
+		for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
+		{
+			Path rectangle;
+			rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+				<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+				<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+				<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
+			clip << rectangle;
+		}
 
-	 }
-	
-	 Clipper sol;
-	 clip.clear();//for display
-	 sol.AddPaths(clip, ptClip, true);
-	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
+	}
 
-	
-	 PolyTree polytree;
-	 Paths subject;
-	 sol.Clear();
-	 sol.AddPaths(clip, ptClip, true);
-	 sol.AddPaths(ori, ptSubject, true);
-	 sol.Execute(ctDifference, polytree, pftNonZero, pftNonZero);
-	 PolyTreeToPaths(polytree, subject);
-	 if (subject.size()== 0)
-	 {
-		 clip.clear();
-		 for (int i = 0; i < COUNTOFANGLE; i++)
-		 {
-			 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
-			 {
-				 Path rectangle;
-				 rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-					 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-					 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
-					 << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
-				 clip << rectangle;
-			 }
+	Clipper sol;
+	clip.clear();//for display
+	sol.AddPaths(clip, ptClip, true);
+	sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
 
-		 }
-		 test_path[angle_id].insert(test_path[angle_id].end(), clip.begin(), clip.end());
 
-		 return 0;
-	 }
-	 std::vector<Vec3f> box = mesh->getBoundingBox();
-	 int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
-	 int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
-	 int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
-	 int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-	 for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
-	 {
-		 for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
-		 {
-			 IntPoint p((x_*dense.x() + center.x()) * 1000, (y_*dense.y() + center.y()) * 1000);
-			 int count = 0;
-			for (int i=0;i<subject.size();i++)
+	PolyTree polytree;
+	Paths subject;
+	sol.Clear();
+	sol.AddPaths(clip, ptClip, true);
+	sol.AddPaths(ori, ptSubject, true);
+	sol.Execute(ctDifference, polytree, pftNonZero, pftNonZero);
+	PolyTreeToPaths(polytree, subject);
+	if (subject.size() == 0)
+	{
+		clip.clear();
+		for (int i = 0; i < COUNTOFANGLE; i++)
+		{
+			for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
 			{
-				if (PointInPolygon(p,subject[i])==1)//means that the ray shoot odd number
-				{
-					count++;
-				}
+				Path rectangle;
+				rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
+				clip << rectangle;
 			}
-			if (count%2==1)
-			{
-				last_loop_point[angle_id].insert(Vec3f((float)p.X / 1000, (float)p.Y / 1000, 0));
 
-			}
-			else
+		}
+		test_path[angle_id].insert(test_path[angle_id].end(), clip.begin(), clip.end());
+
+		return 0;
+	}
+	std::vector<Vec3f> box = mesh->getBoundingBox();
+	int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
+	int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
+	int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
+	int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
+	for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
+	{
+		for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
+		{
+			IntPoint p((x_*dense.x() + center.x()) * 1000, (y_*dense.y() + center.y()) * 1000);
+			Path rectangle;
+			Paths insec;
+			rectangle << IntPoint(p.X - dense.x() / 2* 1000, p.Y - dense.y() / 2 * 1000)
+				<< IntPoint(p.X + dense.x() / 2 * 1000, p.Y - dense.y() / 2 * 1000)
+				<< IntPoint(p.X + dense.x() / 2 * 1000, p.Y + dense.y() / 2 * 1000)
+				<< IntPoint(p.X - dense.x() / 2 * 1000, p.Y + dense.y() / 2 * 1000);
+			Clipper com_insec_;
+			com_insec_.AddPath(rectangle, ptClip, true);
+			com_insec_.AddPaths(subject, ptSubject, true);
+			com_insec_.Execute(ctIntersection, insec, pftNonZero, pftNonZero);
+			float area = 0.0;
+			for (auto iter = insec.begin(); iter != insec.end(); iter++)
 			{
-				continue;
-				IntPoint pr[4] = { p,p,p,p };
-				pr[0].X -= dense.x() / 2 * 1000;
-				pr[1].Y -= dense.y() / 2 * 1000;
-				pr[2].X += dense.x() / 2 * 1000;
-				pr[3].Y += dense.y() / 2 * 1000;
-				for (int r = 0; r < 4; r++)
+				area += Area(*iter);
+			}
+			qDebug() << area;
+			if (area > 0.3 * 2000*2000)//set an constant
+			{
+				int count = 0;
+				for (int i = 0; i < subject.size(); i++)
 				{
-					count = 0;
-					for (int i = 0; i < subject.size(); i++)
-						if (PointInPolygon(pr[r], subject[i]) == 1)//means that the ray shoot odd number
-						{
-							count++;
-						}
-					if (count % 2 == 1)
+
+					if (PointInPolygon(p, subject[i]) == 1)//means that the ray shoot odd number
 					{
-						last_loop_point[angle_id].insert(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
+						count++;
+					}
+				}
+				if (count % 2 == 1)
+				{
+					last_loop_point[angle_id].insert(Vec3f((float)p.X / 1000, (float)p.Y / 1000, 0));
+
+				}
+				else
+				{
+					//continue;
+					IntPoint pr[4] = { p,p,p,p };
+					pr[0].X -= dense.x() / 2 * 1000;
+					pr[1].Y -= dense.y() / 2 * 1000;
+					pr[2].X += dense.x() / 2 * 1000;
+					pr[3].Y += dense.y() / 2 * 1000;
+					for (int r = 0; r < 4; r++)
+					{
+						count = 0;
+						for (int i = 0; i < subject.size(); i++)
+							if (PointInPolygon(pr[r], subject[i]) == 1)//means that the ray shoot odd number
+							{
+								count++;
+							}
+						if (count % 2 == 1)
+						{
+							last_loop_point[angle_id].insert(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
+						}
 					}
 				}
 			}
-		 }
-	 }
-	
-
-	 clip.clear();
-	 for (int i = angle_id; i < angle_id+1; i++)
-	 {
-		 for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
-		 {
-			 Path rectangle;
-			 rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-				 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-				 << IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
-				 << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
-			 clip << rectangle;
-		 }
-
-	 }
-	 test_path[angle_id].insert(test_path[angle_id].end(), clip.begin(), clip.end());
-	 sol.Clear();
-	 sol.AddPaths(clip, ptClip, true);
-	 sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
-	
-	 sol.Clear();
-	 sol.AddPaths(clip, ptClip, true);
-	 sol.AddPaths(ori, ptSubject, true);
-	 Paths diff_path;
-	 sol.Execute(ctDifference, diff_path, pftNonZero, pftNonZero);
-	 int diff_area=0;
-	 for (int i=0;i<diff_path.size();i++)
-	 {
-		 diff_area += Area(diff_path[i])/1e6;
-	 }
-	 return diff_area;
- }
 
 
- std::set<Vec3f> SupportLib::compute_local_low_point(Mesh3D* mesh)
- {
-	 std::set<Vec3f> local_minimal_point;
-	 auto vList = *(mesh->get_vertex_list());
-	 mesh->UpdateMesh();
-	 for (int j = 0; j < vList.size(); j++)
-	 {
-		 if (vList[j]->position().z()<5e-1)
-		 {
-			 continue;
-		 }
-		 std::vector<size_t> va = vList[j]->neighborIdx;
-		 int k = 0;
-		 for (k = 0; k < va.size(); k++)
-		 {
-			 if (vList[va[k]]->position().z()<vList[j]->position().z())
-			 {
 
-				 break;
-			 }
-		 }
-		 if (k == va.size()&&vList[j]->pedge_->pface_->normal().z()<0)
-		 {
+		}
+	}
 
-			 local_minimal_point.insert(vList[j]->position());		
-		 }
-	 }
-	 return local_minimal_point;
- }
+
+	clip.clear();
+	for (int i = angle_id; i < angle_id + 1; i++)
+	{
+		for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
+		{
+			Path rectangle;
+			rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+				<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+				<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+				<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
+			clip << rectangle;
+		}
+
+	}
+	test_path[angle_id].insert(test_path[angle_id].end(), clip.begin(), clip.end());
+	sol.Clear();
+	sol.AddPaths(clip, ptClip, true);
+	sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
+
+	sol.Clear();
+	sol.AddPaths(clip, ptClip, true);
+	sol.AddPaths(ori, ptSubject, true);
+	Paths diff_path;
+	sol.Execute(ctDifference, diff_path, pftNonZero, pftNonZero);
+	int diff_area = 0;
+	for (int i = 0; i < diff_path.size(); i++)
+	{
+		diff_area += Area(diff_path[i]) / 1e6;
+	}
+	return diff_area;
+}
+
+
+std::set<Vec3f> SupportLib::compute_local_low_point(Mesh3D* mesh)
+{
+	std::set<Vec3f> local_minimal_point;
+	auto vList = *(mesh->get_vertex_list());
+	mesh->UpdateMesh();
+	for (int j = 0; j < vList.size(); j++)
+	{
+		if (vList[j]->position().z() < 5e-1)
+		{
+			continue;
+		}
+		std::vector<size_t> va = vList[j]->neighborIdx;
+		int k = 0;
+		for (k = 0; k < va.size(); k++)
+		{
+			if (vList[va[k]]->position().z() < vList[j]->position().z())
+			{
+
+				break;
+			}
+		}
+		if (k == va.size() && vList[j]->pedge_->pface_->normal().z() < 0)
+		{
+
+			local_minimal_point.insert(vList[j]->position());
+		}
+	}
+	return local_minimal_point;
+}
 
 

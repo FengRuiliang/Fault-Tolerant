@@ -804,13 +804,15 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 			for (auto iter = sup_point_[i].begin(); iter != sup_point_[i].end(); iter++)
 			{
+				//Vec3f color = SetColor(i);
+				//glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
 				for (int k = 0; k < sp_flist_.size(); k++)
 				{
 					HE_edge* sta = sp_flist_[k]->pedge_;
 					HE_edge* cur = sta;
 					do
 					{
-						glVertex3fv(cur->pvert_->position() + *iter/*-Vec3f(0,0,100)*/);
+						glVertex3fv(cur->pvert_->position() + *iter-Vec3f(0,0,100));
 						cur = cur->pnext_;
 					} while (cur != sta);
 				}
@@ -833,6 +835,8 @@ void RenderingWidget::draw_support_aera(bool bv)
 
 			for (int j = 0; j < test_path[i].size(); j++)
 			{
+				//Vec3f color = SetColor(j);
+				//glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
 				glBegin(GL_LINE_LOOP);
 				for (int k = 0; k < test_path[i][j].size(); k++)
 				{
@@ -842,7 +846,6 @@ void RenderingWidget::draw_support_aera(bool bv)
 			}
 		}
 		glDisable(GL_LINE_STIPPLE);
-	return;
 
 
 
@@ -857,7 +860,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 // 				}
 				Vec3f color = SetColor(j);
 				glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
-				glColor4ub(0.0, 170.0, 0.0, 255);//for display
+				//glColor4ub(0.0, 170.0, 0.0, 255);//for display
 				for (int k=0;k<sup_component_region[i][j].size();k++)
 				{
 				
@@ -913,27 +916,27 @@ Vec3f RenderingWidget::SetColor(int j)
 	case -1:
 		return Vec3f(153.0, 153.0, 153.0);
 	case 0:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(228, 26, 28);
 
 	case 1:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(55, 126, 184);
 
 	case 2:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(77, 175, 14);
 
 	case 3:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(152, 78, 163);
 
 	case 4:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 172.0, 0.0);
 
 	case 5:
-		return Vec3f(0.0, 170.0, 0.0);
+		//return Vec3f(0.0, 170.0, 0.0);
 		return Vec3f(255.0, 172.0, 0.0);
 		return Vec3f(255.0, 255.0, 51.0);
 

@@ -52,27 +52,42 @@ void PSO::pso_swarm_init()
 	qDebug() << "start initialize swarm";
 	
 	for (int id=0;id<settings.size;id++)
-	{
-		for (int i=0;i<component_regions_mesh.size();i++)
+	{	
+		
+		if (id == 0)
 		{
-			for (int j=0;j<component_regions_mesh[i].size();j++)
-			{
-				dense = SupportLib::get_dense(j * 5);
-				for (int k=0;k<component_regions_mesh[i][j].size();k++)
-				{
-
-					if (id == 0)
-					{
-						swarm[id].pos.push_back(Vec2f(0, 0));
-					}
-					else
-					{
-						swarm[id].pos.push_back(Vec2f((float)rand()/ RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
-					}
-				}
-			}
+			swarm[id].pos.push_back(Vec2f(0, 0));
+			swarm[id].pos.push_back(Vec2f(0, 0));
 		}
-		test_path.clear();
+		else
+		{
+			dense = SupportLib::get_dense(0 * 5);
+			swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
+			swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
+
+		}
+		
+
+		
+		//for (int i=0;i<component_regions_mesh.size();i++)
+		//{
+		//	for (int j=0;j<component_regions_mesh[i].size();j++)
+		//	{
+	
+		//		dense = SupportLib::get_dense(j * 5);
+		//		for (int k=0;k<component_regions_mesh[i][j].size();k++)
+		//		{
+		//			if (id == 0)
+		//			{
+		//				swarm[id].pos.push_back(Vec2f(0, 0));
+		//			}
+		//			else
+		//			{
+		//				swarm[id].pos.push_back(Vec2f((float)rand()/ RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
+		//			}
+		//		}
+		//	}
+		//}
 		swarm[id].fit = pso_obj_fun_t(swarm[id]);
 		if (swarm[id].fit < solution.fit_b)
 		{
@@ -165,6 +180,11 @@ double PSO::calc_inertia_lin_dec(int step)
 std::map<int,std::set<Vec3f>> PSO::pso_solve()
 {
 	qDebug() << "star pso solution";
+
+	while (solution.fit_b == MAX_FITNESS)
+		pso_swarm_init();
+
+
 	// initialize omega using standard value
 	float  w = PSO_INERTIA;// current omega
 							// RUN ALGORITHM
@@ -240,14 +260,16 @@ std::map<int,std::set<Vec3f>> PSO::pso_solve()
 		}
 		else
 			count++;
-		if (count == 200)
+		if (count == 500)
 		{
 			break;
 		}
-		qDebug() << step << solution.fit_b;
-
+		
+	qDebug() <<step<<solution.fit_b;
 	}
-	qDebug() << "end run solver and we have" << solution.resualt.size() << "points";
+	
+	qDebug() << solution.gbest[0].x() << solution.gbest[0].y();
+	qDebug() << "end run solver and we have" << "points";
 	return solution.resualt;
 }
 
@@ -261,41 +283,73 @@ double PSO::pso_obj_fun_t(particle& bird)
 	}
 	
 	float int_aera = 0;
-	for (int i = 0; i < component_regions_mesh.size(); i++)
+	std::map<int, std::set<Vec3f>> temp_int_set;
+	dense = SupportLib::get_dense(0 * 5);
+	auto sampleresualt1 = SupportLib::single_area_sampling(component_regions_mesh[0][0][1], dense, temp_int_set, 0, que.back());
+	que.pop_back();
+	dense = SupportLib::get_dense(0 * 5);
+	auto sampleresualt12 = SupportLib::single_area_sampling(component_regions_mesh[0][1][0], dense, temp_int_set, 1, que.back());
+	que.pop_back();
+	//int_aera = int_aera1>int_aera2? int_aera1:int_aera2;
+//	for (int i = 0; i < component_regions_mesh.size(); i++)
+//	{
+//	
+//		if (i!=0)
+//		{
+//			continue;
+//		}
+//		std::map<int, std::set<Vec3f>> temp_int_set;
+//// 		for (int j = 0; j < component_local_sup_point[i].size(); j++)
+//// 		{
+//// 			temp_int_set[0].insert(component_local_sup_point[i][j]);
+//// 		}
+//
+//
+//		for (int j = 0; j < component_regions_mesh[i].size(); j++)
+//		{
+//			if (j!=0)
+//			{
+//				continue;
+//			}
+//			//Vec2f dense = SupportLib::get_dense(j * 5);
+//			dense = SupportLib::get_dense(j * 5);
+//			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
+//			{
+//				if (k!=1)
+//				{
+//					continue;
+//				}
+//				int_aera = SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j,que.back());
+//				que.pop_back();
+//			}
+//		}	
+//		for (int ii = 0; ii < COUNTOFANGLE; ii++)
+//		{
+//			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
+//			{
+//				bird.resualt[ii].insert(*iter);
+//			}
+//
+//		}
+//	}
+	if (sampleresualt1.second>0.5*2000*2000||sampleresualt12.second>0.5*2000*2000)
 	{
-	
-		std::map<int, std::set<Vec3f>> temp_int_set;
-		for (int j = 0; j < component_local_sup_point[i].size(); j++)
-		{
-			temp_int_set[0].insert(component_local_sup_point[i][j]);
-		}
-
-
-		for (int j = 0; j < component_regions_mesh[i].size(); j++)
-		{
-			//Vec2f dense = SupportLib::get_dense(j * 5);
-			dense = SupportLib::get_dense(j * 5);
-			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
-			{
-				int_aera += SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j,que.back());
-				que.pop_back();
-			}
-		}	
-		for (int ii = 0; ii < COUNTOFANGLE; ii++)
-		{
-			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
-			{
-				bird.resualt[ii].insert(*iter);
-			}
-
-		}
+		return 1e10;
 	}
 
+	for (int ii = 0; ii < COUNTOFANGLE; ii++)
+	{
+		for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
+		{
+			bird.resualt[ii].insert(*iter);
+		}
+
+	}
 	for (int i=0;i<COUNTOFANGLE;i++)
 	{
-		int_aera += 2*bird.resualt[i].size();
+		sampleresualt12.first += bird.resualt[i].size()*100;
 	}
-	return int_aera;
+	return sampleresualt12.first;
 }
 
 //==============================================================

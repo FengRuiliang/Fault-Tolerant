@@ -696,8 +696,8 @@ std::pair<float,float> SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dens
 	float diff_area = 0, area_max=0;
 	for (int i = 0; i < diff_path.size(); i++)
 	{
-		float t=Area(diff_path[i]);
-		diff_area += t/1e6;
+		float t=Area(diff_path[i])/1e6;
+		diff_area += t;
 		area_max = area_max > t ? area_max : t;
 	}
 	return make_pair(diff_area,area_max);

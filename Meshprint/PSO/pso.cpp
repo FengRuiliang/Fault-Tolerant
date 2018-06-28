@@ -332,10 +332,7 @@ double PSO::pso_obj_fun_t(particle& bird)
 //
 //		}
 //	}
-	if (sampleresualt1.second>0.5*2000*2000||sampleresualt12.second>0.5*2000*2000)
-	{
-		return 1e10;
-	}
+
 
 	for (int ii = 0; ii < COUNTOFANGLE; ii++)
 	{
@@ -345,11 +342,14 @@ double PSO::pso_obj_fun_t(particle& bird)
 		}
 
 	}
+	float max_ = sampleresualt1.second > sampleresualt12.second ? sampleresualt1.second : sampleresualt12.second;
+	max_ *= 100;
+
 	for (int i=0;i<COUNTOFANGLE;i++)
 	{
-		sampleresualt12.first += bird.resualt[i].size()*100;
+		max_+= bird.resualt[i].size();
 	}
-	return sampleresualt12.first;
+	return max_;
 }
 
 //==============================================================

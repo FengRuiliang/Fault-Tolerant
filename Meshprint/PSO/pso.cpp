@@ -57,13 +57,13 @@ void PSO::pso_swarm_init()
 		if (id == 0)
 		{
 			swarm[id].pos.push_back(Vec2f(0, 0));
-			swarm[id].pos.push_back(Vec2f(0, 0));
+			//swarm[id].pos.push_back(Vec2f(0, 0));
 		}
 		else
 		{
 			dense = SupportLib::get_dense(0 * 5);
 			swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
-			swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
+			//swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
 
 		}
 		
@@ -287,10 +287,13 @@ double PSO::pso_obj_fun_t(particle& bird)
 	dense = SupportLib::get_dense(0 * 5);
 	auto sampleresualt1 = SupportLib::single_area_sampling(component_regions_mesh[0][0][1], dense, temp_int_set, 0, que.back());
 	que.pop_back();
-	dense = SupportLib::get_dense(0 * 5);
-	auto sampleresualt12 = SupportLib::single_area_sampling(component_regions_mesh[0][1][0], dense, temp_int_set, 1, que.back());
-	que.pop_back();
+	//dense = SupportLib::get_dense(0 * 5);
+	//auto sampleresualt12 = SupportLib::single_area_sampling(component_regions_mesh[0][1][0], dense, temp_int_set, 1, que.back());
+	//que.pop_back();
 	//int_aera = int_aera1>int_aera2? int_aera1:int_aera2;
+
+	//////////////////////////////////////////////////////////////////////////
+
 //	for (int i = 0; i < component_regions_mesh.size(); i++)
 //	{
 //	
@@ -342,8 +345,13 @@ double PSO::pso_obj_fun_t(particle& bird)
 		}
 
 	}
-	float max_ = sampleresualt1.second > sampleresualt12.second ? sampleresualt1.second : sampleresualt12.second;
-	max_ *= 100;
+	//float max_ = sampleresualt1.second > sampleresualt12.second ? sampleresualt1.second : sampleresualt12.second;
+	float max_ = sampleresualt1.second;
+	if (max_>0.5*2*2)
+	{
+		return 1e6;
+	}
+
 
 	for (int i=0;i<COUNTOFANGLE;i++)
 	{

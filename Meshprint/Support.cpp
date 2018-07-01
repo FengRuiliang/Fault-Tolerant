@@ -9,12 +9,12 @@
 #include "Library/IntervalTree.h"
 #include "Library/space2dKDTree.h"
 #include <iomanip>
-#include "ga/GASimpleGA.h"
-#include "ga/GA1DBinStrGenome.h"
+
 
 #define PI 3.1415926
 std::map<int, Paths> test_path;
-
+std::vector<Mesh3D*> component;
+std::vector<Paths> covers;
 Support::Support()
 {
 }
@@ -289,64 +289,26 @@ void Support::support_point_sampling(int counter_)
 #define OPTIMAL (int)0
 
 	sample_points_.clear();
-
-	// add local minimal support point
-	auto local_sup_point = SupportLib::compute_local_low_point(target_mesh);
-	std::vector<MeshOctree> octree;
-	octree.resize(component.size());
-	for (int i = 0; i < component.size(); i++)
-	{
-		octree[i].BuildOctree(component[i]);
-	}
-
-	map<int, std::vector<Vec3f>> component_local_minimal_point;
-	for (auto iter = local_sup_point.begin(); iter != local_sup_point.end(); iter++)
-	{
-		bool is_in_component_ = false;
-		for (int i = 0; i < component.size(); i++)
-		{
-			Vec3f p = octree[i].InteractPoint(*iter - Vec3f(0.0, 0.0, (*iter).z()), Vec3f(0, 0, 1));
-			if (p.z() < 999.0f)
-			{
-				is_in_component_ = true;
-				component_local_minimal_point[i].push_back(p);
-				Vec3f p = octree[i].InteractPoint(*iter - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-				if (p.z() < 999.0)
-					component_local_minimal_point[i].push_back(p);
-				p = octree[i].InteractPoint(*iter - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-				if (p.z() < 999.0)
-					component_local_minimal_point[i].push_back(p);
-				p = octree[i].InteractPoint(*iter + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
-
-				if (p.z() < 999.0)
-					component_local_minimal_point[i].push_back(p);
-				p = octree[i].InteractPoint(*iter + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
-				if (p.z() < 999.0)
-					component_local_minimal_point[i].push_back(p);
-			}
-		}
-		if (is_in_component_ == false)
-		{
-			sample_points_[-1].insert(*iter);
-		}
-	}
-
 	std::map<int, std::set<Vec3f>> d_sample_points;
+	map<int, std::vector<Vec3f>> component_local_minimal_point;
 
-
-	component_local_minimal_point.clear();
 	if (counter_ % 3 == OPTIMAL)
 	{
+		test_path.clear();
 		qDebug() << "optimal";
+		compute_intersection_line();
+		for (int i=0;i<covers.size();i++)
+		{
+			test_path[i]=covers[i];
+		}
 		GARandomSeed((unsigned)time(NULL));
 		// Declare variables for the GA parameters and set them to some default values.
-		int width = 10;
-		int popsize = 30;
-		int ngen = 400;
+		int popsize = 500;
+		int ngen = 20000;
 		float pmut = 0.001;
 		float pcross = 0.9;
 		float Objective(GAGenome &);
-		GA1DBinaryStringGenome genome(width, Objective);
+		GA1DBinaryStringGenome genome((unsigned int)covers.size(), Objective);
 		// Now that we have the genome, we create the genetic algorithm and set
 		// its parameters - number of generations, mutation probability, and crossover
 		// probability.  And finally we tell it to evolve itself.
@@ -357,6 +319,18 @@ void Support::support_point_sampling(int counter_)
 		ga.pCrossover(pcross);
 		ga.evolve();
 		cout << "The GA found:\n" << ga.statistics().bestIndividual() << "\n";
+		GA1DBinaryStringGenome & genomeout = (GA1DBinaryStringGenome &)ga.statistics().bestIndividual();
+		for (int i = 0; i < genomeout.length(); i++) {
+			if (genomeout.gene(i))
+			{
+				for (size_t j = 0; j < covers[i].size(); j++)
+				{
+					Vec3f p((covers[i][j][0].X + covers[i][j][1].X) / 2000, (covers[i][j][0].Y + covers[i][j][3].Y) / 2000, 0.0);
+					d_sample_points[0].insert(p);
+
+				}
+			}
+		}
 	}
 	else if (counter_ % 3 == UNIFORM)
 	{
@@ -629,7 +603,184 @@ int SupportLib::sam_project_to_mesh(std::map<int, std::set<Vec3f>> in_, std::map
 	return num;
 }
 
-float Objective(GAGenome &)
+float Objective(GAGenome &g)
 {
-	return		0.0;
+	float score = 0.0;
+	GA1DBinaryStringGenome & genome = (GA1DBinaryStringGenome &)g;
+	Paths subject, clip;
+	for (int i = 0; i < genome.length(); i++) {
+		if (genome.gene(i))
+		{
+			score += covers[i].size();
+			clip.insert(clip.end(), covers[i].begin(), covers[i].end());
+		}
+	}
+	for (int i = 0; i < component.size(); i++)
+	{
+
+		auto belist = component[i]->GetBLoop();
+		for (int i = 0; i < belist.size(); i++)
+		{
+			Path loop;
+			for (int j = 0; j < belist[i].size(); j++)
+			{
+				loop << IntPoint(belist[i][j]->pvert_->position().x() * 1000, belist[i][j]->pvert_->position().y() * 1000);
+			}
+			subject << loop;
+		}
+	}
+	Clipper solver;
+	solver.AddPaths(clip, ptClip, true);
+	solver.Execute(ctUnion, clip, pftNonZero, pftNonZero);
+	solver.Clear();
+	solver.AddPaths(clip, ptClip, true);
+	solver.AddPaths(subject, ptSubject, true);
+	solver.Execute(ctDifference, subject, pftNonZero, pftNonZero);
+	float max_area = 0;
+	for (int i = 0; i < subject.size(); i++)
+	{
+		max_area = max_area > Area(subject[i]) ? max_area : Area(subject[i]);
+	}
+	if (max_area > 4e6)
+	{
+		return 1e6;
+	}
+	else
+		return score;
+}
+
+
+void Support::compute_intersection_line()
+{
+	covers.clear();
+	for (int i = 0; i < component_regions_mesh.size(); i++)
+	{
+		for (int j = 0; j < component_regions_mesh[i].size(); j++)
+		{
+			float gap = SupportLib::get_dense(j).x();
+			float ver = SupportLib::get_dense(j).y();
+			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
+			{
+				auto blist = component_regions_mesh[i][j][k]->GetBLoop();
+				std::map<int, std::vector<Vec2f>>ins_container;
+				std::set<int> container_first;
+				float line_width_ = 1.0;
+				for (int ii = 0; ii < blist.size(); ii++)
+				{
+					if (blist[ii].size() < 7)
+					{
+						continue;
+					}
+					for (int jj = 0; jj < blist[ii].size(); jj++)
+					{
+						Vec3f a, b, v; Vec2f p_vec2;
+						a = blist[ii][jj]->start_->position();
+						b = blist[ii][jj]->pvert_->position();
+						v = b - a;
+						float y_min_ = a.y() <= b.y() ? a.y() : b.y();
+						float y_max_ = a.y() >= b.y() ? a.y() : b.y();
+						int min_hei_id_ = (int)((y_min_ + line_width_ * 1000) / line_width_) - 1000;
+						int max_hei_id_ = (int)((y_max_ + line_width_ * 1000) / line_width_) - 1000;
+						for (int y_id_ = min_hei_id_ + 1; y_id_ <= max_hei_id_; y_id_++)//取上不取下
+						{
+							if (v.y() == 0) { continue; }
+							else
+							{
+								p_vec2.x() = a.x() + (y_id_*line_width_ - a.y()) / v.y()*v.x();
+								p_vec2.y() = a.y() + (y_id_*line_width_ - a.y()) / v.y()*v.y();
+								container_first.insert(y_id_);
+								ins_container[y_id_].push_back(p_vec2);
+							}
+						}
+					}
+				}
+				for (auto iter=container_first.begin();iter!=container_first.end();iter++)
+				{
+					std::sort(ins_container[*iter].begin(), ins_container[*iter].end());
+					for (int jj = 0; jj+ 1 < ins_container[*iter].size(); jj += 2)
+					{
+						vector<Vec2f> sup_sample;
+						sup_sample.push_back(ins_container[*iter][jj]);
+						while ((ins_container[*iter][jj + 1].x() - sup_sample.back().x()) > gap)
+						{
+							sup_sample.push_back(sup_sample.back() + Vec2f(gap, 0));
+
+						}
+						if ((ins_container[*iter][jj + 1].x() - sup_sample.back().x()) > 0.6*gap)
+						{
+							sup_sample.push_back(ins_container[*iter][jj + 1]);
+						}
+						else
+						{
+							float dis=ins_container[*iter][jj + 1].x() - sup_sample.back().x();
+							for (int kk = 0; kk < sup_sample.size(); kk++)
+							{
+								sup_sample[kk] += Vec2f(0,0.5*dis);
+							}
+						}
+						Paths cover;
+						for (int kk = 0; kk < sup_sample.size(); kk++)
+						{
+							Path rec;
+							IntPoint p(sup_sample[kk].x() * 1000, sup_sample[kk].y() * 1000);
+							rec << IntPoint(p.X - gap * 1000 / 2, p.Y - ver * 1000 / 2)
+								<< IntPoint(p.X + gap * 1000 / 2, p.Y - ver * 1000 / 2)
+								<< IntPoint(p.X + gap * 1000 / 2, p.Y + ver * 1000 / 2)
+								<< IntPoint(p.X - gap * 1000 / 2, p.Y + ver * 1000 / 2);
+							cover << rec;
+						}
+						covers.push_back(cover);//每一条线段都看作是粒子的一个维度。
+					}
+				}
+			}
+		}
+	}
+}
+
+void Support::compute_local_minimal_point()
+{
+	// add local minimal support point
+	auto local_sup_point = SupportLib::compute_local_low_point(target_mesh);
+	std::vector<MeshOctree> octree;
+	octree.resize(component.size());
+	for (int i = 0; i < component.size(); i++)
+	{
+		octree[i].BuildOctree(component[i]);
+	}
+
+	map<int, std::vector<Vec3f>> component_local_minimal_point;
+	for (auto iter = local_sup_point.begin(); iter != local_sup_point.end(); iter++)
+	{
+		bool is_in_component_ = false;
+		for (int i = 0; i < component.size(); i++)
+		{
+			Vec3f p = octree[i].InteractPoint(*iter - Vec3f(0.0, 0.0, (*iter).z()), Vec3f(0, 0, 1));
+			if (p.z() < 999.0f)
+			{
+				is_in_component_ = true;
+				component_local_minimal_point[i].push_back(p);
+				Vec3f p = octree[i].InteractPoint(*iter - Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+				p = octree[i].InteractPoint(*iter - Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+				p = octree[i].InteractPoint(*iter + Vec3f(2.0, 0.0, 0.0), Vec3f(0, 0, 1));
+
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+				p = octree[i].InteractPoint(*iter + Vec3f(0.0, 2.0, 0.0), Vec3f(0, 0, 1));
+				if (p.z() < 999.0)
+					component_local_minimal_point[i].push_back(p);
+			}
+		}
+		if (is_in_component_ == false)
+		{
+			sample_points_[-1].insert(*iter);
+		}
+	}
+
+
+
+	component_local_minimal_point.clear();
 }

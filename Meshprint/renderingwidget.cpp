@@ -753,7 +753,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		//glLineStipple(1, 0x3F07);
 		glEnable(GL_LINE_STIPPLE);
 
-		for (int i=0;i<COUNTOFANGLE;i++)
+		for (int i=0;i<1000;i++)
 		{
 			if (i != slice_check_id_)
 			{

@@ -2,6 +2,8 @@
 #include "HE_mesh/Mesh3D.h"
 #include "HE_mesh/Vec.h"
 #include "Library/clipper.hpp"
+#include "ga/GASimpleGA.h"
+#include "ga/GA1DBinStrGenome.h"
 using namespace ClipperLib;
 extern std::map<int,Paths> test_path;
 #define COUNTOFANGLE 5
@@ -24,9 +26,8 @@ public:
 	
 	void exportcylinder(const char * fouts);
 	
-
-	
-
+	void compute_intersection_line();
+	void compute_local_minimal_point();
 private:
 	Mesh3D* target_mesh;
 	int limit_angle_ = { 30 };
@@ -36,13 +37,14 @@ private:
 
 public:
 
-	std::vector<Mesh3D*> component;
+	
 	std::map<int, std::set<Vec3f>> sample_points_;
 
 	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_mesh;
 	Mesh3D sp_mesh;
 	std::vector<int> vec_angle;
 	int num;// support point number
+	
 private:
 	Mesh3D* wholemesh;// find big support area
 					 // local minimal point

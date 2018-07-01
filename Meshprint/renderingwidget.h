@@ -7,7 +7,6 @@
 #include "HE_mesh/Vec.h"
 #include "HE_mesh/Mesh3D.h"
 #include "SliceCut.h"
-#include "Hatch.h"
 using trimesh::vec;
 using trimesh::point;
 typedef trimesh::vec3  Vec3f;
@@ -73,21 +72,6 @@ private:
 	void DoSlice();
 	void FillPath();
 	void add_support();
-	void FindNarrowBand();
-	void LayerOffset(LayerOffDis layer_offdis, int layernum);
-	void PathToCutLine();
-	bool IsNestedIn(Path a, Path b);
-	bool ModelThicken(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* tc, int numlayer);
-	bool DrawPaths(ClipperLib::Paths contours, int numlayer);
-	bool Contour2Layer(ClipperLib::Paths contours, int numlayer);
-	std::pair<int, int> point2grid(std::pair<double, double> p);
-	bool JudgeLoopDir(std::vector<std::pair<double, double>> Loop);
-	pa furthestdir(pa p[3][3]);
-	pa rotate(pa p, double angle);
-	double dot(pa p1, pa p2);
-	pa normailize(pa p);
-	void CancelBugCut(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_, int i, int j);
-	void setHatchType(int type_);
 	void setThickness(double t) { 
 		thickness_ = t; }
 private:
@@ -108,7 +92,6 @@ public:
 	CArcBall					*ptr_arcball_;
 	Mesh3D						*ptr_mesh_;
 	SliceCut					*ptr_slice_;
-	Hatch						*ptr_hatch_;
 	hatchType					hatch_type_;
 	Support						*ptr_support_;
 	// Texture
@@ -138,7 +121,6 @@ private:
 	int field_id{0};
 	int line_id_{0};
 public:
-	std::vector<Paths>			res_path;
 	std::vector<std::vector<CutLine>*>* offsetpieces;
 	std::vector<std::vector<std::vector<std::pair<double, double> > > > layers;
 	std::vector<std::vector<Vec3f>>			offset_points;

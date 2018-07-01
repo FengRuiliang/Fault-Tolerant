@@ -157,6 +157,38 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cylinder.cpp" />
+    <ClCompile Include="ga\GA1DArrayGenome.cpp" />
+    <ClCompile Include="ga\GA1DBinStrGenome.cpp" />
+    <ClCompile Include="ga\GA2DArrayGenome.cpp" />
+    <ClCompile Include="ga\GA2DBinStrGenome.cpp" />
+    <ClCompile Include="ga\GA3DArrayGenome.cpp" />
+    <ClCompile Include="ga\GA3DBinStrGenome.cpp" />
+    <ClCompile Include="ga\GAAllele.cpp" />
+    <ClCompile Include="ga\GABaseGA.cpp" />
+    <ClCompile Include="ga\GABin2DecGenome.cpp" />
+    <ClCompile Include="ga\gabincvt.cpp" />
+    <ClCompile Include="ga\GABinStr.cpp" />
+    <ClCompile Include="ga\GADCrowdingGA.cpp" />
+    <ClCompile Include="ga\GADemeGA.cpp" />
+    <ClCompile Include="ga\gaerror.cpp" />
+    <ClCompile Include="ga\GAGenome.cpp" />
+    <ClCompile Include="ga\GAIncGA.cpp" />
+    <ClCompile Include="ga\GAList.cpp" />
+    <ClCompile Include="ga\GAListBASE.cpp" />
+    <ClCompile Include="ga\GAListGenome.cpp" />
+    <ClCompile Include="ga\GAParameter.cpp" />
+    <ClCompile Include="ga\GAPopulation.cpp" />
+    <ClCompile Include="ga\garandom.cpp" />
+    <ClCompile Include="ga\GARealGenome.cpp" />
+    <ClCompile Include="ga\GAScaling.cpp" />
+    <ClCompile Include="ga\GASelector.cpp" />
+    <ClCompile Include="ga\GASimpleGA.cpp" />
+    <ClCompile Include="ga\GASStateGA.cpp" />
+    <ClCompile Include="ga\GAStatistics.cpp" />
+    <ClCompile Include="ga\GAStringGenome.cpp" />
+    <ClCompile Include="ga\GATree.cpp" />
+    <ClCompile Include="ga\GATreeBASE.cpp" />
+    <ClCompile Include="ga\GATreeGenome.cpp" />
     <ClCompile Include="Library\ArcBall.cpp" />
     <ClCompile Include="Library\clipper.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_meshprint.cpp">
@@ -186,7 +218,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="globalFunctions.cpp" />
-    <ClCompile Include="Hatch.cpp" />
     <ClCompile Include="HE_mesh\Mesh3D.cpp" />
     <ClCompile Include="Library\space2dKDTree.cpp" />
     <ClCompile Include="main.cpp" />
@@ -242,6 +273,48 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="ga\ga.h" />
+    <ClInclude Include="ga\GA1DArrayGenome.h" />
+    <ClInclude Include="ga\GA1DBinStrGenome.h" />
+    <ClInclude Include="ga\GA2DArrayGenome.h" />
+    <ClInclude Include="ga\GA2DBinStrGenome.h" />
+    <ClInclude Include="ga\GA3DArrayGenome.h" />
+    <ClInclude Include="ga\GA3DBinStrGenome.h" />
+    <ClInclude Include="ga\GAAllele.h" />
+    <ClInclude Include="ga\GAArray.h" />
+    <ClInclude Include="ga\GABaseGA.h" />
+    <ClInclude Include="ga\GABin2DecGenome.h" />
+    <ClInclude Include="ga\gabincvt.h" />
+    <ClInclude Include="ga\GABinStr.h" />
+    <ClInclude Include="ga\gaconfig.h" />
+    <ClInclude Include="ga\GADCrowdingGA.h" />
+    <ClInclude Include="ga\GADemeGA.h" />
+    <ClInclude Include="ga\gaerror.h" />
+    <ClInclude Include="ga\GAEvalData.h" />
+    <ClInclude Include="ga\GAGenome.h" />
+    <ClInclude Include="ga\gaid.h" />
+    <ClInclude Include="ga\GAIncGA.h" />
+    <ClInclude Include="ga\GAList.h" />
+    <ClInclude Include="ga\GAListBASE.h" />
+    <ClInclude Include="ga\GAListGenome.h" />
+    <ClInclude Include="ga\GAMask.h" />
+    <ClInclude Include="ga\GANode.h" />
+    <ClInclude Include="ga\GAParameter.h" />
+    <ClInclude Include="ga\GAPopulation.h" />
+    <ClInclude Include="ga\garandom.h" />
+    <ClInclude Include="ga\GARealGenome.h" />
+    <ClInclude Include="ga\GAScaling.h" />
+    <ClInclude Include="ga\GASelector.h" />
+    <ClInclude Include="ga\GASimpleGA.h" />
+    <ClInclude Include="ga\GASStateGA.h" />
+    <ClInclude Include="ga\GAStatistics.h" />
+    <ClInclude Include="ga\GAStringGenome.h" />
+    <ClInclude Include="ga\GATree.h" />
+    <ClInclude Include="ga\GATreeBASE.h" />
+    <ClInclude Include="ga\GATreeGenome.h" />
+    <ClInclude Include="ga\gatypes.h" />
+    <ClInclude Include="ga\gaversion.h" />
+    <ClInclude Include="ga\std_stream.h" />
     <ClInclude Include="Library\ArcBall.h" />
     <ClInclude Include="Library\clipper.hpp" />
     <ClInclude Include="Cutline.h" />

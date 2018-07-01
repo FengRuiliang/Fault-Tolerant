@@ -9,6 +9,9 @@
 #include "Library/IntervalTree.h"
 #include "Library/space2dKDTree.h"
 #include <iomanip>
+#include "ga/GASimpleGA.h"
+#include "ga/GA1DBinStrGenome.h"
+
 #define PI 3.1415926
 std::map<int, Paths> test_path;
 
@@ -335,14 +338,25 @@ void Support::support_point_sampling(int counter_)
 	if (counter_ % 3 == OPTIMAL)
 	{
 		qDebug() << "optimal";
-		PSO pso_solver;
-		pso_solver.component_local_sup_point = component_local_minimal_point;
-		pso_solver.component_regions_mesh = component_regions_mesh;
-		pso_solver.component = component;
-		pso_solver.settings.size = 100;
-		pso_solver.settings.steps = 2000;
-		pso_solver.pso_swarm_init();
-		d_sample_points = pso_solver.pso_solve();
+		GARandomSeed((unsigned)time(NULL));
+		// Declare variables for the GA parameters and set them to some default values.
+		int width = 10;
+		int popsize = 30;
+		int ngen = 400;
+		float pmut = 0.001;
+		float pcross = 0.9;
+		float Objective(GAGenome &);
+		GA1DBinaryStringGenome genome(width, Objective);
+		// Now that we have the genome, we create the genetic algorithm and set
+		// its parameters - number of generations, mutation probability, and crossover
+		// probability.  And finally we tell it to evolve itself.
+		GASimpleGA ga(genome);
+		ga.populationSize(popsize);
+		ga.nGenerations(ngen);
+		ga.pMutation(pmut);
+		ga.pCrossover(pcross);
+		ga.evolve();
+		cout << "The GA found:\n" << ga.statistics().bestIndividual() << "\n";
 	}
 	else if (counter_ % 3 == UNIFORM)
 	{
@@ -615,3 +629,7 @@ int SupportLib::sam_project_to_mesh(std::map<int, std::set<Vec3f>> in_, std::map
 	return num;
 }
 
+float Objective(GAGenome &)
+{
+	return		0.0;
+}

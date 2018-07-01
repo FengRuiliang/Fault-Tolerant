@@ -62,8 +62,7 @@ void PSO::pso_swarm_init()
 			for (int j = 0; j < component_regions_mesh[i].size(); j++)
 			{
 				// do hath for every component 
-				compute_intersection_line()
-				TESTIF;
+
 				dense = SupportLib::get_dense(j);
 				for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
 				{

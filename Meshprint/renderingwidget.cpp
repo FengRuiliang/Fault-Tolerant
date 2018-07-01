@@ -826,7 +826,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		//glLineStipple(1, 0x3F07);
 		glEnable(GL_LINE_STIPPLE);
 
-		for (int i=0;i<6;i++)
+		for (int i=0;i<COUNTOFANGLE;i++)
 		{
 			if (i != slice_check_id_)
 			{
@@ -835,66 +835,28 @@ void RenderingWidget::draw_support_aera(bool bv)
 
 			for (int j = 0; j < test_path[i].size(); j++)
 			{
+				
 				glBegin(GL_LINE_LOOP);
 				for (int k = 0; k < test_path[i][j].size(); k++)
 				{
 					glVertex3f((float)test_path[i][j][k].X / 1000, (float)test_path[i][j][k].Y / 1000, -1);
 				}
 				glEnd();
+
 			}
 		}
 		glDisable(GL_LINE_STIPPLE);
-		//////////////////////////////////////////////////////////////////////////
-		Vec3f color = SetColor(0);
-		glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
-		glBegin(GL_TRIANGLES);
-		auto face_list_ = sup_component_region[0][0][1]->get_faces_list();
-		for (int ii = 0; ii < face_list_->size(); ii++)
-		{
-			HE_edge* sta = face_list_->at(ii)->pedge_;
-			HE_edge* cur = sta;
-			do
-			{
-				glVertex3fv(cur->pvert_->position() - Vec3f(0, 0, cur->pvert_->position().z()));
-				//glVertex3fv(cur->pvert_->position());
-				cur = cur->pnext_;
-			} while (cur != sta);
 
-		}
-		glEnd();
-		
-		color = SetColor(1);
-		glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
-		glBegin(GL_TRIANGLES);
-		face_list_ = sup_component_region[0][1][0]->get_faces_list();
-		for (int ii = 0; ii < face_list_->size(); ii++)
-		{
-			HE_edge* sta = face_list_->at(ii)->pedge_;
-			HE_edge* cur = sta;
-			do
-			{
-				glVertex3fv(cur->pvert_->position() - Vec3f(0, 0, cur->pvert_->position().z()));
-				cur = cur->pnext_;
-			} while (cur != sta);
 
-		}
-		glEnd();
-		return;
-		//////////////////////////////////////////////////////////////////////////
 		for (int i=0;i<sup_component_region.size();i++)
 		{
 			for (int j=0;j<sup_component_region[i].size();j++)
 			{
 				Vec3f color = SetColor(j);
 				glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
-				//glColor4ub(0.0, 170.0, 0.0, 255);//for display
 				for (int k=0;k<sup_component_region[i][j].size();k++)
 				{
 				
-					if (k!=line_id_)
-					{
-						continue;
-					}
 					glBegin(GL_TRIANGLES);
 					auto face_list_ =sup_component_region[i][j][k]->get_faces_list();
 					for (int ii = 0; ii < face_list_->size(); ii++)
@@ -904,7 +866,6 @@ void RenderingWidget::draw_support_aera(bool bv)
 						do
 						{
 							glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
-							//glVertex3fv(cur->pvert_->position());
 							cur = cur->pnext_;
 						} while (cur != sta);
 
@@ -1039,6 +1000,7 @@ void RenderingWidget::add_support()
 	
 	ptr_support_->support_point_sampling(counter_);
 	qDebug() << "the final support point number is " << ptr_support_->num;
+	return;
 	QString filename = QFileDialog::
 		getSaveFileName(this, tr("Write Mesh"),
 			"..", tr("grs (*.grs)"));

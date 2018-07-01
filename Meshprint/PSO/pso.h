@@ -67,7 +67,7 @@ public:
 	// PSO SOLUTION -- Initialized by the user
 	struct pso_result_t {
 		int error, error_last;
-		double fit_b;
+		Vec3f fit_b;
 		std::vector<Vec2f> gbest; // should contain DIM elements!!
 		std::vector<int> isavailable;
 		std::map<int,std::set<Vec3f>> resualt;
@@ -80,7 +80,7 @@ public:
 		std::vector<Vec2f> pos_hist_b;// best position matrix
 		std::vector<Vec2f> pos_nb;	// what is the best informed position for each particle
 		std::map<int,std::set<Vec3f>> resualt;
-		double fit, fit_hist_b;		// particle fitness 
+		Vec3f fit, fit_hist_b;		// particle fitness 
 								// best fitness 
 
 	};
@@ -111,7 +111,7 @@ public:
 	Vec2f get_dense(int angle);
 	std::map<int, std::set<Vec3f>> pso_solve();
 public:
-	double pso_obj_fun_t(particle& bird);
+	Vec3f pso_obj_fun_t(particle& bird);
 	ClipperLib::Paths remain_paths_,grid_paths_;
 	Vec2f dense;
 	std::vector<IntPoint> original;

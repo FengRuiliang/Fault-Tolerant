@@ -274,13 +274,40 @@ Vec2f PSO::pso_obj_fun_t(particle& bird)
 				max_rate = max_rate > rate ? max_rate : rate;
 			}
 		}	
+		Paths clip;
+		dense = SupportLib::get_dense(4);
 		for (int ii = 0; ii < COUNTOFANGLE; ii++)
 		{
 			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
 			{
 				bird.resualt[ii].insert(*iter);
+				Path rectangle;
+				rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
+				clip << rectangle;
 			}
-
+		}
+		Paths subject;
+		auto belist = component[i]->GetBLoop();
+		for (int ii = 0; ii < belist.size(); ii++)
+		{
+			Path loop;
+			for (int jj = 0; jj < belist[ii].size(); jj++)
+			{
+				loop << IntPoint(belist[ii][jj]->pvert_->position().x() * 1000, belist[ii][jj]->pvert_->position().y() * 1000);
+			}
+			subject << loop;
+		}
+		Clipper sov;
+		sov.AddPaths(clip, ptClip, true);
+		sov.AddPaths(subject, ptSubject, true);
+		sov.Execute(ctDifference, subject, pftNonZero, pftNonZero);
+		for (int ii = 0; ii < subject.size(); ii++)
+		{
+			float rate_ = Area(subject[ii]) / (1e6*dense.x()*dense.y());
+			max_rate = max_rate > rate_ ? max_rate : rate_;
 		}
 	}
 
@@ -289,7 +316,7 @@ Vec2f PSO::pso_obj_fun_t(particle& bird)
 	{
 		num += bird.resualt[i].size();
 	}
-	if (max_rate < 0.3)
+	if (max_rate < 0.5)
 	{
 		return Vec2f(num, max_rate);
 	}

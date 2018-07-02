@@ -533,20 +533,6 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int, 
 	PolyTreeToPaths(polytree, subject);
 	if (subject.size() == 0)
 	{
-		clip.clear();
-		for (int i = 0; i < COUNTOFANGLE; i++)
-		{
-			for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
-			{
-				Path rectangle;
-				rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
-					<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
-				clip << rectangle;
-			}
-
-		}
 		return 0.0;
 	}
 	std::vector<Vec3f> box = mesh->getBoundingBox();
@@ -597,6 +583,29 @@ float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int, 
 			}		
 		}
 	}
+	Clipper sov;
+	clip.clear();
+	for (auto iter=last_loop_point[angle_id].begin();iter!=last_loop_point[angle_id].end();iter++)
+	{
+		Path rectangle;
+		rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+			<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+			<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+			<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
+		clip << rectangle;
+	}
+	sov.AddPaths(clip, ptClip, true);
+	sov.Execute(ctUnion, clip, pftNonZero, pftNonZero);
+	sov.Clear();
+	sov.AddPaths(subject, ptSubject, true);
+	sov.AddPaths(clip, ptClip, true);
+	sov.Execute(ctDifference, subject, pftNonZero, pftNonZero);
+	for (int i=0;i<subject.size();i++)
+	{
+		float rate_=Area(subject[i]) / (1e6*dense.x()*dense.y());
+		area_rate = area_rate > rate_ ? area_rate : rate_;
+	}
+
 	return area_rate;
 }
 

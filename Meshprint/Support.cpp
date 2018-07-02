@@ -345,7 +345,6 @@ void Support::support_point_sampling(int counter_)
 		pso_solver.pso_swarm_init();
 		//sample_points_ = pso_solver.solution.resualt;
 		d_sample_points = pso_solver.pso_solve();
-		test_path = pso_solver.returnPaths();
 	}
 	else if (counter_ % 3 == UNIFORM)
 	{
@@ -376,61 +375,51 @@ void Support::support_point_sampling(int counter_)
 	{
 		qDebug() << "sparse:";
 		test_path.clear();
-		std::map<int, std::set<Vec3f>> temp_int_set;
-		Vec2f dense = SupportLib::get_dense(0* 5);
-		auto samre=SupportLib::single_area_sampling(component_regions_mesh[0][0][1], dense, temp_int_set, 0);
-		qDebug() << samre.second;
-		//dense = SupportLib::get_dense(1 * 5);
-		//SupportLib::single_area_sampling(component_regions_mesh[0][1][0], dense, temp_int_set, 0);
-		for (int i = 0; i < COUNTOFANGLE; i++)
+		
+		for (int i = 0; i < component_regions_mesh.size(); i++)
 		{
-			for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
+		
+			std::map<int, std::set<Vec3f>> temp_int_set;
+			for (int j = 0; j < component_local_minimal_point[i].size(); j++)
 			{
-				d_sample_points[i].insert(*iter);
+				temp_int_set[0].insert(component_local_minimal_point[i][j]);
 			}
+			for (int j = 0; j < component_regions_mesh[i].size(); j++)
+			{
 
+				Vec2f dense = SupportLib::get_dense(j);
+				for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
+				{
+					SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j);
+				}
+			}
+			for (int i = 0; i < COUNTOFANGLE; i++)
+			{
+				for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
+				{
+					d_sample_points[i].insert(*iter);
+				}
+			}
 		}
-
-		//for (int i = 0; i < component_regions_mesh.size(); i++)
-		//{
-		//	if (i!=0)
-		//	{
-		//		continue;
-		//	}
-		//	std::map<int, std::set<Vec3f>> temp_int_set;
-		//	for (int j = 0; j < component_local_minimal_point[i].size(); j++)
-		//	{
-		//		temp_int_set[0].insert(component_local_minimal_point[i][j]);
-		//	}
-		//	for (int j = 0; j < component_regions_mesh[i].size(); j++)
-		//	{
-		//
-		//		Vec2f dense = SupportLib::get_dense(j * 5);
-
-		//		for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
-		//		{
-
-		//			 SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j);
-
-		//		}
-		//	}
-		//	for (int i = 0; i < COUNTOFANGLE; i++)
-		//	{
-		//		for (auto iter = temp_int_set[i].begin(); iter != temp_int_set[i].end(); iter++)
-		//		{
-		//			d_sample_points[i].insert(*iter);
-		//		}
-
-		//	}
-		//}
 	}
-
-
 	Support::sam_project_to_mesh(d_sample_points);
-	num = 0;
-	for (int i = -1; i < COUNTOFANGLE; i++)
+	for (int i = 0; i < COUNTOFANGLE; i++)
 	{
-		num += sample_points_[i].size();
+		Clipper sov;Vec2f dense = SupportLib::get_dense(i);
+		for (int j=0;j<=i;j++)
+		{
+			for (auto iter = d_sample_points[j].begin(); iter != d_sample_points[j].end(); iter++)
+			{
+				Path rectangle;
+				rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
+					<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
+				sov.AddPath(rectangle, ptClip, true);
+			}
+		
+		}
+		sov.Execute(ctUnion, test_path[i], pftNonZero, pftNonZero);
 	}
 }
 
@@ -481,40 +470,26 @@ void Support::exportcylinder(const char* fouts)
 
 Vec2f SupportLib::get_dense(int angle)
 {
-	Vec2f d_;
-	if (angle < 15)
+	
+	switch (angle)
 	{
-		d_.x() = 2.0;
-
-		if (angle < 5)
-		{
-			d_.y() = 2.0;
-		}
-		else if (angle < 10)
-		{
-			d_.y() = 2.5;
-		}
-		else if (angle < 15)
-		{
-			d_.y() = 8.0;
-		}
-	}
-	else
-	{
-		d_.x() = 2.5;
-
-		if (angle < 18)
-		{
-			d_.y() = 10.0;
-		}
-		else
-			d_.y() = 15.0;
+	case 0:
+		return Vec2f(2.0, 2.0);
+	case 1:
+		return Vec2f(2.0, 2.5);
+	case 2:
+		return Vec2f(2.0, 8.0);
+	case 3:
+		return Vec2f(2.5, 10.0);
+	case 4:
+		return Vec2f(2.5, 15.0);
+	default:
+		return Vec2f(2.0, 2.0);
 	}
 
-	return d_;
 }
 
-std::pair<float,float> SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int, std::set<Vec3f>>& last_loop_point, int angle_id, Vec2f center)
+float SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dense, std::map<int, std::set<Vec3f>>& last_loop_point, int angle_id, Vec2f center)
 {
 	Paths ori;
 	auto belist = mesh->GetBLoop();
@@ -527,7 +502,7 @@ std::pair<float,float> SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dens
 		}
 		ori << loop;
 	}
-	//test_path = ori;
+	
 	Paths clip;
 	for (int i = 0; i < COUNTOFANGLE; i++)
 	{
@@ -572,16 +547,14 @@ std::pair<float,float> SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dens
 			}
 
 		}
-		test_path[angle_id].insert(test_path[angle_id].end(), clip.begin(), clip.end());
-
-		return make_pair(0,0);
+		return 0.0;
 	}
 	std::vector<Vec3f> box = mesh->getBoundingBox();
 	int min_x_ = (int)((box[1].x() + 1000 * dense.x()) / dense.x()) - 1000;
 	int min_y_ = (int)((box[1].y() + 1000 * dense.y()) / dense.y()) - 1000;
 	int max_x_ = (int)((box[0].x() + 1000 * dense.x()) / dense.x()) - 1000;
 	int max_y_ = (int)((box[0].y() + 1000 * dense.y()) / dense.y()) - 1000;
-
+	float area_rate = 0;
 	for (int x_ = min_x_; x_ <= max_x_ + 1; x_++)
 	{
 		for (int y_ = min_y_; y_ <= max_y_ + 1; y_++)
@@ -602,105 +575,29 @@ std::pair<float,float> SupportLib::single_area_sampling(Mesh3D* mesh, Vec2f dens
 				last_loop_point[angle_id].insert(Vec3f((float)p.X / 1000, (float)p.Y / 1000, 0));
 
 			}
-			continue;
-			//////////////////////////////////////////////////////////////////////////
-
-			
-			Path rectangle;
-			Paths insec;
-			rectangle << IntPoint(p.X - dense.x() / 2* 1000, p.Y - dense.y() / 2 * 1000)
-				<< IntPoint(p.X + dense.x() / 2 * 1000, p.Y - dense.y() / 2 * 1000)
-				<< IntPoint(p.X + dense.x() / 2 * 1000, p.Y + dense.y() / 2 * 1000)
-				<< IntPoint(p.X - dense.x() / 2 * 1000, p.Y + dense.y() / 2 * 1000);
-			Clipper com_insec_;
-			com_insec_.AddPath(rectangle, ptClip, true);
-			com_insec_.AddPaths(subject, ptSubject, true);
-			com_insec_.Execute(ctIntersection, insec, pftNonZero, pftNonZero);
-			float area = 0.0;
-			for (auto iter = insec.begin(); iter != insec.end(); iter++)
+			else
 			{
-				area += Area(*iter);
-			}
-			if (area > 0.3 * 2000*2000)//set an constant
-			{
-				int count = 0;
-				for (int i = 0; i < subject.size(); i++)
+				Path rectangle;
+				Paths insec;
+				rectangle << IntPoint(p.X - dense.x() / 2 * 1000, p.Y - dense.y() / 2 * 1000)
+					<< IntPoint(p.X + dense.x() / 2 * 1000, p.Y - dense.y() / 2 * 1000)
+					<< IntPoint(p.X + dense.x() / 2 * 1000, p.Y + dense.y() / 2 * 1000)
+					<< IntPoint(p.X - dense.x() / 2 * 1000, p.Y + dense.y() / 2 * 1000);
+				Clipper com_insec_;
+				com_insec_.AddPath(rectangle, ptClip, true);
+				com_insec_.AddPaths(subject, ptSubject, true);
+				com_insec_.Execute(ctIntersection, insec, pftNonZero, pftNonZero);
+				float area = 0.0;
+				for (auto iter = insec.begin(); iter != insec.end(); iter++)
 				{
-
-					if (PointInPolygon(p, subject[i]) == 1)//means that the ray shoot odd number
-					{
-						count++;
-					}
+					area += Area(*iter);
 				}
-				if (count % 2 == 1)
-				{
-					last_loop_point[angle_id].insert(Vec3f((float)p.X / 1000, (float)p.Y / 1000, 0));
-
-				}
-				else
-				{
-
-					continue;
-					IntPoint pr[4] = { p,p,p,p };
-					pr[0].X -= dense.x() / 2 * 1000;
-					pr[1].Y -= dense.y() / 2 * 1000;
-					pr[2].X += dense.x() / 2 * 1000;
-					pr[3].Y += dense.y() / 2 * 1000;
-					for (int r = 0; r < 4; r++)
-					{
-						count = 0;
-						for (int i = 0; i < subject.size(); i++)
-							if (PointInPolygon(pr[r], subject[i]) == 1)//means that the ray shoot odd number
-							{
-								count++;
-							}
-						if (count % 2 == 1)
-						{
-							last_loop_point[angle_id].insert(Vec3f((float)pr[r].X / 1000, (float)pr[r].Y / 1000, 0));
-						}
-					}
-				}
-			}
-
-
-
+				area=area/(1e6*dense.x()*dense.y());
+				area_rate = area_rate > area ? area_rate : area;
+			}		
 		}
 	}
-
-
-	clip.clear();
-	for (int i = angle_id; i < angle_id + 1; i++)
-	{
-		for (auto iter = last_loop_point[i].begin(); iter != last_loop_point[i].end(); iter++)
-		{
-			Path rectangle;
-			rectangle << IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-				<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() - dense.y() / 2) * 1000)
-				<< IntPoint(((*iter).x() + dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000)
-				<< IntPoint(((*iter).x() - dense.x() / 2) * 1000, ((*iter).y() + dense.y() / 2) * 1000);
-			clip << rectangle;
-		}
-
-	}
-	
-	sol.Clear();
-	sol.AddPaths(clip, ptClip, true);
-	sol.Execute(ctUnion, clip, pftNonZero, pftNonZero);
-	test_path[angle_id].clear();
-	test_path[angle_id].insert(test_path[angle_id].end(), clip.begin(), clip.end());
-	sol.Clear();
-	sol.AddPaths(clip, ptClip, true);
-	sol.AddPaths(ori, ptSubject, true);
-	Paths diff_path;
-	sol.Execute(ctDifference, diff_path, pftNonZero, pftNonZero);
-	float diff_area = 0, area_max=0;
-	for (int i = 0; i < diff_path.size(); i++)
-	{
-		float t=Area(diff_path[i])/1e6;
-		diff_area += t;
-		area_max = area_max > t ? area_max : t;
-	}
-	return make_pair(diff_area,area_max);
+	return area_rate;
 }
 
 

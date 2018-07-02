@@ -48,54 +48,37 @@ void PSO::pso_swarm_init()
 {
 	// SWARM INITIALIZATION
 	srand((unsigned)time(NULL));
+	swarm.clear();
 	swarm.resize(settings.size);
 	qDebug() << "start initialize swarm";
-	
+	solution.fit_b = Vec2f(1e6, 1e6);
 	for (int id=0;id<settings.size;id++)
 	{	
-		
-		if (id == 0)
+		for (int i = 0; i < component_regions_mesh.size(); i++)
 		{
-			swarm[id].pos.push_back(Vec2f(0, 0));
-			//swarm[id].pos.push_back(Vec2f(0, 0));
-		}
-		else
-		{
-			dense = SupportLib::get_dense(0 * 5);
-			swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
-			//swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
+			for (int j = 0; j < component_regions_mesh[i].size(); j++)
+			{
 
+				dense = SupportLib::get_dense(j);
+				for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
+				{
+					if (id == 0)
+					{
+						swarm[id].pos.push_back(Vec2f(0, 0));
+					}
+					else
+					{
+						swarm[id].pos.push_back(Vec2f((float)rand() / RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
+					}
+				}
+			}
 		}
-		
-
-		
-		//for (int i=0;i<component_regions_mesh.size();i++)
-		//{
-		//	for (int j=0;j<component_regions_mesh[i].size();j++)
-		//	{
-	
-		//		dense = SupportLib::get_dense(j * 5);
-		//		for (int k=0;k<component_regions_mesh[i][j].size();k++)
-		//		{
-		//			if (id == 0)
-		//			{
-		//				swarm[id].pos.push_back(Vec2f(0, 0));
-		//			}
-		//			else
-		//			{
-		//				swarm[id].pos.push_back(Vec2f((float)rand()/ RAND_MAX*dense.x(), (float)rand() / RAND_MAX*dense.y()));
-		//			}
-		//		}
-		//	}
-		//}
 		swarm[id].fit = pso_obj_fun_t(swarm[id]);
 		if (swarm[id].fit < solution.fit_b)
 		{
 			solution.fit_b = swarm[id].fit;
 			solution.gbest = swarm[id].pos;
 			solution.resualt = swarm[id].resualt;
-			solution.angle_paths = test_path;
-
 		}
 		swarm[id].vel = swarm[id].pos;
 		swarm[id].vel = swarm[id].pos;
@@ -110,7 +93,7 @@ void PSO::pso_swarm_init()
 		swarm[i].pos_nb = solution.gbest;
 	}
 	
-	qDebug() << "end initialize swarm"<<"best fitness is "<<solution.fit_b;
+	qDebug() << "end initialize swarm"<<"best fitness is "<<solution.fit_b.x()<< solution.fit_b.y();
 
 }
 
@@ -180,11 +163,8 @@ double PSO::calc_inertia_lin_dec(int step)
 std::map<int,std::set<Vec3f>> PSO::pso_solve()
 {
 	qDebug() << "star pso solution";
-
-	while (solution.fit_b == MAX_FITNESS)
+	while (solution.fit_b.x() == 1e6)
 		pso_swarm_init();
-
-
 	// initialize omega using standard value
 	float  w = PSO_INERTIA;// current omega
 							// RUN ALGORITHM
@@ -199,8 +179,6 @@ std::map<int,std::set<Vec3f>> PSO::pso_solve()
 		w = calc_inertia_lin_dec(step);
 
 		// update pos_nb matrix (find best of neighborhood for all particles)
-
-
 		improved = 0;	// the value of improved was just used; reset it
 		float rho1, rho2; // random numbers (coefficients)
 		// update all particles
@@ -249,7 +227,6 @@ std::map<int,std::set<Vec3f>> PSO::pso_solve()
 				// copy particle pos to gbest vector
 				solution.gbest = swarm[i].pos;
 				solution.resualt = swarm[i].resualt;
-				solution.angle_paths = test_path;
 			}
 
 		}
@@ -259,21 +236,22 @@ std::map<int,std::set<Vec3f>> PSO::pso_solve()
 			count = 0;
 		}
 		else
+		{
 			count++;
-		if (count == 500)
+		}
+		
+		if (count > 200)
 		{
 			break;
 		}
-		
-	qDebug() <<step<<solution.fit_b;
+
+		qDebug() << step << solution.fit_b.x()<< solution.fit_b.y();
 	}
-	
-	qDebug() << solution.gbest[0].x() << solution.gbest[0].y();
 	qDebug() << "end run solver and we have" << "points";
 	return solution.resualt;
 }
 
-double PSO::pso_obj_fun_t(particle& bird)
+Vec2f PSO::pso_obj_fun_t(particle& bird)
 {
 	bird.resualt.clear();
 	std::vector<Vec2f> que;
@@ -281,83 +259,43 @@ double PSO::pso_obj_fun_t(particle& bird)
 	{
 		que.push_back(*iter);
 	}
-	
-	float int_aera = 0;
-	std::map<int, std::set<Vec3f>> temp_int_set;
-	dense = SupportLib::get_dense(0 * 5);
-	auto sampleresualt1 = SupportLib::single_area_sampling(component_regions_mesh[0][0][1], dense, temp_int_set, 0, que.back());
-	que.pop_back();
-	//dense = SupportLib::get_dense(0 * 5);
-	//auto sampleresualt12 = SupportLib::single_area_sampling(component_regions_mesh[0][1][0], dense, temp_int_set, 1, que.back());
-	//que.pop_back();
-	//int_aera = int_aera1>int_aera2? int_aera1:int_aera2;
-
-	//////////////////////////////////////////////////////////////////////////
-
-//	for (int i = 0; i < component_regions_mesh.size(); i++)
-//	{
-//	
-//		if (i!=0)
-//		{
-//			continue;
-//		}
-//		std::map<int, std::set<Vec3f>> temp_int_set;
-//// 		for (int j = 0; j < component_local_sup_point[i].size(); j++)
-//// 		{
-//// 			temp_int_set[0].insert(component_local_sup_point[i][j]);
-//// 		}
-//
-//
-//		for (int j = 0; j < component_regions_mesh[i].size(); j++)
-//		{
-//			if (j!=0)
-//			{
-//				continue;
-//			}
-//			//Vec2f dense = SupportLib::get_dense(j * 5);
-//			dense = SupportLib::get_dense(j * 5);
-//			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
-//			{
-//				if (k!=1)
-//				{
-//					continue;
-//				}
-//				int_aera = SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j,que.back());
-//				que.pop_back();
-//			}
-//		}	
-//		for (int ii = 0; ii < COUNTOFANGLE; ii++)
-//		{
-//			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
-//			{
-//				bird.resualt[ii].insert(*iter);
-//			}
-//
-//		}
-//	}
-
-
-	for (int ii = 0; ii < COUNTOFANGLE; ii++)
+	float max_rate = 0;
+	for (int i = 0; i < component_regions_mesh.size(); i++)
 	{
-		for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
+		std::map<int, std::set<Vec3f>> temp_int_set;
+		for (int j = 0; j < component_regions_mesh[i].size(); j++)
 		{
-			bird.resualt[ii].insert(*iter);
+			Vec2f dense = SupportLib::get_dense(j);
+			dense = SupportLib::get_dense(j);
+			for (int k = 0; k < component_regions_mesh[i][j].size(); k++)
+			{
+				float rate= SupportLib::single_area_sampling(component_regions_mesh[i][j][k], dense, temp_int_set, j,que.back());
+				que.pop_back();
+				max_rate = max_rate > rate ? max_rate : rate;
+			}
+		}	
+		for (int ii = 0; ii < COUNTOFANGLE; ii++)
+		{
+			for (auto iter = temp_int_set[ii].begin(); iter != temp_int_set[ii].end(); iter++)
+			{
+				bird.resualt[ii].insert(*iter);
+			}
+
 		}
-
 	}
-	//float max_ = sampleresualt1.second > sampleresualt12.second ? sampleresualt1.second : sampleresualt12.second;
-	float max_ = sampleresualt1.second;
-	if (max_>0.5*2*2)
+
+	int num = 0;
+	for (int i = 0; i < COUNTOFANGLE; i++)
 	{
-		return 1e6;
+		num += bird.resualt[i].size();
 	}
-
-
-	for (int i=0;i<COUNTOFANGLE;i++)
+	if (max_rate < 0.3)
 	{
-		max_+= bird.resualt[i].size();
+		return Vec2f(num, max_rate);
 	}
-	return max_;
+	else
+		return Vec2f(1e6, max_rate);
+	
 }
 
 //==============================================================
@@ -365,38 +303,4 @@ double PSO::pso_obj_fun_t(particle& bird)
 int PSO::pso_calc_swarm_size(int dim) {
 	int size = 10. + 2. * sqrt(dim);
 	return (size > PSO_MAX_SIZE ? PSO_MAX_SIZE : size);
-}
-Vec2f PSO::get_dense(int angle)
-{
-
-	Vec2f d_;
-	if (angle < 15)
-	{
-		d_.x() = 2.5;
-
-		if (angle < 5)
-		{
-			d_.y() = 2.5;
-		}
-		else if (angle < 10)
-		{
-			d_.y() = 2.5;
-		}
-		else if (angle < 15)
-		{
-			d_.y() = 8.0;
-		}
-	}
-	else
-	{
-		d_.x() = 3.0;
-
-		if (angle < 18)
-		{
-			d_.y() = 10.0;
-		}
-		else
-			d_.y() = 15.0;
-	}
-	return d_;
 }

@@ -54,6 +54,6 @@ namespace SupportLib
 
 	
 	Vec2f get_dense(int angle);
-	std::pair<float,float> single_area_sampling(Mesh3D * mesh, Vec2f dense, std::map<int, std::set<Vec3f>>& last_loop_point, int angle_id,Vec2f center = Vec2f(0, 0));
+	float single_area_sampling(Mesh3D * mesh, Vec2f dense, std::map<int, std::set<Vec3f>>& last_loop_point, int angle_id,Vec2f center = Vec2f(0, 0));
 	std::set<Vec3f> compute_local_low_point(Mesh3D *mesh);
 }

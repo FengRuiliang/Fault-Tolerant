@@ -138,14 +138,14 @@ void RenderingWidget::paintGL()
 				else	mId[i][j] = 0.f;
 			}
 		}
-		// 	mId[1][1] = 0;
-		// 	mId[2][2] = 0;
-		// 	mId[2][1] = 1;
-		// 	mId[1][2] = -1;
+		 	//mId[1][1] = 0;
+		 	//mId[2][2] = 0;
+		 	//mId[2][1] = 1;
+		 //	mId[1][2] = -1;
 		mId[1][1] = -1;
 		mId[2][2] = -1;
-	//	glMultMatrixf((float*)mId);
-	glMultMatrixf(ptr_arcball_->GetBallMatrix());
+	glMultMatrixf((float*)mId);
+	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
 
 	Render();
 
@@ -336,9 +336,9 @@ void RenderingWidget::SetLight()
 	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
 	glEnable(GL_LIGHTING);
-	//glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);
-	//glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT2);
 }
 
 void RenderingWidget::SetBackground()
@@ -704,20 +704,6 @@ void RenderingWidget::DrawSlice(bool bv)
 		}
 		glEnd();
 	}
-
-	//slicing after offset
-	DrawPaths(res_path[slice_check_id_], slice_check_id_);
-
-
-	//show grids
-	if (slice_check_id_)for (int i = 0; i < gridshow[slice_check_id_ - 1].size(); i++) {
-		glBegin(GL_LINE_LOOP); glColor4f(1.0, 1.0, 1.0, 1.0);
-		glVertex3f(gridshow[slice_check_id_ - 1][i].first*MIN_DIS, gridshow[slice_check_id_ - 1][i].second*MIN_DIS, thickness_*slice_check_id_);
-		glVertex3f(gridshow[slice_check_id_ - 1][i].first*MIN_DIS + MIN_DIS, gridshow[slice_check_id_ - 1][i].second*MIN_DIS, thickness_*slice_check_id_);
-		glVertex3f(gridshow[slice_check_id_ - 1][i].first*MIN_DIS + MIN_DIS, gridshow[slice_check_id_ - 1][i].second*MIN_DIS + MIN_DIS, thickness_*slice_check_id_);
-		glVertex3f(gridshow[slice_check_id_ - 1][i].first*MIN_DIS, gridshow[slice_check_id_ - 1][i].second*MIN_DIS + MIN_DIS, thickness_*slice_check_id_);
-		glEnd();
-	}
 }
 void RenderingWidget::DrawHatch(bool bv)
 {
@@ -798,10 +784,10 @@ void RenderingWidget::draw_support_aera(bool bv)
 		glBegin(GL_TRIANGLES);
 		for (int i = -1; i < 6; i++)
 		{
-			if (i > slice_check_id_)
-			{
-				continue;
-			}
+// 			if (i > slice_check_id_)
+// 			{
+// 				continue;
+// 			}
 			for (auto iter = sup_point_[i].begin(); iter != sup_point_[i].end(); iter++)
 			{
 				//Vec3f color = SetColor(i);
@@ -826,7 +812,7 @@ void RenderingWidget::draw_support_aera(bool bv)
 		//glLineStipple(1, 0x3F07);
 		glEnable(GL_LINE_STIPPLE);
 
-		for (int i=0;i<6;i++)
+		for (int i = 0; i < 6; i++)
 		{
 			if (i != slice_check_id_)
 			{
@@ -845,9 +831,9 @@ void RenderingWidget::draw_support_aera(bool bv)
 		}
 		glDisable(GL_LINE_STIPPLE);
 
-		for (int i=0;i<sup_component_region.size();i++)
+		for (int i = 0; i < sup_component_region.size(); i++)
 		{
-			for (int j=0;j<sup_component_region[i].size();j++)
+			for (int j = 0; j < sup_component_region[i].size(); j++)
 			{
 				if (j > slice_check_id_)
 				{
@@ -856,18 +842,18 @@ void RenderingWidget::draw_support_aera(bool bv)
 				Vec3f color = SetColor(j);
 				glColor4ub((int)color.x(), (int)color.y(), (int)color.z(), 255);
 				//glColor4ub(0.0, 170.0, 0.0, 255);//for display
-				for (int k=0;k<sup_component_region[i][j].size();k++)
+				for (int k = 0; k < sup_component_region[i][j].size(); k++)
 				{
-				
+
 					glBegin(GL_TRIANGLES);
-					auto face_list_ =sup_component_region[i][j][k]->get_faces_list();
+					auto face_list_ = sup_component_region[i][j][k]->get_faces_list();
 					for (int ii = 0; ii < face_list_->size(); ii++)
 					{
 						HE_edge* sta = face_list_->at(ii)->pedge_;
 						HE_edge* cur = sta;
 						do
 						{
-							glVertex3fv(cur->pvert_->position()-Vec3f(0,0,cur->pvert_->position().z()));
+							glVertex3fv(cur->pvert_->position() - Vec3f(0, 0, cur->pvert_->position().z()));
 							//glVertex3fv(cur->pvert_->position());
 							cur = cur->pnext_;
 						} while (cur != sta);
@@ -878,6 +864,30 @@ void RenderingWidget::draw_support_aera(bool bv)
 				}
 			}
 		}
+
+		if (ptr_support_->sup_slice != NULL)
+		{
+			auto ptr_sup_reg_pie = ptr_support_->sup_region_pieces_;
+			int num = ptr_support_->sup_slice->GetNumPieces();
+			glLineWidth(1.0);
+			glColor3f(0, 0, 0);
+			glBegin(GL_LINES);
+			for (int i = 0; i < num; i++)
+			{
+				for (int j = 0; j < ptr_sup_reg_pie[i].size(); j++)
+				{
+					for (int k = 0; k < ptr_sup_reg_pie[i][j].size(); k++)
+					{
+						glVertex3f(ptr_sup_reg_pie[i][j][k].first.x(), ptr_sup_reg_pie[i][j][k].first.y(),-1);
+						glVertex3f(ptr_sup_reg_pie[i][j][k].second.x(), ptr_sup_reg_pie[i][j][k].second.y(),-1);
+					}
+				}
+			}
+			glEnd();
+		}
+
+
+
 	}
 }
 Vec3f RenderingWidget::SetColor(int j)
@@ -937,7 +947,7 @@ void RenderingWidget::DoSlice()
 	ptr_slice_ = new SliceCut(ptr_mesh_);
 	ptr_slice_->StoreFaceIntoSlice();
 	ptr_slice_->CutInPieces();
-	FindNarrowBand();
+	//FindNarrowBand();
 }
 void RenderingWidget::FillPath()
 {
@@ -979,8 +989,8 @@ void RenderingWidget::add_support()
 	}
 	counter_++;
 	ptr_support_->find_support_area();
-	
-	ptr_support_->support_point_sampling(counter_);
+	ptr_support_->cut_support_region();
+	//ptr_support_->support_point_sampling(counter_);
 	return;
 	qDebug() << "the final support point number is " << ptr_support_->num;
 	QString filename = QFileDialog::
@@ -990,388 +1000,4 @@ void RenderingWidget::add_support()
 		return;
 	QByteArray byfilename = filename.toLocal8Bit();
 	ptr_support_->exportcylinder(byfilename);
-}
-
-
-void RenderingWidget::FindNarrowBand()
-{
-	std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_ = ptr_slice_->GetPieces();
-	layers.clear(); res_path.clear();
-
-	qDebug() << "preprocessing" << endl;
-	for (int i = 0; i < ptr_slice_->GetNumPieces(); i++) {
-		std::vector<std::vector<std::pair<double, double> > > contours; contours.clear(); New2Origin layerlinenew2origin;
-		for (int j = 0; j < pieces_[i].size(); j++) {
-			std::vector<std::pair<double, double> > contour; contour.clear();
-			//CancelBugCut(pieces_,i,j);
-			for (int k = 0; k < pieces_[i][j].size(); k++) {
-				double x1 = pieces_[i][j][k].first[0]; double y1 = pieces_[i][j][k].first[1];
-				double x2 = pieces_[i][j][k].second[0]; double y2 = pieces_[i][j][k].second[1];
-				std::set<double> godis; godis.clear();
-				godis.insert(0); godis.insert(1);
-				for (int ii = int(min(x1, x2) / MIN_DIS); ii < int(max(x1, x2) / MIN_DIS); ii++) {
-					if (!(x1 < ii*MIN_DIS&&ii*MIN_DIS < x2))continue;
-					godis.insert((ii*MIN_DIS - x1) / (x2 - x1));
-				}
-				for (int jj = int(min(y1, y2) / MIN_DIS); jj < int(max(y1, y2) / MIN_DIS); jj++) {
-					if (!(y1 < jj*MIN_DIS&&jj*MIN_DIS < y2))continue;
-					godis.insert((jj*MIN_DIS - y1) / (y2 - y1));
-				}
-				std::set<double>::iterator it;
-				double last_it;
-				for (it = godis.begin(); it != godis.end(); ++it) {
-					if (it != godis.begin() && abs(*it - last_it) < eps)continue;
-					last_it = *it;
-					layerlinenew2origin.layermap[j][contour.size()] = k;
-					contour.push_back(std::make_pair(x1 + *it*(x2 - x1), y1 + *it*(y2 - y1)));
-				}
-			}
-			contours.push_back(contour);
-		}
-		lines_new2origin.push_back(layerlinenew2origin);
-		layers.push_back(contours);
-	}
-
-	int dir[9][2] = { { -1,1 },{ 0,1 },{ 1,1 },{ -1,0 },{ 0,0 },{ 1,0 },{ -1,-1 },{ 0,-1 },{ 1,-1 } };
-
-	qDebug() << "begin detection" << endl;
-	for (int i = 0; i < layers.size(); i++) {
-		std::map<std::pair<int, int>, LayerGrid  > layer_grids;
-		std::map<std::vector<int>, int> lineincontour;
-		std::vector<bool> IsInner;
-		LayerOffDis layer_offdis;
-		//build grids
-		for (int j = 0; j < layers[i].size(); j++) {
-			IsInner.push_back(!JudgeLoopDir(layers[i][j]));
-			for (int k = 0; k < layers[i][j].size(); k++) {
-				layer_offdis.dis[j].push_back(0);
-				double x1 = layers[i][j][k].first, x2 = layers[i][j][(k + 1) % layers[i][j].size()].first;
-				double y1 = layers[i][j][k].second, y2 = layers[i][j][(k + 1) % layers[i][j].size()].second;
-				double x = 0.5*(x1 + x2), y = 0.5*(y1 + y2);
-				std::pair<int, int> g = point2grid(std::make_pair(x, y));
-				std::vector<int> a; a.push_back(g.first); a.push_back(g.second); a.push_back(j); a.push_back(layer_grids[g].grids[j].size());
-				lineincontour[a] = k;
-				layer_grids[g].grids[j].push_back(std::make_pair(std::make_pair(x1, y1), std::make_pair(x2, y2)));
-			}
-		}
-		std::map<std::pair<int, int>, LayerGrid  >::iterator it1, it2;
-		std::set<std::pair<pa, pa> > vis;
-		//detection of near distance
-		for (it1 = layer_grids.begin(); it1 != layer_grids.end(); it1++) {
-			int x = it1->first.first, y = it1->first.second;
-			for (int k = 0; k < 9; k++) {
-				int next_x = x + dir[k][0], next_y = y + dir[k][1];
-				if (vis.find(std::make_pair(std::make_pair(x, y), std::make_pair(next_x, next_y))) != vis.end())continue;
-				vis.insert(std::make_pair(std::make_pair(next_x, next_y), std::make_pair(x, y))); vis.insert(std::make_pair(std::make_pair(next_x, next_y), std::make_pair(x, y)));
-				it2 = layer_grids.find(std::make_pair(next_x, next_y));
-				if (it2 == layer_grids.end())continue;
-				for (int j1 = 0; j1 < layers[i].size(); j1++) if (it1->second.grids[j1].size()) {
-					for (int j2 = 0; j2 < layers[i].size(); j2++)if (it2->second.grids[j2].size()) {
-						if (IsInner[j1] && IsInner[j2] && j1 != j2) {
-							for (int k1 = 0; k1 < it1->second.grids[j1].size(); k1++) {
-								for (int k2 = 0; k2 < it2->second.grids[j2].size(); k2++) {
-									pa p[3][3], optimal_dir, offdir[3];
-									p[1][1] = it1->second.grids[j1][k1].first, p[1][2] = it1->second.grids[j1][k1].second;
-									p[2][1] = it2->second.grids[j2][k2].first, p[2][2] = it2->second.grids[j2][k2].second;
-									optimal_dir = furthestdir(p);
-									double line_dis = sqrt(dot(optimal_dir, optimal_dir));
-									//line_dis = sqrt((p[1][1].first + p[1][2].first - p[2][1].first - p[2][2].first) * (p[1][1].first + p[1][2].first - p[2][1].first - p[2][2].first)* 0.25 + (p[1][1].second + p[1][2].second - p[2][1].second - p[2][2].second) *(p[1][1].second + p[1][2].second - p[2][1].second - p[2][2].second)*0.25);
-									double move = (MIN_DIS - line_dis);
-									if (move < 0)continue;
-									std::vector<int> a; a.push_back(x); a.push_back(y); a.push_back(j1); a.push_back(k1);
-									std::vector<int> b; b.push_back(next_x); b.push_back(next_y); b.push_back(j2); b.push_back(k2);
-									layer_offdis.dis[j1][lineincontour[a]] = max(move*0.5, layer_offdis.dis[j1][lineincontour[a]]);
-									layer_offdis.dis[j2][lineincontour[b]] = max(move*0.5, layer_offdis.dis[j2][lineincontour[b]]);
-									//if (dot(p1, optimal_dir) > 0 && dot(p1, optimal_dir) < 0)
-								}
-							}
-						}
-						else if (IsInner[j1] && !IsInner[j2] && j1 != j2) {
-							for (int k1 = 0; k1 < it1->second.grids[j1].size(); k1++) {
-								for (int k2 = 0; k2 < it2->second.grids[j2].size(); k2++) {
-									pa p[3][3], optimal_dir, offdir[3];
-									p[1][1] = it1->second.grids[j1][k1].first, p[1][2] = it1->second.grids[j1][k1].second;
-									p[2][1] = it2->second.grids[j2][k2].first, p[2][2] = it2->second.grids[j2][k2].second;
-									optimal_dir = furthestdir(p);
-									double line_dis = sqrt(dot(optimal_dir, optimal_dir));
-									double move = (MIN_DIS - line_dis);
-									if (move < 0)continue;
-									std::vector<int> a; a.push_back(x); a.push_back(y); a.push_back(j1); a.push_back(k1);
-									std::vector<int> b; b.push_back(next_x); b.push_back(next_y); b.push_back(j2); b.push_back(k2);
-									layer_offdis.dis[j1][lineincontour[a]] = max(move, layer_offdis.dis[j1][lineincontour[a]]);
-								}
-							}
-						}
-						else if (!IsInner[j1] && IsInner[j2] && j1 != j2) {
-							for (int k1 = 0; k1 < it1->second.grids[j1].size(); k1++) {
-								for (int k2 = 0; k2 < it2->second.grids[j2].size(); k2++) {
-									pa p[3][3], optimal_dir, offdir[3];
-									p[1][1] = it1->second.grids[j1][k1].first, p[1][2] = it1->second.grids[j1][k1].second;
-									p[2][1] = it2->second.grids[j2][k2].first, p[2][2] = it2->second.grids[j2][k2].second;
-									optimal_dir = furthestdir(p);
-									double line_dis = sqrt(dot(optimal_dir, optimal_dir));
-									double move = (MIN_DIS - line_dis);
-									if (move < 0)continue;
-									std::vector<int> a; a.push_back(x); a.push_back(y); a.push_back(j1); a.push_back(k1);
-									std::vector<int> b; b.push_back(next_x); b.push_back(next_y); b.push_back(j2); b.push_back(k2);
-									layer_offdis.dis[j2][lineincontour[b]] = max(move, layer_offdis.dis[j2][lineincontour[b]]);
-								}
-							}
-						}
-						else if (!IsInner[j1] && !IsInner[j2] && j1 == j2) {
-							for (int k1 = 0; k1 < it1->second.grids[j1].size(); k1++) {
-								for (int k2 = 0; k2 < it2->second.grids[j2].size(); k2++) if (k1 != k2) {
-									pa p[3][3], optimal_dir, offdir[3];
-									p[1][1] = it1->second.grids[j1][k1].first, p[1][2] = it1->second.grids[j1][k1].second;
-									p[2][1] = it2->second.grids[j2][k2].first, p[2][2] = it2->second.grids[j2][k2].second;
-									optimal_dir = furthestdir(p);
-									double line_dis = sqrt(dot(optimal_dir, optimal_dir));
-									double move = (MIN_DIS - line_dis);
-									if (move < 0)continue;
-									pa p1, p2; p1.first = p[1][1].first - p[1][2].first; p1.second = p[1][1].second - p[1][2].second;
-									p2.first = p[2][1].first - p[2][2].first; p2.second = p[2][1].second - p[2][2].second;
-									if (dot(p1, p2) > 0)continue;
-									std::vector<int> a; a.push_back(x); a.push_back(y); a.push_back(j1); a.push_back(k1);
-									std::vector<int> b; b.push_back(next_x); b.push_back(next_y); b.push_back(j2); b.push_back(k2);
-									layer_offdis.dis[j2][lineincontour[b]] = max(move, layer_offdis.dis[j2][lineincontour[b]]);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		offdis.push_back(layer_offdis);
-		//save grid
-		std::vector<pa> tmp_grid;
-		for (auto it = layer_grids.begin(); it != layer_grids.end(); it++) tmp_grid.push_back(it->first);
-		if (tmp_grid.size())gridshow.push_back(tmp_grid);
-	}
-	qDebug() << "begin offset" << endl;
-	for (int i = 0; i < layers.size(); i++) {
-		LayerOffset(offdis[i], i);
-	}
-
-	qDebug() << "save slicing to [offsetpieces]" << endl;
-	//PathToCutLine();
-}
-void RenderingWidget::LayerOffset(LayerOffDis layer_offdis, int layernum) {
-	std::vector<bool> IsInner;
-	for (int j = 0; j < layers[layernum].size(); j++) {
-		IsInner.push_back(!JudgeLoopDir(layers[layernum][j]));
-	}
-	qDebug() << "1 guo";
-	Paths final_clippers, subs, tmp_res, tmp_res1, res;
-	for (int i = 0; i < layers[layernum].size(); i++) if (IsInner[i]) {
-		Path sub, clipper; ClipperOffset offset; Clipper difference; Paths clippers;
-		double max_d = 0;
-		for (int j = 0; j < layers[layernum][i].size(); j++) {
-			double d = layer_offdis.dis[i][j];
-			ClipperLib::cInt x = ScaleNumber*layers[layernum][i][j].first;
-			ClipperLib::cInt y = ScaleNumber*layers[layernum][i][j].second;
-			max_d = max(max_d, d);
-			sub << IntPoint(x, y);
-			if (max_d > eps)clipper << IntPoint(x, y);
-
-			if (fabs(d) < eps&&max_d > eps) {
-				offset.AddPath(clipper, jtMiter, etOpenButt);
-				offset.Execute(clippers, max_d*ScaleNumber); ClipperLib::CleanPolygons(clippers);
-				difference.AddPaths(clippers, ptClip, TRUE);
-				max_d = 0;
-				clipper.clear();
-				continue;
-			}
-		}
-		if (clipper.size()) {
-			offset.AddPath(clipper, jtMiter, etOpenButt);
-			offset.Execute(clippers, max_d*ScaleNumber); ClipperLib::CleanPolygons(clippers);
-			difference.AddPaths(clippers, ptClip, TRUE);
-			clipper.clear();
-		}
-		if (sub.size())subs.push_back(sub);/* DrawPaths(subs, layernum);*/
-		difference.AddPath(sub, ptSubject, TRUE);
-		difference.Execute(ctDifference, tmp_res, pftNonZero, pftNonZero);  ClipperLib::CleanPolygons(tmp_res);
-		tmp_res1.clear(); for (int j = 0; j < tmp_res.size(); j++)if (fabs(Area(tmp_res[j]))*1.0 / ScaleNumber / ScaleNumber >= MIN_DIS*MIN_DIS*0.2)tmp_res1.push_back(tmp_res[j]);
-		for (int j = 0; j < tmp_res1.size(); j++)if (tmp_res1[j].size())res.push_back(tmp_res1[j]);
-	}
-	qDebug() << "2 guo";
-	for (int i = 0; i < layers[layernum].size(); i++) if (!IsInner[i]) {
-		Path sub, clipper; ClipperOffset offset; Clipper difference; Paths clippers;
-		for (int j = 0; j < layers[layernum][i].size(); j++) {
-			ClipperLib::cInt x = ScaleNumber*layers[layernum][i][j].first;
-			ClipperLib::cInt y = ScaleNumber*layers[layernum][i][j].second;
-			sub << IntPoint(x, y);
-		}
-		//ClipperLib::CleanPolygon(sub);
-		res.push_back(sub);
-	}
-	qDebug() << "3 guo";
-	res_path.push_back(res);
-}
-void RenderingWidget::PathToCutLine() {
-	offsetpieces = new std::vector<std::vector<CutLine>*>[res_path.size()];
-	//qDebug() << "size of res_path = " << res_path.size() << endl;
-	for (int i = 0; i < res_path.size(); i++)
-	{
-		//qDebug() << "res_path[" << i << "].size()=" << res_path[i].size() << endl;
-		for (int j = 0; j < res_path[i].size(); j++)
-		{
-			std::vector<CutLine>* circle_list_ = new std::vector<CutLine>;
-			if (res_path[i][j].size() <= 2)continue;
-			//qDebug() << "res_path[" << i<<","<<j << "].size()=" << res_path[i][j].size() << endl;
-			for (int k = 0; k < res_path[i][j].size(); k++) {
-				double x1, y1, z1 = i*thickness_, x2, y2, z2 = i*thickness_;
-				x1 = res_path[i][j][k].X*1.0 / ScaleNumber; y1 = res_path[i][j][k].Y*1.0 / ScaleNumber;
-				x2 = res_path[i][j][(k + 1) % res_path[i][j].size()].X*1.0 / ScaleNumber; y2 = res_path[i][j][(k + 1) % res_path[i][j].size()].Y*1.0 / ScaleNumber;
-				point pos1(x1, y1, z1), pos2(x2, y2, z2);
-				CutLine new_CutLine(pos1, pos2);
-				circle_list_->push_back(new_CutLine);
-			}
-			offsetpieces[i].push_back(circle_list_);
-			//delete[]circle_list_;
-		}
-	}
-}
-bool RenderingWidget::IsNestedIn(Path a, Path b) {
-	Clipper difference; Paths solutions;
-	difference.AddPath(b, ptClip, TRUE); difference.AddPath(a, ptSubject, TRUE);
-	difference.Execute(ctDifference, solutions, pftNonZero, pftNonZero);
-	return solutions.size() == 0 ? TRUE : FALSE;
-}
-bool RenderingWidget::ModelThicken(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* tc, int numlayer) {
-	/* if (mycutthicken == NULL)mycutthicken = new std::vector<std::vector<CutLine>*>[mycut->GetNumPieces()];*/
-	if (tc == NULL)return FALSE;
-	ClipperLib::Paths contours, res;
-	for (size_t j = 0; j < tc[numlayer].size(); j++) {
-		ClipperLib::Path p;
-		for (int k = 0; k < (tc[numlayer])[j].size(); k++) {
-			ClipperLib::cInt x = ScaleNumber*((tc[numlayer])[j]).at(k).first[0];
-			ClipperLib::cInt y = ScaleNumber*((tc[numlayer])[j]).at(k).first[1];
-			p << IntPoint(x, y);
-		}
-		contours.push_back(p);
-	}
-	//DrawPaths(contours);
-	for (int i = contours.size() - 1; i >= 0; i--) {
-		if (Orientation(contours[i]) == FALSE) {
-			Clipper difference; Clipper intersection; Paths tmpsolution, solution;
-			for (int j = 0; j < contours.size(); j++)if (j != i) {
-				if (Orientation(contours[j]) == TRUE&&IsNestedIn(contours[i], contours[j])) {
-					ClipperOffset co; Paths solution;
-					co.AddPath(contours[j], jtMiter, etClosedPolygon);
-					co.Execute(solution, -ScaleNumber*MIN_DIS); CleanPolygons(solution);
-					intersection.AddPaths(solution, ptClip, TRUE);
-					/*DrawPaths(solution);*/
-				}
-				else if (Orientation(contours[j]) == FALSE) {
-					ClipperOffset co; Paths solution;
-					co.AddPath(contours[j], jtMiter, etClosedPolygon);
-					co.Execute(solution, ScaleNumber*MIN_DIS); CleanPolygons(solution);
-					difference.AddPaths(solution, ptClip, TRUE);
-					/*DrawPaths(solution);*/
-				}
-			}
-			intersection.AddPath(contours[i], ptSubject, TRUE);
-			intersection.Execute(ctIntersection, tmpsolution, pftNonZero, pftNonZero);
-			difference.AddPaths(tmpsolution, ptSubject, TRUE);
-			difference.Execute(ctDifference, solution, pftNonZero, pftNonZero);
-			for (int j = 0; j < solution.size(); j++)res.push_back(solution[j]);
-		}
-		else if (Orientation(contours[i]) == TRUE) {
-			res.push_back(contours[i]);
-		}
-	}
-
-	DrawPaths(res, numlayer);
-	Contour2Layer(res, numlayer);
-	return TRUE;
-}
-bool RenderingWidget::DrawPaths(ClipperLib::Paths contours, int numlayer) {
-	for (int i = 0; i < contours.size(); i++) {
-		ClipperLib::Path p = contours[i];
-		glBegin(GL_LINE_LOOP);
-		glColor4f(1.0, 0.0, 0.0, 1.0);
-		for (int j = 0; j < p.size(); j++) {
-			glVertex3f(p[j].X*1.0 / ScaleNumber, p[j].Y*1.0 / ScaleNumber, numlayer*thickness_);
-		}
-		glEnd();
-	}
-	return TRUE;
-}
-bool RenderingWidget::Contour2Layer(ClipperLib::Paths contours, int numlayer) {
-	//if (mycutthicken[numlayer].size() != 0)return FALSE;
-	std::vector<CutLine>* circle_list_ = new std::vector<CutLine>;
-	for (int i = 0; i < contours.size(); i++) {
-		for (int j = 0; j < contours[i].size(); j++) {
-			point pos1, pos2;
-			pos1[0] = contours[i][j].X*1.0 / ScaleNumber; pos1[1] = contours[i][j].Y*1.0 / ScaleNumber; pos1[2] = numlayer*thickness_;
-			pos2[0] = contours[i][j].X*1.0 / ScaleNumber; pos2[1] = contours[i][j].Y*1.0 / ScaleNumber; pos2[2] = numlayer*thickness_;
-			CutLine new_CutLine(pos1, pos2);
-			circle_list_->push_back(new_CutLine);
-		}
-	}
-	//mycutthicken[numlayer].push_back(circle_list_);
-	return TRUE;
-}
-std::pair<int, int> RenderingWidget::point2grid(std::pair<double, double> p) {
-	double x = p.first, y = p.second;
-	return std::make_pair(int(x / MIN_DIS - (x < 0 ? 1 : 0)), int(y / MIN_DIS - (y < 0 ? 1 : 0)));
-}
-bool RenderingWidget::JudgeLoopDir(std::vector<std::pair<double, double> > Loop) {
-	ClipperLib::Path p;
-	for (int i = 0; i < Loop.size(); i++) {
-		ClipperLib::cInt x = ScaleNumber*(int)Loop[i].first;
-		ClipperLib::cInt y = ScaleNumber*(int)Loop[i].second;
-		p << IntPoint(x, y);
-	}
-	return Orientation(p);
-}
-pa RenderingWidget::furthestdir(pa p[3][3]) {
-	double l2 = (p[2][1].first - p[2][2].first)*(p[2][1].first - p[2][2].first) + (p[2][1].second - p[2][2].second)*(p[2][1].second - p[2][2].second);
-	double t = max(0.0, min(1.0, ((p[1][1].first - p[2][1].first)*(p[2][2].first - p[2][1].first) + (p[1][1].second - p[2][1].second)*(p[2][2].second - p[2][1].second)) / l2));
-	pa p11, p12, p21, p22, res, pnear;
-	pnear.first = p[2][1].first + t*(p[2][2].first - p[2][1].first);
-	pnear.second = p[2][1].second + t*(p[2][2].second - p[2][1].second);
-	p11.first = p[1][1].first - pnear.first; p11.second = p[1][1].second - pnear.second;
-
-	t = max(0.0, min(1.0, ((p[1][2].first - p[2][1].first)*(p[2][2].first - p[2][1].first) + (p[1][2].second - p[2][1].second)*(p[2][2].second - p[2][1].second)) / l2));
-	pnear.first = p[2][1].first + t*(p[2][2].first - p[2][1].first);
-	pnear.second = p[2][1].second + t*(p[2][2].second - p[2][1].second);
-	p12.first = p[1][2].first - pnear.first; p12.second = p[1][2].second - pnear.second;
-	res = p11.first*p11.first + p11.second*p11.second < p12.first*p12.first + p12.second*p12.second ? p11 : p12;
-
-	l2 = (p[1][1].first - p[1][2].first)*(p[1][1].first - p[1][2].first) + (p[1][1].second - p[1][2].second)*(p[1][1].second - p[1][2].second);
-	t = max(0.0, min(1.0, ((p[2][1].first - p[1][1].first)*(p[1][2].first - p[1][1].first) + (p[2][1].second - p[1][1].second)*(p[1][2].second - p[1][1].second)) / l2));
-	pnear.first = p[1][1].first + t*(p[1][2].first - p[1][1].first);
-	pnear.second = p[1][1].second + t*(p[1][2].second - p[1][1].second);
-	p21.first = -1 * (p[2][1].first - pnear.first); p21.second = -1 * (p[2][1].second - pnear.second);
-	res = res.first*res.first + res.second*res.second < p21.first*p21.first + p21.second*p21.second ? res : p21;
-
-	l2 = (p[1][1].first - p[1][2].first)*(p[1][1].first - p[1][2].first) + (p[1][1].second - p[1][2].second)*(p[1][1].second - p[1][2].second);
-	t = max(0.0, min(1.0, ((p[2][2].first - p[1][1].first)*(p[1][2].first - p[1][1].first) + (p[2][2].second - p[1][1].second)*(p[1][2].second - p[1][1].second)) / l2));
-	pnear.first = p[1][1].first + t*(p[1][2].first - p[1][1].first);
-	pnear.second = p[1][1].second + t*(p[1][2].second - p[1][1].second);
-	p22.first = -1 * (p[2][2].first - pnear.first); p22.second = -1 * (p[2][2].second - pnear.second);
-	res = res.first*res.first + res.second*res.second < p22.first*p22.first + p22.second*p22.second ? res : p22;
-	return res;
-	//return make_pair(res.first/sqrt(res.first*res.first+res.second*res.second),res.second/sqrt(res.first*res.first+res.second*res.second));
-}
-pa RenderingWidget::rotate(pa p, double angle) {
-	pa res;
-	res.first = p.first*cos(angle) - p.second*sin(angle);
-	res.second = p.first*sin(angle) + p.second*cos(angle);
-	return res;
-}
-double RenderingWidget::dot(pa p1, pa p2) {
-	return p1.first*p2.first + p2.second*p1.second;
-}
-pa RenderingWidget::normailize(pa p) {
-	return std::make_pair(p.first / sqrt(p.first*p.first + p.second*p.second), p.second / sqrt(p.first*p.first + p.second*p.second));
-}
-void RenderingWidget::CancelBugCut(std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* pieces_, int i, int j) {
-	if (!pieces_[i][j].size())return;
-	if (pieces_[i][j].at(0).first != pieces_[i][j].at(pieces_[i][j].size() - 1).second) {
-		std::pair<Vec3f, Vec3f> new_CutLine(pieces_[i][j].at(pieces_[i][j].size() - 1).second, pieces_[i][j].at(0).first);
-		pieces_[i][j].push_back(new_CutLine);
-	}
 }

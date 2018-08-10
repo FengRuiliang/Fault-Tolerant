@@ -2,6 +2,7 @@
 #include "HE_mesh/Mesh3D.h"
 #include "HE_mesh/Vec.h"
 #include "Library/clipper.hpp"
+#include "SliceCut.h"
 using namespace ClipperLib;
 extern std::map<int,Paths> test_path;
 #define COUNTOFANGLE 5
@@ -20,6 +21,7 @@ public:
 	void angle_dfs(HE_face* facet, std::vector<HE_face*>& re_faces, int angle_id_);
 	void sup_mesh_dfs(HE_face* facet, Mesh3D* mesh, int angle_id);
 	void find_support_area();
+	void cut_support_region();
 	void support_point_sampling(int counter_);
 	
 	void exportcylinder(const char * fouts);
@@ -35,14 +37,15 @@ private:
 
 
 public:
-
+	SliceCut* sup_slice;
 	std::vector<Mesh3D*> component;
 	std::map<int, std::set<Vec3f>> sample_points_;
-
 	std::vector<std::map<int, std::vector<Mesh3D*>>> component_regions_mesh;
 	Mesh3D sp_mesh;
 	std::vector<int> vec_angle;
 	int num;// support point number
+
+	std::vector<std::vector<std::pair<Vec3f, Vec3f>>>* sup_region_pieces_;
 private:
 	Mesh3D* wholemesh;// find big support area
 					 // local minimal point

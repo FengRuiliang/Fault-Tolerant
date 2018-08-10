@@ -35,14 +35,23 @@ std::vector<int> * SliceCut::StoreFaceIntoSlice()
 	//qDebug() << storage_Face_list_->size()<<2/thickness_+1;
 	for (auto iter_Face= faces.begin();iter_Face!= faces.end();iter_Face++ )
 	{
-		double max_height = MIN_FLOAT_VALUE;
-		double min_height = MAX_FLOAT_VALUE;
-	
+		(*iter_Face)->vec_ptr_vert_.clear();
+		HE_edge* sta = (*iter_Face)->pedge_;
+		HE_edge* cur = sta;
+		do
+		{
+			(*iter_Face)->vec_ptr_vert_.push_back(cur->pvert_);
+			cur = cur->pnext_;
+
+		} while (cur != sta);
+		float max_height = MIN_FLOAT_VALUE;
+		float min_height = MAX_FLOAT_VALUE;
 		for (int i=0;i<3;i++)
 		{
-			min_height = min(min_height, (*iter_Face)->vec_ptr_vert_[i]->position().z());
-			max_height = max(max_height, (*iter_Face)->vec_ptr_vert_[i]->position().z());
+			min_height = std::min(min_height, (*iter_Face)->vec_ptr_vert_[i]->position().z());
+			max_height = std::max(max_height, (*iter_Face)->vec_ptr_vert_[i]->position().z());
 		}
+
 		if (max_height-min_height<1e-3)// 22/01/2017
 		{
 			continue;
@@ -151,6 +160,7 @@ void SliceCut::CutInPieces()
 
 	for (int i = 0; i < num_pieces_; i++)
 	{
+		qDebug() << "for debug" << i;
 		Polygon polygon_;
 		std::vector<int>&slice_faces_ = storage_Face_list_[i];
 		float cur_height_ = i*thickness_;
@@ -194,6 +204,7 @@ static bool sortCutLineByZ(const CutLine* a,const CutLine* b )
 std::pair<Vec3f,Vec3f> SliceCut::cutFacet(HE_face* facet,float cur_height_)
 {
 	std::vector<Vec3f> p;
+
 	p.push_back(facet->vec_ptr_vert_[0]->position());
 	p.push_back(facet->vec_ptr_vert_[1]->position());
 	p.push_back(facet->vec_ptr_vert_[2]->position());

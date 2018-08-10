@@ -13,13 +13,13 @@ public:
 	Vec3f A, B, center;
 
 	LineSegment(Vec3f A, Vec3f B){
-		AA[0] = std::min(A[0], B[0]);
-		AA[1] = std::min(A[1], B[1]);
-		AA[2] = std::min(A[2], B[2]);
+		AA[0] = min(A[0], B[0]);
+		AA[1] = min(A[1], B[1]);
+		AA[2] = min(A[2], B[2]);
 
-		BB[0] = std::max(A[0], B[0]);
-		BB[1] = std::max(A[1], B[1]);
-		BB[2] = std::max(A[2], B[2]);
+		BB[0] = max(A[0], B[0]);
+		BB[1] = max(A[1], B[1]);
+		BB[2] = max(A[2], B[2]);
 
 		this->A = A;
 		this->B = B;
@@ -52,13 +52,13 @@ inline static bool SortByX(const Vec3f t1, const Vec3f t2)
 
 static void MergeBoundingBox(Vec3f &A, Vec3f &B, Vec3f A1, Vec3f B1, Vec3f A2, Vec3f B2)
 {
-	A[0] = std::min(A1[0], A2[0]);
-	A[1] = std::min(A1[1], A2[1]);
-	A[2] = std::min(A1[2], A2[2]);
+	A[0] = min(A1[0], A2[0]);
+	A[1] = min(A1[1], A2[1]);
+	A[2] = min(A1[2], A2[2]);
 
-	B[0] = std::max(B1[0], B2[0]);
-	B[1] = std::max(B1[1], B2[1]);
-	B[2] = std::max(B1[2], B2[2]);
+	B[0] = max(B1[0], B2[0]);
+	B[1] = max(B1[1], B2[1]);
+	B[2] = max(B1[2], B2[2]);
 }
 
 static bool XRayHitAABB2d(Vec3f sPoint, Vec3f A, Vec3f B)

@@ -98,9 +98,6 @@
     <ClCompile Include="cylinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Library\space2dKDTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="meshprint.h">
@@ -175,9 +172,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Library\IntervalTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\space2dKDTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

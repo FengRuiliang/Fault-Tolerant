@@ -1,7 +1,8 @@
 #include "Octree.h"
 void MeshOctree::DeleteMeshOcTree()
 {
-	SafeDelete(this->oc_root_);
+	delete this->oc_root_;
+	this->oc_root_ = NULL;
 }
 
 void MeshOctree::BuildOctree(Mesh3D* ptr_in)
@@ -27,8 +28,9 @@ void MeshOctree::BuildOctree(Mesh3D* ptr_in)
 	AABB aabb = AABB(ptr_in->getBoundingBox()[0], ptr_in->getBoundingBox()[1]);
 	DeleteMeshOcTree();
 	createOctree(oc_root_, face_list_idx, aabb, false);
+	delete face_list_idx;
+	face_list_idx = NULL;
 
-	SafeDelete(face_list_idx);
 }
 
 void MeshOctree::createOctree(MeshOcNode*& node_in, std::vector<int>* face_list_idx, AABB aabb, bool stopFlag)
@@ -114,7 +116,11 @@ void MeshOctree::createOctree(MeshOcNode*& node_in, std::vector<int>* face_list_
 	createOctree(node_in->child_node_[7], tmp_face_list_idx[7], AABB(aabb.max_point - Vec3f(hab.x(), 0, 0), split_center - Vec3f(hab.x(), 0, 0)), stopFlag);
 
 	for (int i = 0; i < 8; i++)
-		SafeDelete(tmp_face_list_idx[i]);
+	{
+		delete tmp_face_list_idx[i];
+		tmp_face_list_idx[i] = NULL;
+	}
+		
 
 	int i = 0;
 	for (; i < 8; i++) {
@@ -201,7 +207,7 @@ bool MeshOctree::RayHitAABB(Vec3f raySPoint, Vec3f rayDirection, Vec3f A, Vec3f 
 		float t1 = A_RS.x() / rayDirection[0];
 		float t2 = B_RS.x() / rayDirection[0];
 		if (t1 > t2)
-			MySwap(t1, t2);
+			std::swap(t1, t2);
 
 		if (maxTMin < t1) maxTMin = t1;
 		if (minTMax > t2) minTMax = t2;
@@ -212,7 +218,7 @@ bool MeshOctree::RayHitAABB(Vec3f raySPoint, Vec3f rayDirection, Vec3f A, Vec3f 
 		float t1 = A_RS.y() / rayDirection[1];
 		float t2 = B_RS.y() / rayDirection[1];
 		if (t1 > t2)
-			MySwap(t1, t2);
+			std::swap(t1, t2);
 
 		if (maxTMin < t1) maxTMin = t1;
 		if (minTMax > t2) minTMax = t2;
@@ -223,7 +229,7 @@ bool MeshOctree::RayHitAABB(Vec3f raySPoint, Vec3f rayDirection, Vec3f A, Vec3f 
 		float t1 = A_RS.z() / rayDirection[2];
 		float t2 = B_RS.z() / rayDirection[2];
 		if (t1 > t2)
-			MySwap(t1, t2);
+			std::swap(t1, t2);
 
 		if (maxTMin < t1) maxTMin = t1;
 		if (minTMax > t2) minTMax = t2;

@@ -1,35 +1,6 @@
 #pragma once
 #include "HE_mesh/Mesh3D.h"
 #include <algorithm>
-
-
-template<class object>
-void SafeDelete(object *ptr)
-{
-	if (ptr != NULL)
-	{
-		delete ptr;
-		ptr = NULL;
-	}
-}
-
-template<class object>
-void SafeDeletes(object *ptr)
-{
-	if (ptr != NULL)
-	{
-		delete[] ptr;
-		ptr = NULL;
-	}
-}
-template <typename T>
-void inline MySwap(T &t1, T &t2)
-{
-	T tmp = t1;
-	t1 = t2;
-	t2 = tmp;
-};
-
 #define ABS_FLOAT_0 1e-3
 typedef struct AlignAxisBoundingBox
 {
@@ -57,8 +28,12 @@ public:
 	~MeshOcNode()
 	{
 		for (int i = 0; i < 8; i++)
-			SafeDelete(child_node_[i]);
-		SafeDelete(ocn_face_list_);
+		{
+			delete child_node_[i];
+			child_node_[i] = NULL;
+		}
+		delete ocn_face_list_;
+		ocn_face_list_ = NULL;
 	};
 
 	//private:

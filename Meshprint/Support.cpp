@@ -9,6 +9,7 @@
 #include "Library/IntervalTree.h"
 #include "Library/space2dKDTree.h"
 #include <iomanip>
+
 #define PI 3.1415926
 std::map<int, Paths> test_path;
 
@@ -278,6 +279,16 @@ void Support::find_support_area()
 		}
 	}
 }
+
+
+void Support::cut_support_region()
+{
+	sup_slice=new SliceCut(wholemesh);
+	sup_slice->StoreFaceIntoSlice();
+	sup_slice->CutInPieces();
+	sup_region_pieces_=sup_slice->GetPieces();
+}
+
 
 void Support::support_point_sampling(int counter_)
 {

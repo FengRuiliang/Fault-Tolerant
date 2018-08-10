@@ -188,7 +188,6 @@
     <ClCompile Include="globalFunctions.cpp" />
     <ClCompile Include="Hatch.cpp" />
     <ClCompile Include="HE_mesh\Mesh3D.cpp" />
-    <ClCompile Include="Library\space2dKDTree.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="meshprint.cpp" />
     <ClCompile Include="Library\MSAABB.cpp" />
@@ -252,7 +251,6 @@
     <ClInclude Include="HE_mesh\Vec.h" />
     <ClInclude Include="Library\IntervalTree.h" />
     <ClInclude Include="Library\Octree.h" />
-    <ClInclude Include="Library\space2dKDTree.h" />
     <ClInclude Include="PSO\pso.h" />
     <ClInclude Include="Support.h" />
     <ClInclude Include="Sweep.h" />

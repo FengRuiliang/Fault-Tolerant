@@ -144,8 +144,8 @@ void RenderingWidget::paintGL()
 		// 	mId[1][2] = -1;
 		mId[1][1] = -1;
 		mId[2][2] = -1;
-		glMultMatrixf((float*)mId);
-	//glMultMatrixf(ptr_arcball_->GetBallMatrix());
+	//	glMultMatrixf((float*)mId);
+	glMultMatrixf(ptr_arcball_->GetBallMatrix());
 
 	Render();
 
@@ -311,17 +311,17 @@ void RenderingWidget::SetLight()
 	//return;
 	static GLfloat mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	static GLfloat mat_shininess[] = { 50.0f };
-	static GLfloat light_position0[] = { 1.0f, 1.0f, 0.5f, 0.0f };
-	static GLfloat light_position1[] = { -1.0f, -1.0f, 0.5f, 0.0f };
-	static GLfloat light_position2[] = { -.0f, -.0f, -0.5f, 0.0f };
+	static GLfloat light_position0[] = { 0.0f, 10.0f, 0.5f, 0.0f };
+	static GLfloat light_position1[] = { 0.0f, -10.0f, 0.5f, 0.0f };
+	static GLfloat light_position2[] = { 0.0f, 0.0f, -0.5f, 0.0f };
 	static GLfloat bright[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 	static GLfloat dim_light[] = { 0.3f, 0.3f, 0.3f, 1.0f };
 	static GLfloat lmodel_ambient[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 
-	//glMaterialfv(GL_FRONT, GL_AMBIENT, mat_specular);
-	//glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_specular);
-	//glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	//glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
@@ -336,9 +336,9 @@ void RenderingWidget::SetLight()
 	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);
-	glEnable(GL_LIGHT2);
+	//glEnable(GL_LIGHT2);
 }
 
 void RenderingWidget::SetBackground()

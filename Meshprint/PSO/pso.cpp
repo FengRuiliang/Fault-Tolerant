@@ -158,8 +158,6 @@ double PSO::calc_inertia_lin_dec(int step)
 		return settings.w_min;
 }
 
-
-
 std::map<int,std::set<Vec3f>> PSO::pso_solve()
 {
 	qDebug() << "star pso solution";
